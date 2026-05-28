@@ -31,7 +31,7 @@ export default function ContactPage() {
     <div className="min-h-screen bg-cream">
       <div className="bg-dark-brown py-24 px-5 text-center">
         <p className="text-gold/70 text-[11px] font-semibold tracking-[0.35em] uppercase mb-5">Reach Us</p>
-        <h1 className="text-[42px] md:text-[56px] font-extrabold text-white tracking-tight mb-4">Get in Touch</h1>
+        <h1 className="font-display text-[42px] md:text-[56px] font-extrabold text-white tracking-tight mb-4">Get in Touch</h1>
         <p className="text-cream/50 text-[16px] max-w-md mx-auto">
           Questions, bulk orders, or just want to say hello — we&apos;re here.
         </p>
@@ -41,7 +41,7 @@ export default function ContactPage() {
         <div className="grid md:grid-cols-2 gap-14">
           {/* Contact info */}
           <div>
-            <h2 className="text-[22px] font-extrabold text-dark-brown tracking-tight mb-8">Reach Us Directly</h2>
+            <h2 className="font-display text-[22px] font-extrabold text-dark-brown tracking-tight mb-8">Reach Us Directly</h2>
 
             <div className="space-y-6">
               {[
@@ -87,7 +87,7 @@ export default function ContactPage() {
 
           {/* Form */}
           <div className="bg-white rounded-2xl p-8 border border-black/6">
-            <h2 className="text-[20px] font-extrabold text-dark-brown tracking-tight mb-7">Send a Message</h2>
+            <h2 className="font-display text-[20px] font-extrabold text-dark-brown tracking-tight mb-7">Send a Message</h2>
 
             {status === 'success' ? (
               <div className="text-center py-10">

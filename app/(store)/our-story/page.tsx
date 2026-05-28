@@ -11,7 +11,7 @@ export default function OurStoryPage() {
     <div className="min-h-screen bg-cream">
       <div className="bg-dark-brown py-24 px-5 text-center">
         <p className="text-gold/70 text-[11px] font-semibold tracking-[0.35em] uppercase mb-5">Est. 1980s · Perundurai, Erode</p>
-        <h1 className="text-[42px] md:text-[64px] font-extrabold text-white tracking-tight leading-[1.0] mb-5">Our Story</h1>
+        <h1 className="font-display text-[42px] md:text-[64px] font-extrabold text-white tracking-tight leading-[1.0] mb-5">Our Story</h1>
         <p className="text-cream/50 text-[17px] max-w-lg mx-auto leading-[1.7]">
           Named after a grandmother and grandfather who gave everything to this land.
         </p>
@@ -28,7 +28,7 @@ export default function OurStoryPage() {
             </div>
           </div>
           <div>
-            <h2 className="text-[24px] font-extrabold text-dark-brown tracking-tight mb-4">Ponnamal — The First Seed</h2>
+            <h2 className="font-display text-[24px] font-extrabold text-dark-brown tracking-tight mb-4">Ponnamal — The First Seed</h2>
             <p className="text-gray-600 leading-[1.9] text-[16px]">
               Our grandmother Ponnamal tended these turmeric fields before we could walk. She knew every row, every plant, every season. She would say turmeric is not just a spice — it is medicine, it is prayer, it is the smell of home. We carry her name so we never forget what this is about.
             </p>
@@ -45,7 +45,7 @@ export default function OurStoryPage() {
             </div>
           </div>
           <div className="md:order-1">
-            <h2 className="text-[24px] font-extrabold text-dark-brown tracking-tight mb-4">Kaaliappa — The Stone Mill</h2>
+            <h2 className="font-display text-[24px] font-extrabold text-dark-brown tracking-tight mb-4">Kaaliappa — The Stone Mill</h2>
             <p className="text-gray-600 leading-[1.9] text-[16px]">
               Our grandfather Kaaliappa built the stone mill with his own hands. He believed that turmeric ground by machine loses its soul — the oils, the fragrance, the depth. He was right. Forty years later, the same stone mill still runs. Slower than a factory. Truer than anything you can buy in a supermarket.
             </p>
@@ -65,7 +65,7 @@ export default function OurStoryPage() {
 
         {/* Three generations */}
         <div className="bg-dark-brown rounded-2xl p-8 md:p-10">
-          <h2 className="text-[24px] font-extrabold text-gold tracking-tight mb-5">Three Generations, One Promise</h2>
+          <h2 className="font-display text-[24px] font-extrabold text-gold tracking-tight mb-5">Three Generations, One Promise</h2>
           <p className="text-cream/70 leading-[1.9] text-[16px] mb-4">
             We are the third generation. We grew up watching our grandparents farm, our parents grind, and now we carry this forward — not with nostalgia, but with pride. The world changed. Distribution changed. But we did not change what matters: the land, the stone, the purity.
           </p>
@@ -79,7 +79,7 @@ export default function OurStoryPage() {
 
         {/* What makes it different */}
         <div>
-          <h2 className="text-[24px] font-extrabold text-dark-brown tracking-tight mb-8">What Makes Ponkali Different</h2>
+          <h2 className="font-display text-[24px] font-extrabold text-dark-brown tracking-tight mb-8">What Makes Ponkali Different</h2>
           <div className="grid md:grid-cols-2 gap-4">
             {[
               { Icon: LeafIcon, title: 'We grow it', desc: 'Our own fields in Perundurai, Erode. We know every row.' },

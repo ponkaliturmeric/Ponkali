@@ -17,11 +17,11 @@ export default function Header() {
           <Image
             src="/images/logo.jpg"
             alt="Ponkali"
-            width={36}
-            height={36}
+            width={48}
+            height={48}
             className="rounded-full"
           />
-          <span className="font-extrabold text-[18px] tracking-widest text-dark-brown">PONKALI</span>
+          <span className="font-extrabold text-[20px] tracking-widest text-dark-brown">PONKALI</span>
         </Link>
 
         <nav className="hidden md:flex items-center gap-8">
