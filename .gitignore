@@ -34,3 +34,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# SQLite database (local data — do not commit)
+/database/
+
+# Original images folder (images moved to public/)
+/images/

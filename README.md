@@ -1,36 +1,62 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Ponkali Masalas — E-Commerce Website
 
-## Getting Started
+Premium Indian spice brand from Erode, Tamil Nadu. Built with Next.js 14, Tailwind CSS, and SQLite.
 
-First, run the development server:
+## Quick Start
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Admin Panel
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+URL: [http://localhost:3000/admin](http://localhost:3000/admin)
 
-## Learn More
+- **Username:** `ponkali_admin`
+- **Password:** `erode2024secure`
 
-To learn more about Next.js, take a look at the following resources:
+## Pages
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Route | Description |
+|-------|-------------|
+| `/` | Homepage with hero, products, story, reviews |
+| `/shop` | Shop with filters and sorting |
+| `/product/[slug]` | Product detail with weight selector |
+| `/cart` | Cart with free shipping progress bar |
+| `/checkout` | Single-page checkout (UPI or COD) |
+| `/order-confirmation/[id]` | Post-order confirmation |
+| `/our-story` | Brand heritage story |
+| `/contact` | Contact form and WhatsApp link |
+| `/admin/login` | Admin login |
+| `/admin/dashboard` | Orders overview + stats |
+| `/admin/orders` | Full orders table with export |
+| `/admin/orders/[id]` | Order detail + status update |
+| `/admin/products` | Edit prices + toggle stock |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Tech Stack
 
-## Deploy on Vercel
+- **Framework:** Next.js 14 (App Router)
+- **Styling:** Tailwind CSS
+- **Database:** SQLite via better-sqlite3
+- **State:** React Context (cart persisted in localStorage)
+- **Export:** exceljs (XLSX), built-in CSV generation
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Database
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Auto-created at `database/ponkali.db` on first run. Products are seeded automatically.
+
+## Export Orders
+
+From the admin panel, export all orders as:
+- **CSV** compatible with Google Sheets, Excel
+- **XLSX** native Excel format with formatting
+
+## Brand Details
+
+- **Email:** ponkaliturmeric@gmail.com
+- **Phone:** 9944033696
+- **FSSAI Lic:** 22426064000154
+- **Manufacturer:** The Native, Perundurai, Erode 638055, Tamil Nadu
