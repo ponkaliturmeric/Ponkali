@@ -38,7 +38,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           />
           <div className="absolute top-3 left-3 flex flex-col gap-1.5">
             {product.is_bestseller === 1 && (
-              <span className="bg-dark-brown text-cream text-[10px] font-bold px-2.5 py-1 rounded-full tracking-wider uppercase">
+              <span className="bg-terracotta text-white text-[10px] font-bold px-2.5 py-1 rounded-full tracking-wider uppercase">
                 Best Seller
               </span>
             )}

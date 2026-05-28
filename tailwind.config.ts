@@ -9,14 +9,16 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        gold: '#D4960A',
+        gold: '#E8950A',          // vibrant turmeric-yellow (was brownish #D4960A)
         'dark-brown': '#2C1000',
         cream: '#FDF3DC',
+        terracotta: '#C04A1C',    // Tamil Nadu red-earth — warmth + authenticity
         'dark-green': '#1A3A0A',
         'light-gold': '#FAE8A0',
       },
       fontFamily: {
         sans: ['var(--font-madefor)', 'Helvetica Neue', 'Arial', 'sans-serif'],
+        display: ['var(--font-playfair)', 'Georgia', 'serif'],
       },
       fontSize: {
         base: ['18px', '27px'],

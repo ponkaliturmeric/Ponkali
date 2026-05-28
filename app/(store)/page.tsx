@@ -66,9 +66,9 @@ export default function HomePage() {
               GI Recognised · Perundurai, Erode
             </p>
 
-            <h1 className="text-[44px] md:text-[54px] lg:text-[64px] font-extrabold text-white leading-[1.02] tracking-[-0.03em] mb-6">
+            <h1 className="font-display text-[44px] md:text-[54px] lg:text-[64px] font-extrabold text-white leading-[1.02] tracking-[-0.02em] mb-6">
               The Turmeric Your<br />
-              <span className="text-gold">Grandparents Knew</span>
+              <span className="text-gold italic">Grandparents Knew</span>
             </h1>
 
             <p className="text-cream/55 text-[17px] leading-[1.75] mb-8 max-w-[500px]">
@@ -177,7 +177,7 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto">
           <div className="mb-12">
             <p className="text-gold text-[11px] font-semibold tracking-[0.3em] uppercase mb-3">Choose Your Pack</p>
-            <h2 className="text-[34px] md:text-[42px] font-extrabold text-dark-brown tracking-tight">
+            <h2 className="font-display text-[34px] md:text-[42px] font-extrabold text-dark-brown tracking-tight">
               Pure Erode Turmeric Powder
             </h2>
             <p className="text-gray-500 mt-2 text-[16px] max-w-md">
@@ -200,7 +200,7 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto">
           <div className="mb-14 text-center">
             <p className="text-gold text-[11px] font-semibold tracking-[0.3em] uppercase mb-3">Full Transparency</p>
-            <h2 className="text-[32px] md:text-[40px] font-extrabold text-dark-brown">
+            <h2 className="font-display text-[32px] md:text-[40px] font-extrabold text-dark-brown">
               Farm to Kitchen — Our Way
             </h2>
             <p className="text-gray-400 mt-3 text-[16px]">Every step is ours. No outsourcing. No compromise.</p>
@@ -227,7 +227,7 @@ export default function HomePage() {
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-14">
             <p className="text-gold/70 text-[11px] font-semibold tracking-[0.3em] uppercase mb-3">The Real Difference</p>
-            <h2 className="text-[32px] md:text-[42px] font-extrabold text-white">
+            <h2 className="font-display text-[32px] md:text-[42px] font-extrabold text-white">
               Not All Turmeric Is Equal
             </h2>
             <p className="text-cream/40 mt-3 text-[16px] max-w-md mx-auto">
@@ -291,7 +291,7 @@ export default function HomePage() {
             </div>
             <div>
               <p className="text-gold text-[11px] font-semibold tracking-[0.3em] uppercase mb-5">Our Heritage</p>
-              <h2 className="text-[34px] md:text-[40px] font-extrabold text-dark-brown tracking-tight mb-6 leading-[1.05]">
+              <h2 className="font-display text-[34px] md:text-[40px] font-extrabold text-dark-brown tracking-tight mb-6 leading-[1.05]">
                 Their names are on every packet
               </h2>
               <p className="text-gray-600 leading-[1.8] mb-5 text-[16px]">
@@ -320,7 +320,7 @@ export default function HomePage() {
           <div className="mb-12">
             <p className="text-gold text-[11px] font-semibold tracking-[0.3em] uppercase mb-3">Customer Stories</p>
             <div className="flex flex-col sm:flex-row sm:items-end gap-3">
-              <h2 className="text-[34px] md:text-[42px] font-extrabold text-dark-brown tracking-tight leading-none">
+              <h2 className="font-display text-[34px] md:text-[42px] font-extrabold text-dark-brown tracking-tight leading-none">
                 Trusted by families across India
               </h2>
               <div className="flex items-center gap-2 pb-1">
@@ -352,7 +352,7 @@ export default function HomePage() {
           <p className="text-dark-brown/40 text-[11px] font-semibold tracking-[0.3em] uppercase mb-4">
             Direct from the Farm
           </p>
-          <h2 className="text-[34px] md:text-[44px] font-extrabold text-dark-brown tracking-tight mb-4 leading-[1.05]">
+          <h2 className="font-display text-[34px] md:text-[44px] font-extrabold text-dark-brown tracking-tight mb-4 leading-[1.05]">
             Taste the Difference Today
           </h2>
           <p className="text-dark-brown/60 mb-8 text-[16px]">

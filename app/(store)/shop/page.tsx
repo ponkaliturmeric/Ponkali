@@ -34,7 +34,7 @@ export default function ShopPage() {
       {/* Hero */}
       <div className="bg-dark-brown py-16 px-5 text-center">
         <p className="text-gold/70 text-[11px] font-semibold tracking-[0.35em] uppercase mb-4">Farm Direct · Erode, Tamil Nadu</p>
-        <h1 className="text-[42px] md:text-[56px] font-extrabold text-white tracking-tight leading-none mb-4">
+        <h1 className="font-display text-[42px] md:text-[56px] font-extrabold text-white tracking-tight leading-none mb-4">
           Shop Turmeric
         </h1>
         <p className="text-cream/50 text-[16px] max-w-sm mx-auto leading-relaxed">
