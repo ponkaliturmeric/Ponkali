@@ -13,11 +13,12 @@ const config: Config = {
         'dark-brown': '#2C1000',
         cream: '#FDF3DC',
         terracotta: '#C04A1C',    // Tamil Nadu red-earth — warmth + authenticity
+        'pkg-yellow': '#F5C418',  // Matches physical packaging background
         'dark-green': '#1A3A0A',
         'light-gold': '#FAE8A0',
       },
       fontFamily: {
-        sans: ['var(--font-madefor)', 'Helvetica Neue', 'Arial', 'sans-serif'],
+        sans: ['var(--font-dm-sans)', 'Helvetica Neue', 'Arial', 'sans-serif'],
         display: ['var(--font-playfair)', 'Georgia', 'serif'],
       },
       fontSize: {

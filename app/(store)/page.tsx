@@ -1,8 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { PRODUCTS } from '@/lib/products';
-import { Product } from '@/lib/types';
-import ProductCard from '@/components/ProductCard';
+import ProductShowcase from '@/components/ProductShowcase';
 import {
   MapPinIcon, CogIcon, LeafIcon, DropletIcon,
   ShieldCheckIcon, StarIcon, ArrowRightIcon,
@@ -42,8 +40,6 @@ function Stars({ count = 5 }: { count?: number }) {
 }
 
 export default function HomePage() {
-  const typedProducts = PRODUCTS as Product[];
-
   return (
     <>
       {/* ─── 1. HERO ─── */}
@@ -172,28 +168,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ─── 4. PRODUCTS ─── */}
-      <section className="py-20 px-5 bg-cream">
-        <div className="max-w-6xl mx-auto">
-          <div className="mb-12">
-            <p className="text-gold text-[11px] font-semibold tracking-[0.3em] uppercase mb-3">Choose Your Pack</p>
-            <h2 className="font-display text-[34px] md:text-[42px] font-extrabold text-dark-brown tracking-tight">
-              Pure Erode Turmeric Powder
-            </h2>
-            <p className="text-gray-500 mt-2 text-[16px] max-w-md">
-              Same farm. Same stone-ground purity. Every size ships fresh.
-            </p>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
-            {typedProducts.map(product => (
-              <ProductCard key={product.slug} product={product} />
-            ))}
-          </div>
-          <p className="text-center text-[13px] text-gray-400 mt-6">
-            Free shipping on orders above ₹399 · Delivered in 3–5 days across India
-          </p>
-        </div>
-      </section>
+      {/* ─── 4. PRODUCT SHOWCASE ─── */}
+      <ProductShowcase />
 
       {/* ─── 5. PROCESS ─── */}
       <section className="py-20 px-5 bg-white">

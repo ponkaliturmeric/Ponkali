@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState } from 'react';
 import { useCart } from './CartContext';
 import { CartIcon, MenuIcon, XIcon } from './Icons';
@@ -12,8 +13,15 @@ export default function Header() {
   return (
     <header className="sticky top-[37px] z-30 bg-cream border-b border-black/8">
       <div className="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
-        <Link href="/" className="font-extrabold text-xl tracking-brand text-dark-brown">
-          PONKALI
+        <Link href="/" className="flex items-center gap-2.5">
+          <Image
+            src="/images/logo.jpg"
+            alt="Ponkali"
+            width={36}
+            height={36}
+            className="rounded-full"
+          />
+          <span className="font-extrabold text-[18px] tracking-widest text-dark-brown">PONKALI</span>
         </Link>
 
         <nav className="hidden md:flex items-center gap-8">
