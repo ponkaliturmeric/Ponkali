@@ -48,10 +48,13 @@ export default function HomePage() {
           background: 'radial-gradient(ellipse 55% 80% at 75% 50%, rgba(212,150,10,0.07) 0%, transparent 65%)',
         }} />
 
-        <div className="max-w-6xl mx-auto px-5 py-20 md:py-0 md:min-h-[95vh] grid md:grid-cols-[1fr_420px] lg:grid-cols-[1fr_480px] gap-10 lg:gap-16 items-center relative z-10">
+        <div className="max-w-6xl mx-auto px-5 relative z-10
+          flex flex-col gap-10
+          md:grid md:grid-cols-[1fr_420px] lg:grid-cols-[1fr_480px] md:gap-10 lg:gap-16 md:items-center
+          pt-14 pb-12 md:py-0 md:min-h-[92vh]">
 
           {/* Left — Copy */}
-          <div className="pt-4 md:pt-0">
+          <div className="order-1 md:order-1">
             {/* Social proof anchor */}
             <div className="flex items-center gap-2.5 mb-7">
               <Stars count={5} />
@@ -62,9 +65,13 @@ export default function HomePage() {
               GI Recognised · Perundurai, Erode
             </p>
 
-            <h1 className="font-display text-[44px] md:text-[54px] lg:text-[64px] font-extrabold text-white leading-[1.02] tracking-[-0.02em] mb-6">
+            <h1 className="font-hero font-bold text-white tracking-[-0.03em] mb-8
+              text-[38px] leading-[1.0]
+              sm:text-[52px] sm:leading-[0.93]
+              md:text-[72px] md:leading-[0.88]
+              lg:text-[100px] lg:leading-[0.85]">
               The Turmeric Your<br />
-              <span className="text-gold italic">Grandparents Knew</span>
+              <span className="text-gold">Grandparents Knew</span>
             </h1>
 
             <p className="text-cream/55 text-[17px] leading-[1.75] mb-8 max-w-[500px]">
@@ -97,28 +104,29 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Right — Product image (desktop only) */}
-          <div className="hidden md:block py-16 relative">
-            <div className="relative rounded-3xl bg-[#F5E8A0]/12 border border-white/5 aspect-square overflow-hidden">
+          {/* Right — Product image (all devices) */}
+          <div className="order-2 md:order-2 relative py-4 md:py-16">
+            {/* Constrain size on mobile, full on desktop */}
+            <div className="relative rounded-2xl bg-white/8 border border-white/8 overflow-hidden
+              aspect-square max-w-[260px] mx-auto
+              md:max-w-none md:rounded-3xl">
               <Image
                 src="/images/product-1.jpeg"
                 alt="Ponkali Erode Turmeric Powder"
                 fill
-                className="object-contain p-8"
+                className="object-contain p-4 md:p-8"
                 priority
-                sizes="480px"
+                sizes="(max-width: 768px) 260px, 480px"
               />
             </div>
 
-            {/* Floating metric badge — curcumin */}
-            <div className="absolute -left-8 top-1/3 bg-white rounded-2xl px-4 py-3.5 shadow-2xl shadow-black/20">
+            {/* Floating badges — desktop only */}
+            <div className="hidden md:block absolute -left-8 top-1/3 bg-white rounded-2xl px-4 py-3.5 shadow-2xl shadow-black/20">
               <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider mb-0.5">Curcumin</p>
               <p className="text-[22px] font-extrabold text-dark-brown leading-none">2.5–4.5%</p>
               <p className="text-[10px] text-gray-400 mt-0.5">Lab Tested</p>
             </div>
-
-            {/* Floating price badge */}
-            <div className="absolute -right-5 bottom-1/4 bg-dark-brown border border-gold/20 rounded-2xl px-4 py-3.5 shadow-2xl">
+            <div className="hidden md:block absolute -right-5 bottom-1/4 bg-dark-brown border border-gold/20 rounded-2xl px-4 py-3.5 shadow-2xl">
               <p className="text-[10px] text-gold/50 font-semibold uppercase tracking-wider mb-0.5">Starting at</p>
               <p className="text-[22px] font-extrabold text-gold leading-none">₹169</p>
               <p className="text-[10px] text-cream/30 mt-0.5">Free ship ₹399+</p>
@@ -211,7 +219,8 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="rounded-2xl overflow-hidden border border-white/12">
+          <div className="rounded-2xl overflow-hidden border border-white/12 overflow-x-auto">
+            <div className="min-w-[520px]">
             {/* Header */}
             <div className="grid grid-cols-[1fr_1fr_1fr] bg-white/8">
               <div className="px-5 py-4 text-left">
@@ -238,6 +247,7 @@ export default function HomePage() {
                 </div>
               </div>
             ))}
+            </div>{/* end min-w wrapper */}
           </div>
 
           <div className="mt-10 text-center">

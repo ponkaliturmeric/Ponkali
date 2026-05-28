@@ -30,18 +30,17 @@ export default function OurStoryPage() {
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-14 items-center">
 
           {/* Product image — shows the grandparents illustration */}
-          <div className="relative">
-            <div className="rounded-2xl overflow-hidden bg-white border border-black/6 shadow-sm aspect-[4/5] relative">
+          <div className="relative max-w-sm mx-auto md:max-w-none">
+            <div className="rounded-2xl overflow-hidden bg-white border border-black/6 shadow-sm aspect-square relative">
               <Image
                 src="/images/product-1.jpeg"
                 alt="Ponkali Turmeric — Ponnamal and Kaaliappa Gounder"
                 fill
-                className="object-contain p-6"
-                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-contain p-4"
+                sizes="(max-width: 768px) 90vw, 45vw"
                 priority
               />
             </div>
-            {/* Caption */}
             <p className="text-center text-[12px] text-gray-400 mt-3 font-medium">
               Ponnamal &amp; Kaaliappa Gounder — Perundurai, Erode
             </p>
@@ -162,7 +161,7 @@ export default function OurStoryPage() {
           </div>
 
           {/* Back of packaging image */}
-          <div className="rounded-2xl overflow-hidden bg-white border border-black/6 shadow-sm aspect-[4/5] relative">
+          <div className="rounded-2xl overflow-hidden bg-white border border-black/6 shadow-sm aspect-square relative max-w-sm mx-auto md:max-w-none">
             <Image
               src="/images/product-2.jpeg"
               alt="Ponkali Turmeric Powder — front and back packaging"

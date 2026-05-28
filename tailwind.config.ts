@@ -18,8 +18,9 @@ const config: Config = {
         'light-gold': '#FAE8A0',
       },
       fontFamily: {
-        sans: ['var(--font-madefor)', 'helveticaneuew01-45ligh', 'helveticaneuew02-45ligh', 'Helvetica Neue', 'Arial', 'sans-serif'],
+        sans:    ['var(--font-madefor)', 'helveticaneuew01-45ligh', 'Helvetica Neue', 'Arial', 'sans-serif'],
         display: ['var(--font-playfair)', 'Georgia', 'serif'],
+        hero:    ['var(--font-jakarta)', 'var(--font-madefor)', 'sans-serif'],
       },
       fontSize: {
         base: ['18px', '27px'],
