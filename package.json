@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@libsql/client": "^0.17.3",
     "better-sqlite3": "^12.10.0",
     "csv-writer": "^1.6.0",
     "exceljs": "^4.4.0",

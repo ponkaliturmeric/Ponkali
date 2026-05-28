@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import db from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { getAdminSession } from '@/lib/auth';
 
 export async function GET() {
@@ -8,8 +8,9 @@ export async function GET() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  // Last 30 days daily revenue + order count
-  const dailyStats = db.prepare(`
+  const db = await getDb();
+
+  const { rows: dailyRows } = await db.execute(`
     SELECT
       date(created_at) as date,
       COUNT(*) as orders,
@@ -18,9 +19,9 @@ export async function GET() {
     WHERE created_at >= date('now', '-29 days')
     GROUP BY date(created_at)
     ORDER BY date ASC
-  `).all() as { date: string; orders: number; revenue: number }[];
+  `);
+  const dailyStats = dailyRows as unknown as { date: string; orders: number; revenue: number }[];
 
-  // Fill in missing days with 0
   const filledDaily: { date: string; orders: number; revenue: number }[] = [];
   for (let i = 29; i >= 0; i--) {
     const d = new Date();
@@ -30,23 +31,20 @@ export async function GET() {
     filledDaily.push(found ?? { date: dateStr, orders: 0, revenue: 0 });
   }
 
-  // Orders by status
-  const byStatus = db.prepare(`
+  const { rows: byStatus } = await db.execute(`
     SELECT status, COUNT(*) as count
     FROM orders
     GROUP BY status
     ORDER BY count DESC
-  `).all() as { status: string; count: number }[];
+  `);
 
-  // Payment method breakdown
-  const byPayment = db.prepare(`
+  const { rows: byPayment } = await db.execute(`
     SELECT payment_method, COUNT(*) as count, ROUND(SUM(total), 2) as revenue
     FROM orders
     GROUP BY payment_method
-  `).all() as { payment_method: string; count: number; revenue: number }[];
+  `);
 
-  // Top products by quantity sold
-  const topProducts = db.prepare(`
+  const { rows: topProducts } = await db.execute(`
     SELECT product_name, weight,
            SUM(quantity) as qty_sold,
            ROUND(SUM(quantity * price), 2) as revenue
@@ -54,10 +52,9 @@ export async function GET() {
     GROUP BY product_name, weight
     ORDER BY qty_sold DESC
     LIMIT 6
-  `).all() as { product_name: string; weight: string; qty_sold: number; revenue: number }[];
+  `);
 
-  // Monthly summary (last 6 months)
-  const monthlyStats = db.prepare(`
+  const { rows: monthlyStats } = await db.execute(`
     SELECT
       strftime('%Y-%m', created_at) as month,
       COUNT(*) as orders,
@@ -66,10 +63,9 @@ export async function GET() {
     WHERE created_at >= date('now', '-6 months')
     GROUP BY strftime('%Y-%m', created_at)
     ORDER BY month ASC
-  `).all() as { month: string; orders: number; revenue: number }[];
+  `);
 
-  // Overall totals
-  const totals = db.prepare(`
+  const { rows: totalsRows } = await db.execute(`
     SELECT
       COUNT(*) as total_orders,
       ROUND(SUM(total), 2) as total_revenue,
@@ -79,15 +75,8 @@ export async function GET() {
       COUNT(CASE WHEN date(created_at) = date('now') THEN 1 END) as today_orders,
       ROUND(SUM(CASE WHEN date(created_at) = date('now') THEN total ELSE 0 END), 2) as today_revenue
     FROM orders
-  `).get() as {
-    total_orders: number;
-    total_revenue: number;
-    avg_order_value: number;
-    pending: number;
-    delivered: number;
-    today_orders: number;
-    today_revenue: number;
-  };
+  `);
+  const totals = totalsRows[0];
 
   return NextResponse.json({
     daily: filledDaily,

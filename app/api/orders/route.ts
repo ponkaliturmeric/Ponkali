@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import db from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { getAdminSession } from '@/lib/auth';
 
 function generateOrderId(): string {
@@ -25,28 +25,28 @@ export async function GET(request: NextRequest) {
 
     let query = 'SELECT * FROM orders';
     const conditions: string[] = [];
-    const params: (string | number)[] = [];
+    const args: (string | number)[] = [];
 
     if (status) {
       conditions.push('status = ?');
-      params.push(status);
+      args.push(status);
     }
     if (search) {
       conditions.push('(order_id LIKE ? OR customer_name LIKE ?)');
-      params.push(`%${search}%`, `%${search}%`);
+      args.push(`%${search}%`, `%${search}%`);
     }
 
     if (conditions.length > 0) {
       query += ' WHERE ' + conditions.join(' AND ');
     }
 
+    const db = await getDb();
     const countQuery = query.replace('SELECT *', 'SELECT COUNT(*) as total');
-    const total = (db.prepare(countQuery).get(...params) as { total: number }).total;
+    const { rows: countRows } = await db.execute({ sql: countQuery, args });
+    const total = Number(countRows[0].total);
 
     query += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
-    params.push(pageSize, offset);
-
-    const orders = db.prepare(query).all(...params);
+    const { rows: orders } = await db.execute({ sql: query, args: [...args, pageSize, offset] });
 
     return NextResponse.json({ orders, total, page, pageSize });
   } catch {
@@ -70,40 +70,30 @@ export async function POST(request: NextRequest) {
     }
 
     const order_id = generateOrderId();
+    const db = await getDb();
 
-    const insertOrder = db.prepare(`
-      INSERT INTO orders (
-        order_id, customer_name, phone, email,
-        address_line1, address_line2, city, state, pincode, landmark,
-        payment_method, upi_id, subtotal, shipping, cod_charge, total
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
+    const statements: { sql: string; args: (string | number | null)[] }[] = [
+      {
+        sql: `INSERT INTO orders (
+          order_id, customer_name, phone, email,
+          address_line1, address_line2, city, state, pincode, landmark,
+          payment_method, upi_id, subtotal, shipping, cod_charge, total
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        args: [
+          order_id, customer_name, phone, email ?? null,
+          address_line1, address_line2 ?? null, city, state, pincode, landmark ?? null,
+          payment_method, upi_id ?? null,
+          subtotal, shipping, cod_charge ?? 0, total,
+        ],
+      },
+      ...items.map((item: { product_name: string; weight: string; quantity: number; price: number }) => ({
+        sql: 'INSERT INTO order_items (order_id, product_name, weight, quantity, price) VALUES (?, ?, ?, ?, ?)',
+        args: [order_id, item.product_name, item.weight, item.quantity, item.price],
+      })),
+      { sql: 'INSERT INTO order_status_history (order_id, status) VALUES (?, ?)', args: [order_id, 'Pending'] },
+    ];
 
-    const insertItem = db.prepare(`
-      INSERT INTO order_items (order_id, product_name, weight, quantity, price)
-      VALUES (?, ?, ?, ?, ?)
-    `);
-
-    const insertHistory = db.prepare(`
-      INSERT INTO order_status_history (order_id, status) VALUES (?, ?)
-    `);
-
-    const transaction = db.transaction(() => {
-      insertOrder.run(
-        order_id, customer_name, phone, email || null,
-        address_line1, address_line2 || null, city, state, pincode, landmark || null,
-        payment_method, upi_id || null,
-        subtotal, shipping, cod_charge || 0, total,
-      );
-
-      for (const item of items) {
-        insertItem.run(order_id, item.product_name, item.weight, item.quantity, item.price);
-      }
-
-      insertHistory.run(order_id, 'Pending');
-    });
-
-    transaction();
+    await db.batch(statements, 'write');
 
     return NextResponse.json({ order_id, success: true }, { status: 201 });
   } catch (error) {

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import db from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { Product } from '@/lib/types';
 import ProductCard from '@/components/ProductCard';
 import {
@@ -66,8 +66,10 @@ function Stars() {
   );
 }
 
-export default function HomePage() {
-  const products = db.prepare('SELECT * FROM products ORDER BY price ASC').all() as Product[];
+export default async function HomePage() {
+  const db = await getDb();
+  const { rows: products } = await db.execute('SELECT * FROM products ORDER BY price ASC');
+  const typedProducts = products as unknown as Product[];
 
   return (
     <>
@@ -151,7 +153,7 @@ export default function HomePage() {
             </p>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
-            {products.map(product => (
+            {typedProducts.map(product => (
               <ProductCard key={product.slug} product={product} />
             ))}
           </div>

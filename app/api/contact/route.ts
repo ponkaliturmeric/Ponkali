@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import db from '@/lib/db';
+import { getDb } from '@/lib/db';
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,7 +10,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Name and message are required' }, { status: 400 });
     }
 
-    db.prepare('INSERT INTO contact_messages (name, email, message) VALUES (?, ?, ?)').run(name, email || null, message);
+    const db = await getDb();
+    await db.execute({
+      sql: 'INSERT INTO contact_messages (name, email, message) VALUES (?, ?, ?)',
+      args: [name, email ?? null, message],
+    });
 
     return NextResponse.json({ success: true });
   } catch {

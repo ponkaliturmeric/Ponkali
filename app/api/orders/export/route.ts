@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import db from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { getAdminSession } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
@@ -12,10 +12,11 @@ export async function GET(request: NextRequest) {
   const format = searchParams.get('format') || 'csv';
 
   try {
-    const orders = db.prepare('SELECT * FROM orders ORDER BY created_at DESC').all() as Record<string, unknown>[];
-    const items = db.prepare('SELECT * FROM order_items').all() as Record<string, unknown>[];
+    const db = await getDb();
+    const { rows: orders } = await db.execute('SELECT * FROM orders ORDER BY created_at DESC');
+    const { rows: items } = await db.execute('SELECT * FROM order_items');
 
-    const itemsByOrder: Record<string, Record<string, unknown>[]> = {};
+    const itemsByOrder: Record<string, typeof items> = {};
     for (const item of items) {
       const oid = item.order_id as string;
       if (!itemsByOrder[oid]) itemsByOrder[oid] = [];
@@ -50,7 +51,7 @@ export async function GET(request: NextRequest) {
       for (const order of orders) {
         const orderItems = itemsByOrder[order.order_id as string] || [];
         const itemsStr = orderItems.map((i) => `${i.product_name} (${i.weight}) x${i.quantity} @ ₹${i.price}`).join('; ');
-        sheet.addRow({ ...order, items: itemsStr });
+        sheet.addRow({ ...Object.fromEntries(Object.entries(order)), items: itemsStr });
       }
 
       sheet.getRow(1).font = { bold: true };
@@ -69,7 +70,6 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // CSV format
     const headers = [
       'Order ID', 'Date', 'Customer Name', 'Phone', 'Email',
       'Address', 'City', 'State', 'Pincode', 'Landmark',
@@ -81,11 +81,11 @@ export async function GET(request: NextRequest) {
       const orderItems = itemsByOrder[order.order_id as string] || [];
       const itemsStr = orderItems.map((i) => `${i.product_name} (${i.weight}) x${i.quantity} @ Rs.${i.price}`).join(' | ');
       return [
-        order.order_id, order.created_at, order.customer_name, order.phone, order.email || '',
+        order.order_id, order.created_at, order.customer_name, order.phone, order.email ?? '',
         `${order.address_line1}${order.address_line2 ? ', ' + order.address_line2 : ''}`,
-        order.city, order.state, order.pincode, order.landmark || '',
+        order.city, order.state, order.pincode, order.landmark ?? '',
         itemsStr, order.subtotal, order.shipping, order.cod_charge, order.total,
-        order.payment_method, order.upi_id || '', order.status,
+        order.payment_method, order.upi_id ?? '', order.status,
       ].map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',');
     });
 
