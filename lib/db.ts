@@ -6,13 +6,22 @@ let _client: Client | null = null;
 let _initPromise: Promise<void> | null = null;
 
 function buildClient(): Client {
-  const url = process.env.TURSO_DATABASE_URL ?? 'file:./database/local.db';
-  if (url.startsWith('file:')) {
-    const filePath = url.slice(5);
-    const absPath = path.resolve(process.cwd(), filePath);
-    const dir = path.dirname(absPath);
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  const url = process.env.TURSO_DATABASE_URL;
+
+  // Production requires a real Turso URL — file: URLs don't work on serverless
+  if (!url) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('TURSO_DATABASE_URL is not set. Add it to your Vercel environment variables.');
+    }
+    // Local dev fallback
+    const localUrl = 'file:./database/local.db';
+    try {
+      const dir = path.join(process.cwd(), 'database');
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    } catch { /* ignore if filesystem is read-only */ }
+    return createClient({ url: localUrl });
   }
+
   return createClient({ url, authToken: process.env.TURSO_AUTH_TOKEN });
 }
 
