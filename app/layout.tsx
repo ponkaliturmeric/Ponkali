@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
-import { DM_Sans, Playfair_Display } from 'next/font/google';
+import { Wix_Madefor_Text, Playfair_Display } from 'next/font/google';
 import './globals.css';
 
-const dmSans = DM_Sans({
+const wixMadefor = Wix_Madefor_Text({
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-dm-sans',
+  weight: ['400', '500', '600', '700', '800'],
+  variable: '--font-madefor',
   display: 'swap',
 });
 
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${dmSans.variable} ${playfair.variable}`}>
+    <html lang="en" className={`${wixMadefor.variable} ${playfair.variable}`}>
       <body className="bg-cream text-black font-sans antialiased">
         {children}
       </body>
