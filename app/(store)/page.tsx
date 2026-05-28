@@ -1,14 +1,12 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { getDb } from '@/lib/db';
+import { PRODUCTS } from '@/lib/products';
 import { Product } from '@/lib/types';
 import ProductCard from '@/components/ProductCard';
 import {
   MapPinIcon, CogIcon, LeafIcon, DropletIcon,
   ShieldCheckIcon, GlobeIcon, StarIcon, ArrowRightIcon,
 } from '@/components/Icons';
-
-export const dynamic = 'force-dynamic';
 
 const TRUST_BADGES = [
   {
@@ -66,10 +64,8 @@ function Stars() {
   );
 }
 
-export default async function HomePage() {
-  const db = await getDb();
-  const { rows: products } = await db.execute('SELECT * FROM products ORDER BY price ASC');
-  const typedProducts = products as unknown as Product[];
+export default function HomePage() {
+  const typedProducts = PRODUCTS as Product[];
 
   return (
     <>

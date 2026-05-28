@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,14 +9,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Name and message are required' }, { status: 400 });
     }
 
-    const db = await getDb();
-    await db.execute({
-      sql: 'INSERT INTO contact_messages (name, email, message) VALUES (?, ?, ?)',
-      args: [name, email ?? null, message],
-    });
+    // Log to Vercel function logs (visible in Vercel dashboard → Functions → Logs)
+    console.log('[CONTACT]', JSON.stringify({ name, email, message, at: new Date().toISOString() }));
 
     return NextResponse.json({ success: true });
   } catch {
-    return NextResponse.json({ error: 'Failed to save message' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to send message' }, { status: 500 });
   }
 }

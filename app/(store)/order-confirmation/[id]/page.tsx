@@ -40,6 +40,15 @@ export default function OrderConfirmationPage() {
         setLoading(false);
       })
       .catch(() => {
+        // Fall back to localStorage (used when no database is configured)
+        try {
+          const cached = localStorage.getItem(`ponkali_order_${params.id}`);
+          if (cached) {
+            setOrder(JSON.parse(cached));
+            setLoading(false);
+            return;
+          }
+        } catch { /* ignore */ }
         setError(true);
         setLoading(false);
       });

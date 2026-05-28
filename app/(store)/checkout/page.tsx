@@ -84,6 +84,25 @@ export default function CheckoutPage() {
         return;
       }
 
+      // Save order to localStorage so confirmation page can display it without a DB
+      try {
+        localStorage.setItem(`ponkali_order_${data.order_id}`, JSON.stringify({
+          order_id: data.order_id,
+          customer_name: form.customer_name,
+          phone: form.phone,
+          total,
+          payment_method: paymentMethod,
+          status: 'Pending',
+          created_at: new Date().toISOString(),
+          items: items.map(i => ({
+            product_name: i.product.name,
+            weight: i.product.weight,
+            quantity: i.quantity,
+            price: i.product.price,
+          })),
+        }));
+      } catch { /* ignore if localStorage unavailable */ }
+
       clearCart();
       router.push(`/order-confirmation/${data.order_id}`);
     } catch {
