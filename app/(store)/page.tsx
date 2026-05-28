@@ -55,15 +55,8 @@ export default function HomePage() {
 
           {/* Left — Copy */}
           <div className="order-1 md:order-1">
-            {/* Social proof anchor */}
-            <div className="flex items-center gap-2.5 mb-7">
-              <Stars count={5} />
-              <span className="text-cream/40 text-[13px]">Trusted by 200+ families across India</span>
-            </div>
 
-            <p className="text-gold/80 text-[11px] font-semibold tracking-[0.35em] uppercase mb-5">
-              GI Recognised · Perundurai, Erode
-            </p>
+           
 
             <h1 className="font-hero font-bold text-white tracking-[-0.03em] mb-8
               text-[38px] leading-[1.0]
@@ -107,7 +100,7 @@ export default function HomePage() {
           {/* Right — Product image (all devices) */}
           <div className="order-2 md:order-2 relative py-4 md:py-16">
             {/* Constrain size on mobile, full on desktop */}
-            <div className="relative rounded-2xl bg-white/8 border border-white/8 overflow-hidden
+            <div className="relative rounded-2xl bg-white/8 border border-none overflow-hidden
               aspect-square max-w-[260px] mx-auto
               md:max-w-none md:rounded-3xl">
               <Image
@@ -266,7 +259,7 @@ export default function HomePage() {
       <section className="py-20 px-5 bg-cream">
         <div className="max-w-6xl mx-auto">
           <div className="grid md:grid-cols-2 gap-14 items-center">
-            <div className="rounded-2xl overflow-hidden bg-cream h-80 md:h-[500px] relative border border-black/6">
+            <div className="rounded-2xl overflow-hidden bg-cream h-80 md:h-[500px] relative border border-none">
               <Image
                 src="/images/product-2.jpeg"
                 alt="Ponkali Turmeric Powder — front and back of packaging"
@@ -281,7 +274,7 @@ export default function HomePage() {
                 Their names are on every packet
               </h2>
               <p className="text-gray-600 leading-[1.8] mb-5 text-[16px]">
-                Ponkali is named after our grandparents — <strong className="text-dark-brown font-semibold">Ponnamal</strong> and <strong className="text-dark-brown font-semibold">Kaaliappa Gounder</strong> — who farmed this same Erode land for over 40 years. They knew every row, every plant, every season.
+                Ponkali is named after our grandparents — <strong className="text-dark-brown font-semibold">Ponnamal</strong> and <strong className="text-dark-brown font-semibold">Kaaliappa </strong> — who farmed this same Erode land for over 40 years. They knew every row, every plant, every season.
               </p>
               <p className="text-gray-600 leading-[1.8] mb-8 text-[16px]">
                 Same land. Same seeds. Same promise. What reaches your kitchen is not just turmeric — it is our family&apos;s legacy, packed with nothing added.

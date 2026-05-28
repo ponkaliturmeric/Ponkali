@@ -42,7 +42,7 @@ export default function OurStoryPage() {
               />
             </div>
             <p className="text-center text-[12px] text-gray-400 mt-3 font-medium">
-              Ponnamal &amp; Kaaliappa Gounder — Perundurai, Erode
+              Ponnamal &amp; Kaaliappa — Perundurai, Erode
             </p>
           </div>
 
@@ -84,6 +84,44 @@ export default function OurStoryPage() {
                 Our fields in Perundurai have been farmed organically for generations. The same water, the same soil, the same sun. We use no synthetic fertilisers. We rotate crops. We respect the land as it has given to us.
               </p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── FARM PHOTO GALLERY PREVIEW ── */}
+      <section className="py-16 px-5 bg-dark-brown">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-10">
+            <p className="text-gold/70 text-[11px] font-semibold tracking-[0.3em] uppercase mb-3">Real Photos</p>
+            <h2 className="font-display text-[28px] md:text-[36px] font-extrabold text-white tracking-tight mb-3">
+              See Our Farm — Exactly as It Is
+            </h2>
+            <p className="text-cream/40 text-[15px]">The fields, the harvest, the processing. No stock photos.</p>
+          </div>
+
+          {/* 6-image preview */}
+          <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-8">
+            {[1, 4, 13, 5, 9, 16].map(n => (
+              <Link key={n} href="/farm" className="relative aspect-square rounded-xl overflow-hidden group">
+                <Image
+                  src={`/images/farm/farm-${String(n).padStart(2, '0')}.jpeg`}
+                  alt="Ponkali farm — Perundurai, Erode"
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  sizes="(max-width: 768px) 33vw, 20vw"
+                />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
+              </Link>
+            ))}
+          </div>
+
+          <div className="text-center">
+            <Link
+              href="/farm"
+              className="inline-flex items-center gap-2 border border-white/20 text-cream/70 px-8 py-3.5 rounded-full font-semibold text-[14px] hover:border-gold hover:text-gold transition-all"
+            >
+              See All 17 Farm Photos →
+            </Link>
           </div>
         </div>
       </section>
