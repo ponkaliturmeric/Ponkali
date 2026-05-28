@@ -211,30 +211,30 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="rounded-2xl overflow-hidden border border-white/8">
+          <div className="rounded-2xl overflow-hidden border border-white/12">
             {/* Header */}
-            <div className="grid grid-cols-[1fr_1fr_1fr] bg-white/5 text-center">
-              <div className="px-4 py-4 text-left">
-                <p className="text-cream/25 text-[11px] font-semibold uppercase tracking-wider">Feature</p>
+            <div className="grid grid-cols-[1fr_1fr_1fr] bg-white/8">
+              <div className="px-5 py-4 text-left">
+                <p className="text-cream/50 text-[11px] font-semibold uppercase tracking-wider">Feature</p>
               </div>
-              <div className="px-4 py-4 border-l border-white/5 text-center">
-                <p className="text-gold font-bold text-[14px]">Ponkali</p>
-                <p className="text-gold/40 text-[11px] mt-0.5">Our farm, Erode</p>
+              <div className="px-5 py-4 border-l border-white/10 text-center">
+                <p className="text-gold font-bold text-[15px]">Ponkali</p>
+                <p className="text-gold/60 text-[11px] mt-0.5">Our farm, Erode</p>
               </div>
-              <div className="px-4 py-4 border-l border-white/5 text-center">
-                <p className="text-cream/40 font-medium text-[13px]">Commercial Brands</p>
-                <p className="text-cream/20 text-[11px] mt-0.5">Supermarket</p>
+              <div className="px-5 py-4 border-l border-white/10 text-center">
+                <p className="text-cream/70 font-medium text-[13px]">Commercial Brands</p>
+                <p className="text-cream/40 text-[11px] mt-0.5">Supermarket</p>
               </div>
             </div>
 
             {COMPARISON.map(({ feature, ours, theirs }, i) => (
-              <div key={feature} className={`grid grid-cols-[1fr_1fr_1fr] text-center ${i % 2 === 0 ? 'bg-white/[0.02]' : ''}`}>
-                <div className="px-4 py-4 text-cream/35 text-[13px] text-left border-t border-white/4">{feature}</div>
-                <div className="px-4 py-4 border-l border-t border-white/4 text-center">
-                  <span className="text-gold font-semibold text-[13px]">{ours}</span>
+              <div key={feature} className={`grid grid-cols-[1fr_1fr_1fr] ${i % 2 === 0 ? 'bg-white/[0.03]' : ''}`}>
+                <div className="px-5 py-4 text-cream/65 text-[13px] text-left border-t border-white/8">{feature}</div>
+                <div className="px-5 py-4 border-l border-t border-white/8 text-center">
+                  <span className="text-gold font-bold text-[13px]">{ours}</span>
                 </div>
-                <div className="px-4 py-4 border-l border-t border-white/4 text-center">
-                  <span className="text-cream/30 text-[13px]">{theirs}</span>
+                <div className="px-5 py-4 border-l border-t border-white/8 text-center">
+                  <span className="text-cream/50 text-[13px]">{theirs}</span>
                 </div>
               </div>
             ))}
@@ -256,7 +256,7 @@ export default function HomePage() {
       <section className="py-20 px-5 bg-cream">
         <div className="max-w-6xl mx-auto">
           <div className="grid md:grid-cols-2 gap-14 items-center">
-            <div className="rounded-2xl overflow-hidden bg-[#F5E8A0] h-80 md:h-[500px] relative">
+            <div className="rounded-2xl overflow-hidden bg-cream h-80 md:h-[500px] relative border border-black/6">
               <Image
                 src="/images/product-2.jpeg"
                 alt="Ponkali Turmeric Powder — front and back of packaging"

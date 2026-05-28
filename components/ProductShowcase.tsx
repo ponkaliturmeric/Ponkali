@@ -6,14 +6,15 @@ import Link from 'next/link';
 import { PRODUCTS } from '@/lib/products';
 import { Product } from '@/lib/types';
 import { useCart } from './CartContext';
+import { TruckIcon, CheckIcon, ShieldCheckIcon } from './Icons';
 
 const WEIGHT_ORDER = ['100g', '250g', '500g', '1kg'];
 
 const VARIANT_INFO: Record<string, { label: string; supply: string; perGram: string }> = {
-  '100g': { label: 'Try It',        supply: '~1 month',   perGram: '₹1.69 per gram' },
-  '250g': { label: 'Most Popular',  supply: '~2.5 months', perGram: '₹1.32 per gram' },
-  '500g': { label: 'Best Value',    supply: '~5 months',  perGram: '₹1.20 per gram' },
-  '1kg':  { label: 'Family Pack',   supply: '~10 months', perGram: '₹0.85 per gram' },
+  '100g': { label: 'Try It',       supply: '~1 month',    perGram: '₹1.69 per gram' },
+  '250g': { label: 'Most Popular', supply: '~2.5 months', perGram: '₹1.32 per gram' },
+  '500g': { label: 'Best Value',   supply: '~5 months',   perGram: '₹1.20 per gram' },
+  '1kg':  { label: 'Family Pack',  supply: '~10 months',  perGram: '₹0.85 per gram' },
 };
 
 export default function ProductShowcase() {
@@ -34,16 +35,13 @@ export default function ProductShowcase() {
 
           {/* ── Left: Product image ── */}
           <div className="sticky top-24">
-            {/* Main image — packaging yellow background matches the actual product */}
-            <div
-              className="rounded-3xl overflow-hidden aspect-square relative"
-              style={{ backgroundColor: '#F5C418' }}
-            >
+            {/* Main image — clean white bg, no coloured border */}
+            <div className="rounded-2xl overflow-hidden aspect-square relative bg-white border border-black/8 shadow-sm">
               <Image
                 src={activeImg === 1 ? '/images/product-1.jpeg' : '/images/product-2.jpeg'}
                 alt={`Ponkali Erode Turmeric Powder ${selected.weight}`}
                 fill
-                className="object-contain p-8 transition-opacity duration-300"
+                className="object-contain p-4 transition-opacity duration-300"
                 priority
                 sizes="(max-width: 768px) 100vw, 50vw"
               />
@@ -55,16 +53,15 @@ export default function ProductShowcase() {
                 <button
                   key={n}
                   onClick={() => setActiveImg(n)}
-                  className={`flex-1 aspect-square rounded-xl overflow-hidden border-2 transition-all relative ${
-                    activeImg === n ? 'border-dark-brown' : 'border-transparent opacity-50 hover:opacity-75'
+                  className={`flex-1 aspect-square rounded-xl overflow-hidden border-2 transition-all relative bg-white ${
+                    activeImg === n ? 'border-dark-brown shadow-sm' : 'border-transparent opacity-50 hover:opacity-75'
                   }`}
-                  style={{ backgroundColor: '#F5C418' }}
                 >
                   <Image
                     src={`/images/product-${n}.jpeg`}
                     alt={`View ${n}`}
                     fill
-                    className="object-contain p-2"
+                    className="object-contain p-1.5"
                     sizes="80px"
                   />
                 </button>
@@ -128,9 +125,9 @@ export default function ProductShowcase() {
               )}
             </div>
 
-            {/* Price display */}
+            {/* Price */}
             <div className="flex items-center gap-3 mb-5">
-              <p className="font-display font-extrabold text-dark-brown text-[48px] leading-none">
+              <p className="font-extrabold text-dark-brown text-[48px] leading-none tracking-tight">
                 ₹{selected.price}
               </p>
               {selected.is_bestseller === 1 && (
@@ -145,7 +142,7 @@ export default function ProductShowcase() {
               )}
             </div>
 
-            {/* CTA */}
+            {/* CTAs */}
             <button
               onClick={() => selected.in_stock === 1 && addItem(selected)}
               disabled={selected.in_stock === 0}
@@ -161,24 +158,30 @@ export default function ProductShowcase() {
               View Full Details
             </Link>
 
-            {/* Shipping + guarantee */}
-            <div className="space-y-2.5 pt-5 border-t border-black/6">
-              <div className="flex items-center gap-2.5">
-                <span className="text-[16px]">🚚</span>
-                <p className="text-[13px] text-gray-500">
+            {/* Shipping & guarantee — professional icons, no emojis */}
+            <div className="space-y-3 pt-5 border-t border-black/6">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-dark-brown/6 flex items-center justify-center flex-shrink-0">
+                  <TruckIcon className="w-4 h-4 text-dark-brown" />
+                </div>
+                <p className="text-[13px] text-gray-600">
                   {freeShipping
                     ? <span className="text-dark-green font-semibold">Free shipping on this order</span>
                     : <>Add <strong className="text-dark-brown">₹{399 - selected.price}</strong> more for free shipping</>
                   }
                 </p>
               </div>
-              <div className="flex items-center gap-2.5">
-                <span className="text-[16px]">✓</span>
-                <p className="text-[13px] text-gray-500">Delivered in 3–5 days anywhere in India</p>
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-dark-brown/6 flex items-center justify-center flex-shrink-0">
+                  <CheckIcon className="w-4 h-4 text-dark-brown" />
+                </div>
+                <p className="text-[13px] text-gray-600">Delivered in 3–5 days anywhere in India</p>
               </div>
-              <div className="flex items-center gap-2.5">
-                <span className="text-[16px]">❤️</span>
-                <p className="text-[13px] text-gray-500">If you don&apos;t love it, we&apos;ll make it right</p>
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-dark-brown/6 flex items-center justify-center flex-shrink-0">
+                  <ShieldCheckIcon className="w-4 h-4 text-dark-brown" />
+                </div>
+                <p className="text-[13px] text-gray-600">If you don&apos;t love it, we&apos;ll make it right</p>
               </div>
             </div>
           </div>
