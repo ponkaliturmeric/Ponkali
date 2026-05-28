@@ -231,7 +231,7 @@ export default function HomePage() {
               Not All Turmeric Is Equal
             </h2>
             <p className="text-cream/40 mt-3 text-[16px] max-w-md mx-auto">
-              Here's what most packaged brands don't tell you.
+              Here&apos;s what most packaged brands don&apos;t tell you.
             </p>
           </div>
 
