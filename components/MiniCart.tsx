@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useCart } from './CartContext';
 import { XIcon, MinusIcon, PlusIcon, CartIcon } from './Icons';
 
@@ -67,8 +68,14 @@ export default function MiniCart() {
             <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
               {items.map(item => (
                 <div key={item.product.slug} className="flex gap-3.5">
-                  <div className="w-16 h-16 bg-gradient-to-br from-gold to-dark-brown rounded-xl flex-shrink-0 flex items-center justify-center">
-                    <span className="text-white text-[11px] font-bold">{item.product.weight}</span>
+                  <div className="w-16 h-16 rounded-xl flex-shrink-0 overflow-hidden bg-white border border-black/8 relative">
+                    <Image
+                      src="/images/product-1.jpeg"
+                      alt={item.product.name}
+                      fill
+                      className="object-contain p-1"
+                      sizes="64px"
+                    />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-[14px] text-dark-brown leading-snug">{item.product.name}</p>
