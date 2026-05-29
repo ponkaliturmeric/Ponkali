@@ -32,6 +32,9 @@ export const metadata: Metadata = {
   },
   description: 'GI-tagged Erode turmeric powder, stone ground on our ancestral mill. Three generations of farm-direct purity. FSSAI certified. Free shipping above ₹399.',
   keywords: ['erode turmeric', 'GI turmeric', 'stone ground turmeric', 'pure turmeric powder', 'farm direct turmeric'],
+  icons: {
+    icon: '/images/logo.jpg',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
