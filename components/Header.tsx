@@ -19,6 +19,7 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [orderId, setOrderId] = useState('');
+  const [user, setUser] = useState<{ email: string } | null>(null);
   const profileRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
@@ -32,6 +33,22 @@ export default function Header() {
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
+
+  // Load current customer session for account links
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then(r => r.json())
+      .then(d => setUser(d.user))
+      .catch(() => setUser(null));
+  }, []);
+
+  const handleLogout = async () => {
+    await fetch('/api/auth/logout', { method: 'POST' });
+    setUser(null);
+    setProfileOpen(false);
+    setMenuOpen(false);
+    router.refresh();
+  };
 
   const handleTrack = () => {
     const id = orderId.trim().toUpperCase();
@@ -77,6 +94,39 @@ export default function Header() {
 
             {profileOpen && (
               <div className="absolute right-0 top-full mt-2 w-72 bg-white border border-black/8 rounded-2xl shadow-xl p-5 z-50">
+                {/* Account */}
+                <div className="border-b border-black/6 pb-4 mb-4">
+                  {user ? (
+                    <>
+                      <p className="text-[12px] text-gray-400 mb-0.5">Signed in as</p>
+                      <p className="font-semibold text-dark-brown text-[14px] truncate mb-3">{user.email}</p>
+                      <button
+                        onClick={handleLogout}
+                        className="w-full border border-dark-brown/20 text-dark-brown py-2 rounded-xl text-[13px] font-semibold hover:bg-dark-brown hover:text-cream transition-all"
+                      >
+                        Sign Out
+                      </button>
+                    </>
+                  ) : (
+                    <div className="flex gap-2">
+                      <Link
+                        href="/login"
+                        onClick={() => setProfileOpen(false)}
+                        className="flex-1 text-center bg-dark-brown text-cream py-2 rounded-xl text-[13px] font-semibold hover:bg-gold hover:text-dark-brown transition-all"
+                      >
+                        Sign In
+                      </Link>
+                      <Link
+                        href="/register"
+                        onClick={() => setProfileOpen(false)}
+                        className="flex-1 text-center border border-dark-brown/20 text-dark-brown py-2 rounded-xl text-[13px] font-semibold hover:border-dark-brown/50 transition-all"
+                      >
+                        Register
+                      </Link>
+                    </div>
+                  )}
+                </div>
+
                 <p className="font-bold text-dark-brown text-[15px] mb-1">Track Your Order</p>
                 <p className="text-[12px] text-gray-400 mb-4">No account needed — enter your order ID</p>
 
@@ -152,6 +202,34 @@ export default function Header() {
             </Link>
           ))}
           <div className="border-t border-black/8 pt-4 mt-1">
+            {user ? (
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-[13px] text-dark-brown/70 truncate">{user.email}</span>
+                <button
+                  onClick={handleLogout}
+                  className="text-[13px] font-semibold text-dark-brown border border-dark-brown/20 px-3 py-1.5 rounded-xl"
+                >
+                  Sign Out
+                </button>
+              </div>
+            ) : (
+              <div className="flex gap-2 mb-4">
+                <Link
+                  href="/login"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex-1 text-center bg-dark-brown text-cream py-2.5 rounded-xl text-[14px] font-semibold"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/register"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex-1 text-center border border-dark-brown/20 text-dark-brown py-2.5 rounded-xl text-[14px] font-semibold"
+                >
+                  Register
+                </Link>
+              </div>
+            )}
             <p className="text-[12px] text-gray-400 font-medium uppercase tracking-wider mb-2">Track Your Order</p>
             <div className="flex gap-2">
               <input

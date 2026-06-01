@@ -1,10 +1,21 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import ProductShowcase from '@/components/ProductShowcase';
+import JsonLd from '@/components/JsonLd';
+import { buildMetadata, productListJsonLd, faqJsonLd } from '@/lib/seo';
+import { PRODUCTS } from '@/lib/products';
 import {
   MapPinIcon, CogIcon, LeafIcon, DropletIcon,
   ShieldCheckIcon, StarIcon, ArrowRightIcon,
 } from '@/components/Icons';
+
+export const metadata: Metadata = buildMetadata({
+  title: 'Pure Erode Turmeric, Farm Direct',
+  description:
+    'Buy GI-tagged Erode turmeric powder, stone ground on our ancestral mill. 2.5–4.5% natural curcumin, zero additives, FSSAI certified. Shipped direct from our family farm. Free shipping above ₹399.',
+  path: '/',
+});
 
 const TRUST_BADGES = [
   { Icon: MapPinIcon,      title: 'GI Recognised',   desc: 'Erode — India\'s turmeric capital' },
@@ -29,6 +40,41 @@ const COMPARISON = [
   { feature: 'Middlemen',         ours: 'Zero — farm direct', theirs: '3–4 layers' },
 ];
 
+const FAQ_ITEMS = [
+  {
+    question: 'Is Ponkali turmeric 100% pure and free from adulteration?',
+    answer: 'Yes. Ponkali is single-origin Erode turmeric powder, stone ground on our family’s ancestral mill with nothing added — no synthetic colour, no starch, no fillers, no lead chromate. It is FSSAI certified (Lic. No. 22426064000154) and checked for purity.',
+  },
+  {
+    question: 'What is the curcumin content of Ponkali turmeric?',
+    answer: 'Our GI-tagged Erode turmeric naturally contains 2.5–4.5% curcumin — much higher than the 0.5–1.5% typical of mass-market supermarket brands. Curcumin is the active compound behind turmeric’s deep colour and health benefits.',
+  },
+  {
+    question: 'Where is Ponkali turmeric grown?',
+    answer: 'It is grown on our own family farm in Perundurai, Erode — the GI-recognised turmeric capital of Tamil Nadu. We have farmed this same land for three generations.',
+  },
+  {
+    question: 'How is it different from supermarket turmeric powder?',
+    answer: 'Most packaged brands blend turmeric from mixed or unknown origins, process it with high heat, and often add colour or starch. Ponkali is single-origin Erode turmeric, slow stone-ground to preserve its natural oils and aroma, and sold farm-direct with zero middlemen.',
+  },
+  {
+    question: 'Is Ponkali turmeric FSSAI certified?',
+    answer: 'Yes — FSSAI Licence No. 22426064000154, manufactured by The Native, Perundurai, Erode 638055, Tamil Nadu.',
+  },
+  {
+    question: 'How long does delivery take and is shipping free?',
+    answer: 'We ship across India in 3–5 working days. Shipping is free on orders above ₹399; below that a flat ₹60 applies. Both Cash on Delivery and online payment (UPI, cards, netbanking) are available.',
+  },
+  {
+    question: 'How should I store turmeric powder, and how do I use it?',
+    answer: 'Store in a cool, dry place away from sunlight with the lid sealed, and use within 6 months for the best aroma. Use it in curries, sambhar and rasam, or stir half a teaspoon into warm milk for a daily golden-milk drink.',
+  },
+  {
+    question: 'What pack sizes are available?',
+    answer: 'Ponkali Erode Turmeric Powder comes in 100g, 250g, 500g and 1kg packs.',
+  },
+];
+
 function Stars({ count = 5 }: { count?: number }) {
   return (
     <div className="flex gap-0.5">
@@ -42,6 +88,8 @@ function Stars({ count = 5 }: { count?: number }) {
 export default function HomePage() {
   return (
     <>
+      <JsonLd data={[productListJsonLd(PRODUCTS), faqJsonLd(FAQ_ITEMS)]} />
+
       {/* ─── 1. HERO ─── */}
       <section className="bg-dark-brown relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none" style={{
@@ -326,7 +374,32 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ─── 9. CTA + GUARANTEE ─── */}
+      {/* ─── 9. FAQ ─── */}
+      <section className="py-20 px-5 bg-white border-t border-black/5">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-12">
+            <p className="text-gold text-[11px] font-semibold tracking-[0.3em] uppercase mb-3">Good to Know</p>
+            <h2 className="font-display text-[32px] md:text-[40px] font-extrabold text-dark-brown tracking-tight">
+              Frequently Asked Questions
+            </h2>
+          </div>
+          <div className="border-t border-black/8">
+            {FAQ_ITEMS.map(({ question, answer }) => (
+              <details key={question} className="group border-b border-black/8 py-5">
+                <summary className="flex items-center justify-between cursor-pointer list-none gap-6">
+                  <h3 className="font-semibold text-dark-brown text-[16px]">{question}</h3>
+                  <span className="text-gold text-[24px] leading-none flex-shrink-0 transition-transform duration-200 group-open:rotate-45">
+                    +
+                  </span>
+                </summary>
+                <p className="text-gray-600 leading-[1.8] text-[15px] mt-3">{answer}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── 10. CTA + GUARANTEE ─── */}
       <section className="py-20 px-5 bg-[#F5E4B0]">
         <div className="max-w-xl mx-auto text-center">
           <p className="text-dark-brown/40 text-[11px] font-semibold tracking-[0.3em] uppercase mb-4">

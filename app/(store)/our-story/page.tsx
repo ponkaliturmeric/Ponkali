@@ -2,11 +2,13 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { CogIcon, LeafIcon, PackageIcon, TruckIcon, ArrowRightIcon } from '@/components/Icons';
+import { buildMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildMetadata({
   title: 'Our Story',
   description: 'Named after grandparents Ponnamal and Kaaliappa Gounder, who farmed Erode turmeric for 40+ years. Three generations of farm-direct purity from Perundurai, Erode.',
-};
+  path: '/our-story',
+});
 
 export default function OurStoryPage() {
   return (

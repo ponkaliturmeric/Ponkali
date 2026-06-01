@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Script from 'next/script';
 import { useCart } from '@/components/CartContext';
 import { ShieldCheckIcon, TruckIcon } from '@/components/Icons';
 
@@ -24,7 +25,7 @@ export default function CheckoutPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState<'upi' | 'cod'>('upi');
+  const [paymentMethod, setPaymentMethod] = useState<'online' | 'cod'>('online');
 
   const [form, setForm] = useState({
     customer_name: '',
@@ -47,15 +48,34 @@ export default function CheckoutPage() {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
+  const cartPayload = () => items.map(i => ({ slug: i.product.slug, quantity: i.quantity }));
 
-    if (items.length === 0) {
-      setError('Your cart is empty.');
-      return;
-    }
+  const persistOrder = (orderId: string, method: 'online' | 'cod', paid: boolean) => {
+    // Save order locally so the confirmation page can render it without a DB.
+    try {
+      localStorage.setItem(`ponkali_order_${orderId}`, JSON.stringify({
+        order_id: orderId,
+        customer_name: form.customer_name,
+        phone: form.phone,
+        total,
+        payment_method: method,
+        status: paid ? 'Paid' : 'Pending',
+        created_at: new Date().toISOString(),
+        items: items.map(i => ({
+          product_name: i.product.name,
+          weight: i.product.weight,
+          quantity: i.quantity,
+          price: i.product.price,
+        })),
+      }));
+    } catch { /* ignore if localStorage unavailable */ }
 
+    clearCart();
+    router.push(`/order-confirmation/${orderId}`);
+  };
+
+  // Cash on Delivery — record the order, collect payment on delivery.
+  const placeCodOrder = async () => {
     setLoading(true);
     try {
       const res = await fetch('/api/orders', {
@@ -63,7 +83,7 @@ export default function CheckoutPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...form,
-          payment_method: paymentMethod,
+          payment_method: 'cod',
           subtotal,
           shipping,
           cod_charge: codCharge,
@@ -76,39 +96,120 @@ export default function CheckoutPage() {
           })),
         }),
       });
-
       const data = await res.json();
-
       if (!res.ok) {
         setError(data.error || 'Something went wrong. Please try again.');
+        setLoading(false);
+        return;
+      }
+      persistOrder(data.order_id, 'cod', false);
+    } catch {
+      setError('Network error. Please try again.');
+      setLoading(false);
+    }
+  };
+
+  // Online payment via Razorpay Checkout — amount is computed & verified server-side.
+  const payWithRazorpay = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/razorpay/order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items: cartPayload() }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || 'Could not start payment. Please try again.');
+        setLoading(false);
         return;
       }
 
-      // Save order to localStorage so confirmation page can display it without a DB
-      try {
-        localStorage.setItem(`ponkali_order_${data.order_id}`, JSON.stringify({
-          order_id: data.order_id,
-          customer_name: form.customer_name,
-          phone: form.phone,
-          total,
-          payment_method: paymentMethod,
-          status: 'Pending',
-          created_at: new Date().toISOString(),
-          items: items.map(i => ({
-            product_name: i.product.name,
-            weight: i.product.weight,
-            quantity: i.quantity,
-            price: i.product.price,
-          })),
-        }));
-      } catch { /* ignore if localStorage unavailable */ }
+      const RazorpayCtor = (window as unknown as {
+        Razorpay?: new (o: Record<string, unknown>) => {
+          open: () => void;
+          on: (e: string, cb: (r: { error?: { description?: string } }) => void) => void;
+        };
+      }).Razorpay;
 
-      clearCart();
-      router.push(`/order-confirmation/${data.order_id}`);
+      if (!RazorpayCtor) {
+        setError('Payment library failed to load. Please refresh and try again.');
+        setLoading(false);
+        return;
+      }
+
+      const rzp = new RazorpayCtor({
+        key: data.keyId,
+        amount: data.amount,
+        currency: data.currency,
+        name: 'Ponkali Masalas',
+        description: 'Pure Erode Turmeric — Order Payment',
+        image: '/images/logo.jpg',
+        order_id: data.orderId,
+        prefill: {
+          name: form.customer_name,
+          email: form.email,
+          contact: form.phone,
+        },
+        notes: {
+          address: `${form.address_line1}, ${form.city}, ${form.state} ${form.pincode}`,
+        },
+        theme: { color: '#E8950A' },
+        handler: async (response: {
+          razorpay_order_id: string;
+          razorpay_payment_id: string;
+          razorpay_signature: string;
+        }) => {
+          try {
+            const verifyRes = await fetch('/api/razorpay/verify', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                customer: { ...form, items: cartPayload() },
+              }),
+            });
+            const verifyData = await verifyRes.json();
+            if (!verifyRes.ok) {
+              setError(verifyData.error || 'Payment could not be verified. If money was deducted, please contact us.');
+              setLoading(false);
+              return;
+            }
+            persistOrder(verifyData.order_id, 'online', true);
+          } catch {
+            setError('Could not verify payment. If money was deducted, please contact us.');
+            setLoading(false);
+          }
+        },
+        modal: {
+          ondismiss: () => setLoading(false),
+        },
+      });
+
+      rzp.on('payment.failed', (resp) => {
+        setError(resp.error?.description || 'Payment failed. Please try again.');
+        setLoading(false);
+      });
+      rzp.open();
     } catch {
       setError('Network error. Please try again.');
-    } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    if (items.length === 0) {
+      setError('Your cart is empty.');
+      return;
+    }
+    if (paymentMethod === 'online') {
+      await payWithRazorpay();
+    } else {
+      await placeCodOrder();
     }
   };
 
@@ -126,6 +227,7 @@ export default function CheckoutPage() {
 
   return (
     <div className="min-h-screen bg-cream">
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="afterInteractive" />
       <div className="max-w-5xl mx-auto px-5 py-12">
         <h1 className="text-[32px] font-extrabold text-dark-brown tracking-tight mb-10">Checkout</h1>
 
@@ -199,21 +301,12 @@ export default function CheckoutPage() {
               <div className="bg-white rounded-2xl p-6 border border-black/6">
                 <h2 className="font-extrabold text-dark-brown text-[17px] tracking-tight mb-5">Payment</h2>
                 <div className="space-y-3">
-                  <label className={`flex items-start gap-4 p-4 rounded-xl border-2 cursor-pointer transition-colors ${paymentMethod === 'upi' ? 'border-dark-brown bg-dark-brown/[0.02]' : 'border-black/10 hover:border-black/20'}`}>
-                    <input type="radio" name="payment" value="upi" checked={paymentMethod === 'upi'}
-                      onChange={() => setPaymentMethod('upi')} className="mt-1 accent-gold" />
+                  <label className={`flex items-start gap-4 p-4 rounded-xl border-2 cursor-pointer transition-colors ${paymentMethod === 'online' ? 'border-dark-brown bg-dark-brown/[0.02]' : 'border-black/10 hover:border-black/20'}`}>
+                    <input type="radio" name="payment" value="online" checked={paymentMethod === 'online'}
+                      onChange={() => setPaymentMethod('online')} className="mt-1 accent-gold" />
                     <div className="flex-1">
-                      <p className="font-semibold text-dark-brown text-[15px]">UPI Payment</p>
-                      <p className="text-[13px] text-gray-400 mt-0.5">Google Pay, PhonePe, Paytm, BHIM</p>
-                      {paymentMethod === 'upi' && (
-                        <div className="mt-3">
-                          <input name="upi_id" value={form.upi_id} onChange={handleChange}
-                            placeholder="yourname@upi" className={inputClass} />
-                          <p className="text-[12px] text-gray-400 mt-2">
-                            We&apos;ll send a payment request after confirming your order.
-                          </p>
-                        </div>
-                      )}
+                      <p className="font-semibold text-dark-brown text-[15px]">Pay Online</p>
+                      <p className="text-[13px] text-gray-400 mt-0.5">UPI · Cards · Netbanking · Wallets — secured by Razorpay</p>
                     </div>
                   </label>
 
@@ -281,7 +374,9 @@ export default function CheckoutPage() {
                   disabled={loading}
                   className="w-full bg-dark-brown text-cream py-4 rounded-full font-semibold text-[15px] hover:bg-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {loading ? 'Placing Order...' : 'Place Order'}
+                  {loading
+                    ? (paymentMethod === 'online' ? 'Processing…' : 'Placing Order…')
+                    : (paymentMethod === 'online' ? `Pay ₹${total}` : 'Place Order')}
                 </button>
 
                 <div className="mt-4 flex items-center gap-2 justify-center">

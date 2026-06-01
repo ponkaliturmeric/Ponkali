@@ -1,37 +1,48 @@
+import crypto from 'crypto';
 import { cookies } from 'next/headers';
+import {
+  ADMIN_USERNAME,
+  ADMIN_COOKIE,
+  ADMIN_SESSION_SECRET,
+  ADMIN_SESSION_DURATION_MS,
+  validateCredentials,
+  encodePayload,
+  decodePayload,
+} from './admin-session';
 
-const ADMIN_USERNAME = 'ponkali_admin';
-const ADMIN_PASSWORD = 'erode2024secure';
-const SESSION_TOKEN = 'ponkali_session';
-const SESSION_SECRET = 'ponkali_secret_2024_erode';
+export { validateCredentials };
+export const SESSION_COOKIE_NAME = ADMIN_COOKIE;
 
-export function validateCredentials(username: string, password: string): boolean {
-  return username === ADMIN_USERNAME && password === ADMIN_PASSWORD;
+/** HMAC-SHA256 of the encoded payload, hex — matches the Web Crypto impl in middleware.ts. */
+function sign(data: string): string {
+  return crypto.createHmac('sha256', ADMIN_SESSION_SECRET).update(data).digest('hex');
 }
 
 export function generateSessionToken(): string {
-  const payload = {
+  const data = encodePayload({
     user: ADMIN_USERNAME,
-    exp: Date.now() + 24 * 60 * 60 * 1000,
-    secret: SESSION_SECRET,
-  };
-  return Buffer.from(JSON.stringify(payload)).toString('base64');
+    exp: Date.now() + ADMIN_SESSION_DURATION_MS,
+  });
+  return `${data}.${sign(data)}`;
 }
 
 export function validateSessionToken(token: string): boolean {
-  try {
-    const payload = JSON.parse(Buffer.from(token, 'base64').toString('utf-8'));
-    return payload.secret === SESSION_SECRET && payload.exp > Date.now();
-  } catch {
+  const [data, signature] = token.split('.');
+  if (!data || !signature) return false;
+
+  const expected = sign(data);
+  const sigBuf = Buffer.from(signature);
+  const expBuf = Buffer.from(expected);
+  if (sigBuf.length !== expBuf.length || !crypto.timingSafeEqual(sigBuf, expBuf)) {
     return false;
   }
+
+  const payload = decodePayload(data);
+  return !!payload && payload.exp > Date.now();
 }
 
 export async function getAdminSession(): Promise<boolean> {
-  const cookieStore = cookies();
-  const token = cookieStore.get(SESSION_TOKEN)?.value;
+  const token = cookies().get(ADMIN_COOKIE)?.value;
   if (!token) return false;
   return validateSessionToken(token);
 }
-
-export const SESSION_COOKIE_NAME = SESSION_TOKEN;

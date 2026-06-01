@@ -2,11 +2,13 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRightIcon } from '@/components/Icons';
+import { buildMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildMetadata({
   title: 'From Our Farm',
   description: 'Real photos from our turmeric farm in Perundurai, Erode — the fields, the harvest, the traditional processing. This is where your Ponkali turmeric begins.',
-};
+  path: '/farm',
+});
 
 const FARM_IMAGES = Array.from({ length: 17 }, (_, i) => ({
   src: `/images/farm/farm-${String(i + 1).padStart(2, '0')}.jpeg`,
