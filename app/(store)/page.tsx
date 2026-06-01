@@ -59,12 +59,13 @@ export default function HomePage() {
            
 
             <h1 className="font-hero font-bold text-white tracking-[-0.03em] mb-8
-              text-[38px] leading-[1.0]
+              text-[7.5vw] leading-[1.05]
               sm:text-[52px] sm:leading-[0.93]
               md:text-[72px] md:leading-[0.88]
               lg:text-[100px] lg:leading-[0.85]">
               The Turmeric Your<br />
-              <span className="text-gold">Grandparents Knew</span>
+              <span className="text-gold">Grandparents</span><br />
+              <span className="text-gold">Knew</span>
             </h1>
 
             <p className="text-cream/55 text-[17px] leading-[1.75] mb-8 max-w-[500px]">
@@ -190,7 +191,7 @@ export default function HomePage() {
               { step: '04', title: 'Shipped Direct', desc: 'From our farm to your doorstep. 3–5 days, anywhere in India.' },
             ].map(({ step, title, desc }) => (
               <div key={step} className="bg-white p-8 md:p-10">
-                <p className="text-[48px] font-extrabold text-gold/15 leading-none mb-5 select-none">{step}</p>
+                <p className="text-[48px] font-extrabold text-gold/35 leading-none mb-5 select-none">{step}</p>
                 <h3 className="font-bold text-dark-brown text-[16px] mb-2">{title}</h3>
                 <p className="text-gray-400 text-[14px] leading-relaxed">{desc}</p>
               </div>
