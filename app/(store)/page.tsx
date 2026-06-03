@@ -10,6 +10,7 @@ import {
   MapPinIcon, LeafIcon, TruckIcon, DropletIcon,
   ShieldCheckIcon, StarIcon, ArrowRightIcon,
 } from '@/components/Icons';
+import Mandala from '@/components/Mandala';
 
 export const metadata: Metadata = buildMetadata({
   title: 'Pure Erode Turmeric, Farm Direct',
@@ -88,6 +89,10 @@ export default function HomePage() {
         <div className="absolute inset-0 pointer-events-none" style={{
           background: 'radial-gradient(ellipse 55% 80% at 75% 50%, rgba(212,150,10,0.07) 0%, transparent 65%)',
         }} />
+        {/* Corner mandala — top-right, clipped by overflow-hidden, stays clear of text */}
+        <Mandala className="absolute -top-20 -right-20 w-[340px] h-[340px] text-gold opacity-[0.07] pointer-events-none select-none" />
+        {/* Corner mandala — bottom-left, only visible on md+ where it won't touch the copy */}
+        <Mandala className="hidden md:block absolute -bottom-20 -left-20 w-[280px] h-[280px] text-gold opacity-[0.05] pointer-events-none select-none" />
 
         <div className="max-w-6xl mx-auto px-5 relative z-10
           flex flex-col gap-10
@@ -117,7 +122,7 @@ export default function HomePage() {
             <div className="flex flex-col sm:flex-row gap-3 mb-8">
               <Link
                 href="/shop"
-                className="bg-gold text-dark-brown px-9 py-4 rounded-full font-bold text-[15px] hover:bg-yellow-400 transition-all duration-150 text-center tracking-wide"
+                className="bg-cream text-dark-brown px-9 py-4 rounded-full font-bold text-[15px] hover:bg-white transition-all duration-150 text-center tracking-wide shadow-md"
               >
                 Shop Now — from ₹169
               </Link>

@@ -10,12 +10,13 @@ const config: Config = {
     extend: {
       colors: {
         gold: '#E8950A',          // vibrant turmeric-yellow (was brownish #D4960A)
-        'dark-brown': '#2C1000',
-        cream: '#FDF3DC',
+        'dark-brown': '#013A2B',
+        cream: '#E5D6C2',
         terracotta: '#C04A1C',    // Tamil Nadu red-earth — warmth + authenticity
         'pkg-yellow': '#F5C418',  // Matches physical packaging background
         'dark-green': '#1A3A0A',
         'light-gold': '#FAE8A0',
+        'warm-white': 'rgb(251, 248, 242)',
       },
       fontFamily: {
         sans:    ['var(--font-madefor)', 'helveticaneuew01-45ligh', 'Helvetica Neue', 'Arial', 'sans-serif'],
