@@ -32,14 +32,6 @@ const REVIEWS = [
   { name: 'Rajan S.',   location: 'Mumbai',    text: 'Switched from Tata Sampann. Will never go back. The quality difference is visible immediately.' },
 ];
 
-const COMPARISON = [
-  { feature: 'Curcumin Content',  ours: '2.5 – 3.5%',        theirs: '0.5 – 1.5%' },
-  { feature: 'Origin',            ours: 'GI Tagged Erode',    theirs: 'Mixed / Unknown' },
-  { feature: 'Artificial Color',  ours: 'None added',         theirs: 'Commonly added' },
-  { feature: 'Starch / Fillers',  ours: 'None',               theirs: 'Common practice' },
-  { feature: 'Processing',        ours: 'Clean, fresh ground', theirs: 'High-heat machine' },
-  { feature: 'Middlemen',         ours: 'Zero — farm direct', theirs: '3–4 layers' },
-];
 
 const FAQ_ITEMS = [
   {
@@ -250,62 +242,6 @@ export default function HomePage() {
 
       {/* ─── 6. FARM GALLERY ─── */}
       <FarmGallery />
-
-      {/* ─── 7. NOT ALL TURMERIC IS EQUAL ─── */}
-      {/* <section className="py-20 px-5 bg-dark-brown">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-14">
-            <p className="text-gold/70 text-[11px] font-semibold tracking-[0.3em] uppercase mb-3">The Real Difference</p>
-            <h2 className="font-hero text-[32px] md:text-[42px] font-extrabold text-white">
-              Not All Turmeric Is Equal
-            </h2>
-            <p className="text-cream/40 mt-3 text-[16px] max-w-md mx-auto">
-              Here&apos;s what most packaged brands don&apos;t tell you.
-            </p>
-          </div>
-
-          <div className="rounded-2xl overflow-hidden border border-white/12 overflow-x-auto">
-            <div className="min-w-[520px]">
-            {/* Header */}
-            {/* <div className="grid grid-cols-[1fr_1fr_1fr] bg-white/8">
-              <div className="px-5 py-4 text-left">
-                <p className="text-cream/50 text-[11px] font-semibold uppercase tracking-wider">Feature</p>
-              </div>
-              <div className="px-5 py-4 border-l border-white/10 text-center">
-                <p className="text-gold font-bold text-[15px]">Ponkali</p>
-                <p className="text-gold/60 text-[11px] mt-0.5">Our farm, Erode</p>
-              </div>
-              <div className="px-5 py-4 border-l border-white/10 text-center">
-                <p className="text-cream/70 font-medium text-[13px]">Commercial Brands</p>
-                <p className="text-cream/40 text-[11px] mt-0.5">Supermarket</p>
-              </div>
-            </div>
-
-            {COMPARISON.map(({ feature, ours, theirs }, i) => (
-              <div key={feature} className={`grid grid-cols-[1fr_1fr_1fr] ${i % 2 === 0 ? 'bg-white/[0.03]' : ''}`}>
-                <div className="px-5 py-4 text-cream/65 text-[13px] text-left border-t border-white/8">{feature}</div>
-                <div className="px-5 py-4 border-l border-t border-white/8 text-center">
-                  <span className="text-gold font-bold text-[13px]">{ours}</span>
-                </div>
-                <div className="px-5 py-4 border-l border-t border-white/8 text-center">
-                  <span className="text-cream/50 text-[13px]">{theirs}</span>
-                </div>
-              </div>
-            ))}
-            </div>{/* end min-w wrapper */}
-          {/* </div>
-
-          <div className="mt-10 text-center">
-            <Link
-              href="/shop"
-              className="inline-flex items-center gap-2 bg-gold text-dark-brown px-9 py-4 rounded-full font-bold text-[15px] hover:bg-yellow-400 transition-all"
-            >
-              Try the Real Difference
-              <ArrowRightIcon className="w-4 h-4" />
-            </Link>
-          </div>
-        </div>
-      </section> */} */} */}
 
       {/* ─── 7. OUR STORY ─── */}
       <section className="py-20 px-5 bg-cream">
