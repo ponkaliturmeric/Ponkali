@@ -86,6 +86,18 @@ export default function HomePage() {
 
       {/* ─── 1. HERO ─── */}
       <section className="bg-dark-brown relative overflow-hidden">
+        {/* Background video */}
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover opacity-30"
+        >
+          <source src="/videos/farm-video.mp4" type="video/mp4" />
+        </video>
+        {/* Dark overlay to keep text readable over video */}
+        <div className="absolute inset-0 bg-dark-brown/60 pointer-events-none" />
         <div className="absolute inset-0 pointer-events-none" style={{
           background: 'radial-gradient(ellipse 55% 80% at 75% 50%, rgba(212,150,10,0.07) 0%, transparent 65%)',
         }} />

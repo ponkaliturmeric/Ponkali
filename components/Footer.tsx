@@ -6,9 +6,9 @@ import { InstagramIcon, FacebookIcon, YouTubeIcon } from './Icons';
 export default function Footer() {
   return (
     <footer className="bg-dark-brown text-warm-white relative overflow-hidden">
-      {/* Half-mandala peeking from right edge */}
+      {/* Half-mandala peeking from right edge — hidden on mobile */}
       <Mandala2
-        className="absolute right-[-350px] top-1/2 -translate-y-1/2 w-[700px] h-[700px] text-warm-white opacity-[0.18] pointer-events-none select-none"
+        className="hidden md:block absolute right-[-350px] top-1/2 -translate-y-1/2 w-[700px] h-[700px] text-warm-white opacity-[0.18] pointer-events-none select-none"
       />
       {/* Small accent mandala — bottom-left corner */}
       <Mandala2
@@ -43,7 +43,7 @@ export default function Footer() {
               <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-warm-white/35 mb-3">Follow Us</p>
               <div className="flex items-center gap-3">
                 <a
-                  href="https://www.instagram.com/ponkali.turmeric"
+                  href="https://www.instagram.com/ponkali_masala"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Follow Ponkali on Instagram"
