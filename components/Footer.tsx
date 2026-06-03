@@ -43,7 +43,7 @@ export default function Footer() {
               <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-warm-white/35 mb-3">Follow Us</p>
               <div className="flex items-center gap-3">
                 <a
-                  href="https://www.instagram.com/ponkali.turmeric"
+                  href="https://www.instagram.com/ponkali_masala"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Follow Ponkali on Instagram"
