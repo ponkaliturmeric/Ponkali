@@ -135,7 +135,7 @@ export default function ProductDetail({ slug }: { slug: string }) {
           {/* Right — Details */}
           <div>
             <p className="text-gold text-[11px] font-semibold tracking-[0.3em] uppercase mb-3">
-              GI-Tagged · Erode · Stone Ground
+              GI-Tagged · Erode · Naturally Grown
             </p>
             <h1 className="text-[32px] md:text-[40px] font-extrabold text-dark-brown tracking-tight leading-tight mb-4">
               Erode Turmeric Powder
@@ -245,7 +245,7 @@ export default function ProductDetail({ slug }: { slug: string }) {
               <div className="border-t border-black/8 py-5">
                 <h2 className="font-bold text-dark-brown mb-3 text-[15px]">About This Product</h2>
                 <p className="text-gray-600 leading-[1.8] text-[15px]">
-                  {selected.description ?? 'Single-origin Erode turmeric powder, stone ground on our ancestral mill in Perundurai. GI-tagged variety with naturally high curcumin content (2.5–4.5%). No additives, no fillers — just pure turmeric as it has been grown and ground for three generations.'}
+                  {selected.description ?? 'Single-origin Erode turmeric powder, naturally grown in Perundurai. GI-tagged variety with naturally high curcumin content (2.5–3.5%). No additives, no fillers — just pure turmeric as it has been grown for three generations.'}
                 </p>
               </div>
 
@@ -254,7 +254,7 @@ export default function ProductDetail({ slug }: { slug: string }) {
                 <ul className="space-y-2.5">
                   {[
                     'GI-tagged Erode variety — certified origin',
-                    'Stone ground on ancestral mill — preserves natural oils',
+                    'Naturally grown, chemical-free farm practices',
                     'No synthetic colours, fillers, or additives',
                     'FSSAI certified · Lic. No. 22426064000154',
                     'Packed fresh within days of grinding',

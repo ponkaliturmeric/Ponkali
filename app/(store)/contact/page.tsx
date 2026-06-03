@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { MailIcon, PhoneIcon, MapPinIcon, WhatsAppIcon } from '@/components/Icons';
+import Mandala from '@/components/Mandala';
 
 export default function ContactPage() {
   const [form, setForm] = useState({ name: '', email: '', message: '' });
@@ -29,19 +30,22 @@ export default function ContactPage() {
 
   return (
     <div className="min-h-screen bg-cream">
-      <div className="bg-dark-brown py-24 px-5 text-center">
-        <p className="text-gold/70 text-[11px] font-semibold tracking-[0.35em] uppercase mb-5">Reach Us</p>
-        <h1 className="font-display text-[42px] md:text-[56px] font-extrabold text-white tracking-tight mb-4">Get in Touch</h1>
-        <p className="text-cream/50 text-[16px] max-w-md mx-auto">
-          Questions, bulk orders, or just want to say hello — we&apos;re here.
-        </p>
+      <div className="relative overflow-hidden py-24 px-5 text-center" style={{ backgroundColor: '#013A2B' }}>
+        <Mandala className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[640px] h-[640px] text-white opacity-[0.08] pointer-events-none select-none" />
+        <div className="relative z-10">
+          <p className="text-gold text-[11px] font-semibold tracking-[0.35em] uppercase mb-5">Reach Us</p>
+          <h1 className="font-hero text-[42px] md:text-[56px] font-extrabold text-white tracking-tight mb-4">Get in Touch</h1>
+          <p className="text-white/75 text-[17px] max-w-md mx-auto leading-[1.7]">
+            Questions, bulk orders, or just want to say hello — we&apos;re here.
+          </p>
+        </div>
       </div>
 
       <div className="max-w-5xl mx-auto px-5 py-20">
         <div className="grid md:grid-cols-2 gap-14">
           {/* Contact info */}
           <div>
-            <h2 className="font-display text-[22px] font-extrabold text-dark-brown tracking-tight mb-8">Reach Us Directly</h2>
+            <h2 className="font-hero text-[22px] font-extrabold text-dark-brown tracking-tight mb-8">Reach Us Directly</h2>
 
             <div className="space-y-6">
               {[
@@ -87,7 +91,7 @@ export default function ContactPage() {
 
           {/* Form */}
           <div className="bg-white rounded-2xl p-8 border border-black/6">
-            <h2 className="font-display text-[20px] font-extrabold text-dark-brown tracking-tight mb-7">Send a Message</h2>
+            <h2 className="font-hero text-[20px] font-extrabold text-dark-brown tracking-tight mb-7">Send a Message</h2>
 
             {status === 'success' ? (
               <div className="text-center py-10">

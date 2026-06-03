@@ -1,27 +1,28 @@
-import type { Metadata } from 'next';
+﻿import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import ProductShowcase from '@/components/ProductShowcase';
+import FarmGallery from '@/components/FarmGallery';
 import JsonLd from '@/components/JsonLd';
 import { buildMetadata, productListJsonLd, faqJsonLd } from '@/lib/seo';
 import { PRODUCTS } from '@/lib/products';
 import {
-  MapPinIcon, CogIcon, LeafIcon, DropletIcon,
+  MapPinIcon, LeafIcon, TruckIcon, DropletIcon,
   ShieldCheckIcon, StarIcon, ArrowRightIcon,
 } from '@/components/Icons';
 
 export const metadata: Metadata = buildMetadata({
   title: 'Pure Erode Turmeric, Farm Direct',
   description:
-    'Buy GI-tagged Erode turmeric powder, stone ground on our ancestral mill. 2.5–4.5% natural curcumin, zero additives, FSSAI certified. Shipped direct from our family farm. Free shipping above ₹399.',
+    'Buy GI-tagged Erode turmeric powder, naturally grown and freshly processed. 2.5–3.5% natural curcumin, zero additives, FSSAI certified. Shipped direct from our family farm. Free shipping above ₹399.',
   path: '/',
 });
 
 const TRUST_BADGES = [
-  { Icon: MapPinIcon,      title: 'GI Recognised',   desc: 'Erode — India\'s turmeric capital' },
-  { Icon: CogIcon,         title: 'Stone Ground',     desc: 'Traditional ancestral mill' },
-  { Icon: LeafIcon,        title: 'Farm Direct',      desc: 'Zero middlemen' },
-  { Icon: DropletIcon,     title: 'High Curcumin',    desc: '2.5–4.5% natural curcumin' },
+  { Icon: MapPinIcon,      title: 'GI Recognised',    desc: 'Erode — India\'s turmeric capital' },
+  { Icon: LeafIcon,        title: 'Naturally Grown',  desc: 'Chemical-free farm practices' },
+  { Icon: TruckIcon,       title: 'Farm Direct',      desc: 'Zero middlemen' },
+  { Icon: DropletIcon,     title: 'High Curcumin',    desc: '2.5–3.5% natural curcumin' },
   { Icon: ShieldCheckIcon, title: 'FSSAI Certified',  desc: 'Lic. 22426064000154' },
 ];
 
@@ -32,46 +33,46 @@ const REVIEWS = [
 ];
 
 const COMPARISON = [
-  { feature: 'Curcumin Content',  ours: '2.5 – 4.5%',        theirs: '0.5 – 1.5%' },
+  { feature: 'Curcumin Content',  ours: '2.5 – 3.5%',        theirs: '0.5 – 1.5%' },
   { feature: 'Origin',            ours: 'GI Tagged Erode',    theirs: 'Mixed / Unknown' },
   { feature: 'Artificial Color',  ours: 'None added',         theirs: 'Commonly added' },
   { feature: 'Starch / Fillers',  ours: 'None',               theirs: 'Common practice' },
-  { feature: 'Processing',        ours: 'Slow stone ground',  theirs: 'High-heat machine' },
+  { feature: 'Processing',        ours: 'Clean, fresh ground', theirs: 'High-heat machine' },
   { feature: 'Middlemen',         ours: 'Zero — farm direct', theirs: '3–4 layers' },
 ];
 
 const FAQ_ITEMS = [
   {
-    question: 'Is Ponkali turmeric 100% pure and free from adulteration?',
-    answer: 'Yes. Ponkali is single-origin Erode turmeric powder, stone ground on our family’s ancestral mill with nothing added — no synthetic colour, no starch, no fillers, no lead chromate. It is FSSAI certified (Lic. No. 22426064000154) and checked for purity.',
+    question: "Is Ponkali turmeric 100% pure and free from adulteration?",
+    answer: "Yes. Ponkali is single-origin Erode turmeric powder, naturally grown and freshly processed with nothing added — no synthetic colour, no starch, no fillers, no lead chromate. It is FSSAI certified (Lic. No. 22426064000154) and checked for purity.",
   },
   {
-    question: 'What is the curcumin content of Ponkali turmeric?',
-    answer: 'Our GI-tagged Erode turmeric naturally contains 2.5–4.5% curcumin — much higher than the 0.5–1.5% typical of mass-market supermarket brands. Curcumin is the active compound behind turmeric’s deep colour and health benefits.',
+    question: "What is the curcumin content of Ponkali turmeric?",
+    answer: "Our GI-tagged Erode turmeric naturally contains 2.5–3.5% curcumin — much higher than the 0.5–1.5% typical of mass-market supermarket brands. Curcumin is the active compound behind turmeric’s deep colour and health benefits.",
   },
   {
-    question: 'Where is Ponkali turmeric grown?',
-    answer: 'It is grown on our own family farm in Perundurai, Erode — the GI-recognised turmeric capital of Tamil Nadu. We have farmed this same land for three generations.',
+    question: "Where is Ponkali turmeric grown?",
+    answer: "It is grown on our own family farm in Perundurai, Erode — the GI-recognised turmeric capital of Tamil Nadu. We have farmed this same land for three generations.",
   },
   {
-    question: 'How is it different from supermarket turmeric powder?',
-    answer: 'Most packaged brands blend turmeric from mixed or unknown origins, process it with high heat, and often add colour or starch. Ponkali is single-origin Erode turmeric, slow stone-ground to preserve its natural oils and aroma, and sold farm-direct with zero middlemen.',
+    question: "How is it different from supermarket turmeric powder?",
+    answer: "Most packaged brands blend turmeric from mixed or unknown origins, process it with high heat, and often add colour or starch. Ponkali is single-origin Erode turmeric, naturally grown and carefully processed to preserve its natural oils and aroma, and sold farm-direct with zero middlemen.",
   },
   {
-    question: 'Is Ponkali turmeric FSSAI certified?',
-    answer: 'Yes — FSSAI Licence No. 22426064000154, manufactured by The Native, Perundurai, Erode 638055, Tamil Nadu.',
+    question: "Is Ponkali turmeric FSSAI certified?",
+    answer: "Yes — FSSAI Licence No. 22426064000154, manufactured by The Native, Perundurai, Erode 638055, Tamil Nadu.",
   },
   {
-    question: 'How long does delivery take and is shipping free?',
-    answer: 'We ship across India in 3–5 working days. Shipping is free on orders above ₹399; below that a flat ₹60 applies. Both Cash on Delivery and online payment (UPI, cards, netbanking) are available.',
+    question: "How long does delivery take and is shipping free?",
+    answer: "We ship across India in 3–5 working days. Shipping is free on orders above ₹399; below that a flat ₹60 applies. Both Cash on Delivery and online payment (UPI, cards, netbanking) are available.",
   },
   {
-    question: 'How should I store turmeric powder, and how do I use it?',
-    answer: 'Store in a cool, dry place away from sunlight with the lid sealed, and use within 6 months for the best aroma. Use it in curries, sambhar and rasam, or stir half a teaspoon into warm milk for a daily golden-milk drink.',
+    question: "How should I store turmeric powder, and how do I use it?",
+    answer: "Store in a cool, dry place away from sunlight with the lid sealed, and use within 6 months for the best aroma. Use it in curries, sambhar and rasam, or stir half a teaspoon into warm milk for a daily golden-milk drink.",
   },
   {
-    question: 'What pack sizes are available?',
-    answer: 'Ponkali Erode Turmeric Powder comes in 100g, 250g, 500g and 1kg packs.',
+    question: "What pack sizes are available?",
+    answer: "Ponkali Erode Turmeric Powder comes in 100g, 250g, 500g and 1kg packs.",
   },
 ];
 
@@ -98,28 +99,27 @@ export default function HomePage() {
 
         <div className="max-w-6xl mx-auto px-5 relative z-10
           flex flex-col gap-10
-          md:grid md:grid-cols-[1fr_420px] lg:grid-cols-[1fr_480px] md:gap-10 lg:gap-16 md:items-center
-          pt-14 pb-12 md:py-0 md:min-h-[92vh]">
+          md:grid md:grid-cols-[1fr_360px] lg:grid-cols-[1fr_440px] md:gap-8 lg:gap-12 md:items-center
+          pt-14 pb-12 md:py-0 md:min-h-[88vh]">
 
           {/* Left — Copy */}
           <div className="order-1 md:order-1">
 
            
 
-            <h1 className="font-hero font-bold text-white tracking-[-0.03em] mb-8
-              text-[7.5vw] leading-[1.05]
-              sm:text-[52px] sm:leading-[0.93]
-              md:text-[72px] md:leading-[0.88]
-              lg:text-[100px] lg:leading-[0.85]">
+            <h1 className="font-hero font-bold text-white tracking-[-0.03em] mb-7
+              text-[9vw] leading-[1.1]
+              sm:text-[46px] sm:leading-[1.05]
+              md:text-[50px] md:leading-[1.0]
+              lg:text-[64px] lg:leading-[0.97]">
               The Turmeric Your<br />
-              <span className="text-gold">Grandparents</span><br />
-              <span className="text-gold">Knew</span>
+              <span className="text-gold">Grandparents Knew</span>
             </h1>
 
-            <p className="text-cream/55 text-[17px] leading-[1.75] mb-8 max-w-[500px]">
-              Three generations of farming in Erode — stone ground on our ancestral mill.
-              2.5–4.5% natural curcumin. Zero additives. Shipped direct from our family farm
-              to your kitchen.
+            <p className="text-cream/60 text-[16px] leading-[1.8] mb-8 max-w-[460px]">
+              Three generations of naturally grown turmeric from Erode.
+              2.5–3.5% natural curcumin. Zero additives, zero middlemen —
+              shipped direct from our family farm to your kitchen.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 mb-8">
@@ -139,7 +139,7 @@ export default function HomePage() {
 
             <div className="flex flex-wrap gap-2">
               {['GI Tagged', 'FSSAI Certified', 'Lab Tested', 'Farm Direct', 'Free Ship ₹399+'].map(t => (
-                <span key={t} className="text-[11px] text-cream/30 border border-cream/10 px-3 py-1 rounded-full">
+                <span key={t} className="text-[11px] text-cream/50 border border-cream/20 px-3 py-1 rounded-full">
                   {t}
                 </span>
               ))}
@@ -165,7 +165,7 @@ export default function HomePage() {
             {/* Floating badges — desktop only */}
             <div className="hidden md:block absolute -left-8 top-1/3 bg-white rounded-2xl px-4 py-3.5 shadow-2xl shadow-black/20">
               <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider mb-0.5">Curcumin</p>
-              <p className="text-[22px] font-extrabold text-dark-brown leading-none">2.5–4.5%</p>
+              <p className="text-[22px] font-extrabold text-dark-brown leading-none">2.5–3.5%</p>
               <p className="text-[10px] text-gray-400 mt-0.5">Lab Tested</p>
             </div>
             <div className="hidden md:block absolute -right-5 bottom-1/4 bg-dark-brown border border-gold/20 rounded-2xl px-4 py-3.5 shadow-2xl">
@@ -205,7 +205,7 @@ export default function HomePage() {
           <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-y md:divide-y-0 divide-black/5">
             {[
               { value: '3rd Gen', label: 'Family Farm' },
-              { value: '2.5–4.5%', label: 'Curcumin Content' },
+              { value: '2.5–3.5%', label: 'Curcumin Content' },
               { value: 'Zero',    label: 'Additives Added' },
               { value: '200+',   label: 'Families Served' },
             ].map(({ value, label }) => (
@@ -222,11 +222,11 @@ export default function HomePage() {
       <ProductShowcase />
 
       {/* ─── 5. PROCESS ─── */}
-      <section className="py-20 px-5 bg-white">
+      <section className="py-10 px-5 bg-white">
         <div className="max-w-6xl mx-auto">
           <div className="mb-14 text-center">
             <p className="text-gold text-[11px] font-semibold tracking-[0.3em] uppercase mb-3">Full Transparency</p>
-            <h2 className="font-display text-[32px] md:text-[40px] font-extrabold text-dark-brown">
+            <h2 className="font-hero text-[32px] md:text-[40px] font-extrabold text-dark-brown">
               Farm to Kitchen — Our Way
             </h2>
             <p className="text-gray-400 mt-3 text-[16px]">Every step is ours. No outsourcing. No compromise.</p>
@@ -234,7 +234,7 @@ export default function HomePage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-black/5 rounded-2xl overflow-hidden">
             {[
               { step: '01', title: 'Grown in Erode', desc: 'GI-recognised soil in Perundurai, nurtured by our family for three generations.' },
-              { step: '02', title: 'Stone Ground',   desc: 'Slow-ground on our ancestral stone mill. No heat, no shortcuts, no compromise on aroma.' },
+              { step: '02', title: 'Freshly Ground',  desc: 'Cleanly processed and freshly ground. No excess heat, no shortcuts, no compromise on aroma.' },
               { step: '03', title: 'Packed Fresh',   desc: 'Sealed within 24 hours of grinding. No warehouses, no long storage.' },
               { step: '04', title: 'Shipped Direct', desc: 'From our farm to your doorstep. 3–5 days, anywhere in India.' },
             ].map(({ step, title, desc }) => (
@@ -248,12 +248,15 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ─── 6. NOT ALL TURMERIC IS EQUAL ─── */}
-      <section className="py-20 px-5 bg-dark-brown">
+      {/* ─── 6. FARM GALLERY ─── */}
+      <FarmGallery />
+
+      {/* ─── 7. NOT ALL TURMERIC IS EQUAL ─── */}
+      {/* <section className="py-20 px-5 bg-dark-brown">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-14">
             <p className="text-gold/70 text-[11px] font-semibold tracking-[0.3em] uppercase mb-3">The Real Difference</p>
-            <h2 className="font-display text-[32px] md:text-[42px] font-extrabold text-white">
+            <h2 className="font-hero text-[32px] md:text-[42px] font-extrabold text-white">
               Not All Turmeric Is Equal
             </h2>
             <p className="text-cream/40 mt-3 text-[16px] max-w-md mx-auto">
@@ -264,7 +267,7 @@ export default function HomePage() {
           <div className="rounded-2xl overflow-hidden border border-white/12 overflow-x-auto">
             <div className="min-w-[520px]">
             {/* Header */}
-            <div className="grid grid-cols-[1fr_1fr_1fr] bg-white/8">
+            {/* <div className="grid grid-cols-[1fr_1fr_1fr] bg-white/8">
               <div className="px-5 py-4 text-left">
                 <p className="text-cream/50 text-[11px] font-semibold uppercase tracking-wider">Feature</p>
               </div>
@@ -290,7 +293,7 @@ export default function HomePage() {
               </div>
             ))}
             </div>{/* end min-w wrapper */}
-          </div>
+          {/* </div>
 
           <div className="mt-10 text-center">
             <Link
@@ -302,7 +305,7 @@ export default function HomePage() {
             </Link>
           </div>
         </div>
-      </section>
+      </section> */} */} */}
 
       {/* ─── 7. OUR STORY ─── */}
       <section className="py-20 px-5 bg-cream">
@@ -319,7 +322,7 @@ export default function HomePage() {
             </div>
             <div>
               <p className="text-gold text-[11px] font-semibold tracking-[0.3em] uppercase mb-5">Our Heritage</p>
-              <h2 className="font-display text-[34px] md:text-[40px] font-extrabold text-dark-brown tracking-tight mb-6 leading-[1.05]">
+              <h2 className="font-hero text-[34px] md:text-[40px] font-extrabold text-dark-brown tracking-tight mb-6 leading-[1.05]">
                 Their names are on every packet
               </h2>
               <p className="text-gray-600 leading-[1.8] mb-5 text-[16px]">
@@ -348,7 +351,7 @@ export default function HomePage() {
           <div className="mb-12">
             <p className="text-gold text-[11px] font-semibold tracking-[0.3em] uppercase mb-3">Customer Stories</p>
             <div className="flex flex-col sm:flex-row sm:items-end gap-3">
-              <h2 className="font-display text-[34px] md:text-[42px] font-extrabold text-dark-brown tracking-tight leading-none">
+              <h2 className="font-hero text-[34px] md:text-[42px] font-extrabold text-dark-brown tracking-tight leading-none">
                 Trusted by families across India
               </h2>
               <div className="flex items-center gap-2 pb-1">
@@ -379,7 +382,7 @@ export default function HomePage() {
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-12">
             <p className="text-gold text-[11px] font-semibold tracking-[0.3em] uppercase mb-3">Good to Know</p>
-            <h2 className="font-display text-[32px] md:text-[40px] font-extrabold text-dark-brown tracking-tight">
+            <h2 className="font-hero text-[32px] md:text-[40px] font-extrabold text-dark-brown tracking-tight">
               Frequently Asked Questions
             </h2>
           </div>
@@ -405,7 +408,7 @@ export default function HomePage() {
           <p className="text-dark-brown/40 text-[11px] font-semibold tracking-[0.3em] uppercase mb-4">
             Direct from the Farm
           </p>
-          <h2 className="font-display text-[34px] md:text-[44px] font-extrabold text-dark-brown tracking-tight mb-4 leading-[1.05]">
+          <h2 className="font-hero text-[34px] md:text-[44px] font-extrabold text-dark-brown tracking-tight mb-4 leading-[1.05]">
             Taste the Difference Today
           </h2>
           <p className="text-dark-brown/60 mb-8 text-[16px]">

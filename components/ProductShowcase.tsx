@@ -93,18 +93,18 @@ export default function ProductShowcase() {
               GI Recognised · Perundurai, Erode
             </p>
 
-            <h1 className="font-display text-[32px] sm:text-[38px] md:text-[44px] font-extrabold text-dark-brown leading-[1.05] tracking-tight mb-3">
+            <h1 className="font-hero text-[32px] sm:text-[38px] md:text-[44px] font-extrabold text-dark-brown leading-[1.05] tracking-tight mb-3">
               Erode Turmeric Powder
             </h1>
 
             <p className="text-gray-500 text-[14px] sm:text-[15px] mb-5 leading-relaxed">
-              Stone-ground on our ancestral mill. 2.5–4.5% natural curcumin.
+              Naturally grown in Erode. 2.5–3.5% natural curcumin.
               Zero additives. FSSAI certified. Direct from our family farm.
             </p>
 
             {/* Trust pills */}
             <div className="flex flex-wrap gap-1.5 mb-6">
-              {['GI Tagged', 'Stone Ground', 'FSSAI Certified', 'Lab Tested', 'Farm Direct'].map(t => (
+              {['GI Tagged', 'Naturally Grown', 'FSSAI Certified', 'Lab Tested', 'Farm Direct'].map(t => (
                 <span key={t} className="text-[11px] font-semibold text-dark-brown/60 border border-dark-brown/15 px-3 py-1 rounded-full">
                   {t}
                 </span>

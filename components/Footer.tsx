@@ -1,10 +1,12 @@
 import Link from 'next/link';
 import Image from 'next/image';
+import Mandala from './Mandala';
 
 export default function Footer() {
   return (
-    <footer className="bg-dark-brown text-cream">
-      <div className="max-w-6xl mx-auto px-5 pt-16 pb-10">
+    <footer className="bg-dark-brown text-cream relative overflow-hidden">
+      <Mandala className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[860px] h-[860px] text-cream opacity-[0.055] pointer-events-none select-none" />
+      <div className="max-w-6xl mx-auto px-5 pt-16 pb-10 relative z-10">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-10 pb-12 border-b border-cream/8">
 
           {/* Brand column with logo */}

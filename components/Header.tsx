@@ -60,7 +60,7 @@ export default function Header() {
   };
 
   return (
-    <header className="sticky top-[37px] z-30 bg-cream border-b border-black/8">
+    <header className="sticky top-[37px] z-30 bg-white border-b border-black/8">
       <div className="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
 
         {/* Logo */}
@@ -194,7 +194,7 @@ export default function Header() {
 
       {/* Mobile nav */}
       {menuOpen && (
-        <div className="md:hidden bg-cream border-t border-black/8 px-5 py-5 flex flex-col gap-4">
+        <div className="md:hidden bg-white border-t border-black/8 px-5 py-5 flex flex-col gap-4">
           {NAV.map(([label, href]) => (
             <Link key={href} href={href} onClick={() => setMenuOpen(false)}
               className="text-[15px] font-semibold text-dark-brown tracking-wide">

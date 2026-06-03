@@ -24,7 +24,7 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
   }
 
   const title = `${product.name} ${product.weight} — Buy Pure GI-Tagged Turmeric`;
-  const description = `Buy ${product.name} (${product.weight}) for ₹${product.price}. Stone-ground GI-tagged Erode turmeric, 2.5–4.5% natural curcumin, FSSAI certified. ${product.in_stock ? 'In stock' : 'Currently unavailable'} · Free shipping above ₹399.`;
+  const description = `Buy ${product.name} (${product.weight}) for ₹${product.price}. Naturally grown GI-tagged Erode turmeric, 2.5–3.5% natural curcumin, FSSAI certified. ${product.in_stock ? 'In stock' : 'Currently unavailable'} · Free shipping above ₹399.`;
 
   return buildMetadata({
     title,

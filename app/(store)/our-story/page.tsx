@@ -19,7 +19,7 @@ export default function OurStoryPage() {
         <p className="text-gold/70 text-[11px] font-semibold tracking-[0.35em] uppercase mb-5">
           Est. 1980s · Perundurai, Erode
         </p>
-        <h1 className="font-display text-[48px] md:text-[72px] font-extrabold text-white tracking-tight leading-[1.0] mb-5">
+        <h1 className="font-hero text-[48px] md:text-[72px] font-extrabold text-white tracking-tight leading-[1.0] mb-5">
           Our Story
         </h1>
         <p className="text-cream/50 text-[17px] max-w-lg mx-auto leading-[1.7]">
@@ -50,7 +50,7 @@ export default function OurStoryPage() {
 
           <div>
             <p className="text-gold text-[11px] font-semibold tracking-[0.3em] uppercase mb-4">The People Behind the Brand</p>
-            <h2 className="font-display text-[32px] md:text-[40px] font-extrabold text-dark-brown tracking-tight leading-[1.05] mb-6">
+            <h2 className="font-hero text-[32px] md:text-[40px] font-extrabold text-dark-brown tracking-tight leading-[1.05] mb-6">
               Ponnamal &amp; Kaaliappa — their names are on every packet
             </h2>
             <p className="text-gray-600 leading-[1.9] text-[16px] mb-5">
@@ -71,14 +71,14 @@ export default function OurStoryPage() {
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
             <p className="text-gold text-[11px] font-semibold tracking-[0.3em] uppercase mb-4">The Land</p>
-            <h2 className="font-display text-[32px] md:text-[40px] font-extrabold text-dark-brown tracking-tight">
+            <h2 className="font-hero text-[32px] md:text-[40px] font-extrabold text-dark-brown tracking-tight">
               Perundurai, Erode — The Yellow City
             </h2>
           </div>
           <div className="grid md:grid-cols-2 gap-8">
             <div className="bg-cream rounded-2xl p-8 border border-black/6">
               <p className="text-gray-600 leading-[1.9] text-[16px]">
-                Erode is not called the Yellow City for nothing. This district in Tamil Nadu produces some of the world&apos;s finest turmeric — with curcumin levels of 2.5–4.5%, double the national average. The Erode variety is GI-tagged, meaning it can only come from here. There is no substitute.
+                Erode is not called the Yellow City for nothing. This district in Tamil Nadu produces some of the world&apos;s finest turmeric — with curcumin levels of 2.5–3.5%, double the national average. The Erode variety is GI-tagged, meaning it can only come from here. There is no substitute.
               </p>
             </div>
             <div className="bg-cream rounded-2xl p-8 border border-black/6">
@@ -95,7 +95,7 @@ export default function OurStoryPage() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-10">
             <p className="text-gold/70 text-[11px] font-semibold tracking-[0.3em] uppercase mb-3">Real Photos</p>
-            <h2 className="font-display text-[28px] md:text-[36px] font-extrabold text-white tracking-tight mb-3">
+            <h2 className="font-hero text-[28px] md:text-[36px] font-extrabold text-white tracking-tight mb-3">
               See Our Farm — Exactly as It Is
             </h2>
             <p className="text-cream/40 text-[15px]">The fields, the harvest, the processing. No stock photos.</p>
@@ -132,7 +132,7 @@ export default function OurStoryPage() {
       <section className="py-20 px-5 bg-dark-brown">
         <div className="max-w-4xl mx-auto">
           <p className="text-gold/70 text-[11px] font-semibold tracking-[0.3em] uppercase mb-5">Our Promise</p>
-          <h2 className="font-display text-[32px] md:text-[42px] font-extrabold text-white tracking-tight mb-8 leading-[1.05]">
+          <h2 className="font-hero text-[32px] md:text-[42px] font-extrabold text-white tracking-tight mb-8 leading-[1.05]">
             Three Generations, One Promise
           </h2>
           <div className="space-y-5 text-cream/70 leading-[1.9] text-[16px]">
@@ -154,7 +154,7 @@ export default function OurStoryPage() {
         <div className="max-w-6xl mx-auto">
           <div className="mb-14 text-center">
             <p className="text-gold text-[11px] font-semibold tracking-[0.3em] uppercase mb-3">End to End</p>
-            <h2 className="font-display text-[30px] md:text-[38px] font-extrabold text-dark-brown">
+            <h2 className="font-hero text-[30px] md:text-[38px] font-extrabold text-dark-brown">
               What Makes Ponkali Different
             </h2>
           </div>
@@ -170,7 +170,7 @@ export default function OurStoryPage() {
                   <Icon className="w-5 h-5 text-gold" />
                 </div>
                 <div>
-                  <p className="font-display font-bold text-dark-brown text-[18px] mb-1">{title}</p>
+                  <p className="font-hero font-bold text-dark-brown text-[18px] mb-1">{title}</p>
                   <p className="text-[14px] text-gray-500 leading-relaxed">{desc}</p>
                 </div>
               </div>
@@ -184,7 +184,7 @@ export default function OurStoryPage() {
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-14 items-center">
           <div>
             <p className="text-gold text-[11px] font-semibold tracking-[0.3em] uppercase mb-4">Inside Every Pack</p>
-            <h2 className="font-display text-[30px] md:text-[38px] font-extrabold text-dark-brown tracking-tight leading-[1.05] mb-6">
+            <h2 className="font-hero text-[30px] md:text-[38px] font-extrabold text-dark-brown tracking-tight leading-[1.05] mb-6">
               What you read on the back is what&apos;s inside
             </h2>
             <p className="text-gray-600 leading-[1.9] text-[16px] mb-5">
@@ -216,7 +216,7 @@ export default function OurStoryPage() {
       {/* ── CTA ── */}
       <section className="py-20 px-5 bg-dark-brown text-center">
         <p className="text-gold/70 text-[11px] font-semibold tracking-[0.3em] uppercase mb-4">From Our Farm</p>
-        <h2 className="font-display text-[32px] md:text-[42px] font-extrabold text-white tracking-tight mb-4">
+        <h2 className="font-hero text-[32px] md:text-[42px] font-extrabold text-white tracking-tight mb-4">
           Taste What Three Generations Built
         </h2>
         <p className="text-cream/50 text-[16px] mb-8 max-w-md mx-auto">

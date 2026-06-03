@@ -10,11 +10,11 @@ export default function ShopPage() {
         <p className="text-gold/70 text-[11px] font-semibold tracking-[0.35em] uppercase mb-4">
           Farm Direct · Erode, Tamil Nadu
         </p>
-        <h1 className="font-display text-[38px] md:text-[52px] font-extrabold text-white tracking-tight leading-tight mb-4">
+        <h1 className="font-hero text-[38px] md:text-[52px] font-extrabold text-white tracking-tight leading-tight mb-4">
           Pure Erode Turmeric Powder
         </h1>
         <p className="text-cream/50 text-[16px] max-w-md mx-auto leading-relaxed">
-          Stone ground on our ancestral mill. GI tagged. Zero adulteration.
+          Naturally grown in Erode. GI tagged. Zero adulteration.
           Choose your weight — every pack ships direct from our farm.
         </p>
       </div>
@@ -28,7 +28,7 @@ export default function ShopPage() {
           <div className="flex flex-wrap justify-center gap-6 text-[14px] text-dark-brown font-medium">
             {[
               'GI-Tagged Erode Origin',
-              'Stone Ground · No Heat',
+              'Naturally Grown',
               'Free Shipping ₹399+',
               'FSSAI Certified',
               '3rd Generation Farm',

@@ -24,7 +24,7 @@ export default function FarmPage() {
         <p className="text-gold/70 text-[11px] font-semibold tracking-[0.35em] uppercase mb-5">
           Perundurai, Erode · Tamil Nadu
         </p>
-        <h1 className="font-display text-[44px] md:text-[68px] font-extrabold text-white tracking-tight leading-[1.0] mb-5">
+        <h1 className="font-hero text-[44px] md:text-[68px] font-extrabold text-white tracking-tight leading-[1.0] mb-5">
           From Our Farm
         </h1>
         <p className="text-cream/50 text-[16px] md:text-[18px] max-w-xl mx-auto leading-[1.7]">

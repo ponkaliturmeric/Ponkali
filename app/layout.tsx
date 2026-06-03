@@ -46,7 +46,7 @@ export const metadata: Metadata = {
   keywords: [
     'erode turmeric',
     'GI tagged turmeric',
-    'stone ground turmeric',
+    'naturally grown turmeric',
     'pure turmeric powder',
     'farm direct turmeric',
     'high curcumin turmeric',
@@ -100,7 +100,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${wixMadefor.variable} ${playfair.variable} ${jakartaSans.variable}`}>
-      <body className="bg-cream text-black font-sans antialiased">
+      <body className="bg-white text-black font-sans antialiased">
         <JsonLd data={organizationJsonLd()} />
         {children}
         <Analytics />

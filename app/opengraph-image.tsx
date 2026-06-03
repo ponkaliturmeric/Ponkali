@@ -64,7 +64,7 @@ export default function OgImage() {
             lineHeight: 1.4,
           }}
         >
-          GI-tagged · stone ground · 2.5–4.5% natural curcumin · FSSAI certified
+          GI-tagged · naturally grown · 2.5–3.5% natural curcumin · FSSAI certified
         </div>
 
         <div
@@ -74,7 +74,7 @@ export default function OgImage() {
             marginTop: '44px',
           }}
         >
-          {['GI Tagged', 'Stone Ground', 'Farm Direct', 'FSSAI Certified'].map((t) => (
+          {['GI Tagged', 'Naturally Grown', 'Farm Direct', 'FSSAI Certified'].map((t) => (
             <div
               key={t}
               style={{
