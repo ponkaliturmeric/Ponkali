@@ -10,11 +10,11 @@ const config: Config = {
     extend: {
       colors: {
         gold: '#E8950A',          // vibrant turmeric-yellow (was brownish #D4960A)
-        'dark-brown': '#013A2B',
+        'dark-brown': '#1C3311',
         cream: '#E5D6C2',
         terracotta: '#C04A1C',    // Tamil Nadu red-earth — warmth + authenticity
         'pkg-yellow': '#F5C418',  // Matches physical packaging background
-        'dark-green': '#1A3A0A',
+        'dark-green': '#2A6B1A',
         'light-gold': '#FAE8A0',
         'warm-white': 'rgb(251, 248, 242)',
       },
