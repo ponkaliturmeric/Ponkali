@@ -1,36 +1,99 @@
-import { createClient, type Client } from '@libsql/client';
-import path from 'path';
-import fs from 'fs';
+import postgres from 'postgres';
 
-let _client: Client | null = null;
-let _initPromise: Promise<void> | null = null;
+/**
+ * Database layer — Supabase (PostgreSQL) via the `postgres` driver.
+ *
+ * Connection string comes from DATABASE_URL (Supabase → Project Settings →
+ * Database → Connection string). For Vercel/serverless, use the **Transaction
+ * pooler** string (port 6543) — it REQUIRES `prepare: false`, which we set below.
+ *
+ * A tiny compatibility shim (`execute` / `executeMultiple` / `batch`) is exposed
+ * so the route handlers can keep using `?` placeholders and the same calls they
+ * used with the previous SQLite/libSQL driver. `?` is rewritten to Postgres
+ * `$1, $2, …` automatically.
+ */
 
-function buildClient(): Client {
-  const url = process.env.TURSO_DATABASE_URL;
+type Row = Record<string, unknown>;
+type Arg = string | number | boolean | null;
 
-  // Production requires a real Turso URL — file: URLs don't work on serverless
-  if (!url) {
-    if (process.env.NODE_ENV === 'production') {
-      throw new Error('TURSO_DATABASE_URL is not set. Add it to your Vercel environment variables.');
-    }
-    // Local dev fallback
-    const localUrl = 'file:./database/local.db';
-    try {
-      const dir = path.join(process.cwd(), 'database');
-      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    } catch { /* ignore if filesystem is read-only */ }
-    return createClient({ url: localUrl });
-  }
-
-  return createClient({ url, authToken: process.env.TURSO_AUTH_TOKEN });
+interface ExecuteInput {
+  sql: string;
+  args?: Arg[];
 }
 
-async function initialize(db: Client) {
+interface ExecuteResult {
+  rows: Row[];
+  rowsAffected: number;
+}
+
+export interface Db {
+  execute(input: string | ExecuteInput): Promise<ExecuteResult>;
+  executeMultiple(sql: string): Promise<void>;
+  batch(statements: ExecuteInput[], mode?: 'write' | 'read'): Promise<void>;
+}
+
+// Reuse a single pool across hot reloads in dev and warm serverless invocations.
+const globalForPg = globalThis as unknown as { _pgClient?: postgres.Sql };
+
+let _initPromise: Promise<void> | null = null;
+
+function getClient(): postgres.Sql {
+  if (globalForPg._pgClient) return globalForPg._pgClient;
+
+  const url = process.env.DATABASE_URL || process.env.POSTGRES_URL;
+  if (!url) {
+    throw new Error(
+      'DATABASE_URL is not set. Add your Supabase connection string (Project Settings → Database → Connection string, Transaction pooler) to .env.local and to your Vercel environment variables.',
+    );
+  }
+
+  // Supabase requires SSL; a local Postgres (localhost) does not.
+  const isLocal = /@(localhost|127\.0\.0\.1)[:/]/.test(url);
+  const client = postgres(url, {
+    prepare: false, // required for Supabase transaction pooler (pgbouncer)
+    ssl: isLocal ? false : 'require',
+    max: 5,
+    idle_timeout: 20,
+  });
+  globalForPg._pgClient = client;
+  return client;
+}
+
+/** Rewrites `?` placeholders to Postgres `$1, $2, …` (left to right). */
+function toPg(sql: string): string {
+  let i = 0;
+  return sql.replace(/\?/g, () => `$${++i}`);
+}
+
+function makeDb(client: postgres.Sql): Db {
+  return {
+    async execute(input) {
+      const text = typeof input === 'string' ? input : input.sql;
+      const args = typeof input === 'string' ? [] : input.args ?? [];
+      const result = await client.unsafe(toPg(text), args as Arg[]);
+      const rows = result as unknown as Row[];
+      return { rows, rowsAffected: result.count ?? rows.length };
+    },
+    async executeMultiple(sql) {
+      // No params → simple query protocol, which allows multiple statements.
+      await client.unsafe(sql);
+    },
+    async batch(statements) {
+      await client.begin(async (tx) => {
+        for (const s of statements) {
+          await tx.unsafe(toPg(s.sql), (s.args ?? []) as Arg[]);
+        }
+      });
+    },
+  };
+}
+
+async function initialize(db: Db) {
   await db.executeMultiple(`
     CREATE TABLE IF NOT EXISTS orders (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      id SERIAL PRIMARY KEY,
       order_id TEXT UNIQUE NOT NULL,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      created_at TIMESTAMPTZ DEFAULT now(),
       customer_name TEXT NOT NULL,
       phone TEXT NOT NULL,
       email TEXT,
@@ -51,17 +114,16 @@ async function initialize(db: Client) {
     );
 
     CREATE TABLE IF NOT EXISTS order_items (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      order_id TEXT NOT NULL,
+      id SERIAL PRIMARY KEY,
+      order_id TEXT NOT NULL REFERENCES orders(order_id),
       product_name TEXT NOT NULL,
       weight TEXT NOT NULL,
       quantity INTEGER NOT NULL,
-      price REAL NOT NULL,
-      FOREIGN KEY (order_id) REFERENCES orders(order_id)
+      price REAL NOT NULL
     );
 
     CREATE TABLE IF NOT EXISTS products (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      id SERIAL PRIMARY KEY,
       slug TEXT UNIQUE NOT NULL,
       name TEXT NOT NULL,
       weight TEXT NOT NULL,
@@ -73,44 +135,46 @@ async function initialize(db: Client) {
     );
 
     CREATE TABLE IF NOT EXISTS contact_messages (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      id SERIAL PRIMARY KEY,
       name TEXT,
       email TEXT,
       message TEXT,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      created_at TIMESTAMPTZ DEFAULT now()
     );
 
     CREATE TABLE IF NOT EXISTS order_status_history (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      id SERIAL PRIMARY KEY,
       order_id TEXT NOT NULL,
       status TEXT NOT NULL,
-      changed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      changed_at TIMESTAMPTZ DEFAULT now(),
       notes TEXT
     );
 
     CREATE TABLE IF NOT EXISTS users (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      id SERIAL PRIMARY KEY,
       email TEXT UNIQUE NOT NULL,
       password_hash TEXT NOT NULL,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      created_at TIMESTAMPTZ DEFAULT now()
     );
   `);
 
   const { rows } = await db.execute('SELECT COUNT(*) as count FROM products');
   if (Number(rows[0].count) === 0) {
     const desc = 'Pure Erode turmeric powder, stone ground on our ancestral mill. GI-recognised region. 2.5–4.5% natural curcumin. No additives. No adulteration. FSSAI certified. Directly from our family farm in Perundurai, Erode.';
+    // Seed prices MUST match the static catalogue in lib/products.ts (the prices
+    // shown on the storefront), so the DB and the displayed prices agree on day one.
     await db.batch([
-      { sql: 'INSERT INTO products (slug, name, weight, price, in_stock, is_bestseller, description) VALUES (?, ?, ?, ?, 1, ?, ?)', args: ['turmeric-100g', 'Erode Turmeric Powder', '100g', 169, 0, desc] },
-      { sql: 'INSERT INTO products (slug, name, weight, price, in_stock, is_bestseller, description) VALUES (?, ?, ?, ?, 1, ?, ?)', args: ['turmeric-250g', 'Erode Turmeric Powder', '250g', 329, 1, desc] },
-      { sql: 'INSERT INTO products (slug, name, weight, price, in_stock, is_bestseller, description) VALUES (?, ?, ?, ?, 1, ?, ?)', args: ['turmeric-500g', 'Erode Turmeric Powder', '500g', 599, 0, desc] },
-      { sql: 'INSERT INTO products (slug, name, weight, price, in_stock, is_bestseller, description) VALUES (?, ?, ?, ?, 1, ?, ?)', args: ['turmeric-1kg', 'Erode Turmeric Powder', '1kg', 849, 0, desc] },
+      { sql: 'INSERT INTO products (slug, name, weight, price, in_stock, is_bestseller, description) VALUES (?, ?, ?, ?, 1, ?, ?)', args: ['turmeric-100g', 'Erode Turmeric Powder', '100g', 149, 0, desc] },
+      { sql: 'INSERT INTO products (slug, name, weight, price, in_stock, is_bestseller, description) VALUES (?, ?, ?, ?, 1, ?, ?)', args: ['turmeric-250g', 'Erode Turmeric Powder', '250g', 299, 1, desc] },
+      { sql: 'INSERT INTO products (slug, name, weight, price, in_stock, is_bestseller, description) VALUES (?, ?, ?, ?, 1, ?, ?)', args: ['turmeric-500g', 'Erode Turmeric Powder', '500g', 449, 0, desc] },
+      { sql: 'INSERT INTO products (slug, name, weight, price, in_stock, is_bestseller, description) VALUES (?, ?, ?, ?, 1, ?, ?)', args: ['turmeric-1kg', 'Erode Turmeric Powder', '1kg', 719, 0, desc] },
     ], 'write');
   }
 }
 
-export async function getDb(): Promise<Client> {
-  if (!_client) _client = buildClient();
-  if (!_initPromise) _initPromise = initialize(_client);
+export async function getDb(): Promise<Db> {
+  const db = makeDb(getClient());
+  if (!_initPromise) _initPromise = initialize(db);
   await _initPromise;
-  return _client;
+  return db;
 }

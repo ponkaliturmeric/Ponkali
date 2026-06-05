@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -22,12 +22,26 @@ const WA_NUMBER = '919944033696';
 
 export default function ProductShowcase() {
   const router = useRouter();
-  const products = PRODUCTS as Product[];
+  // Start with the static catalogue (no loading flash), then refresh with live
+  // prices/stock from the DB so admin edits show on the storefront.
+  const [products, setProducts] = useState<Product[]>(PRODUCTS as Product[]);
   const ordered = WEIGHT_ORDER.map(w => products.find(p => p.weight === w)!).filter(Boolean);
   const defaultProduct = ordered.find(p => p.is_bestseller === 1) ?? ordered[1];
   const [selected, setSelected] = useState<Product>(defaultProduct);
   const [activeImg, setActiveImg] = useState<1 | 2>(1);
   const { addItem } = useCart();
+
+  useEffect(() => {
+    fetch('/api/products')
+      .then(r => r.json())
+      .then((live: Product[]) => {
+        if (Array.isArray(live) && live.length) {
+          setProducts(live);
+          setSelected(prev => live.find(p => p.weight === prev.weight) ?? prev);
+        }
+      })
+      .catch(() => { /* keep static catalogue on failure */ });
+  }, []);
 
   const info = VARIANT_INFO[selected.weight];
   const freeShipping = selected.price >= 399;

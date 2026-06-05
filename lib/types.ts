@@ -37,6 +37,7 @@ export interface Order {
   status: string;
   notes?: string;
   items?: OrderItem[];
+  item_count?: number;
 }
 
 export interface OrderItem {

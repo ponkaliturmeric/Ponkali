@@ -39,11 +39,11 @@ export async function POST(request: NextRequest) {
     }
 
     const result = await db.execute({
-      sql: 'INSERT INTO users (email, password_hash) VALUES (?, ?)',
+      sql: 'INSERT INTO users (email, password_hash) VALUES (?, ?) RETURNING id',
       args: [email, hashPassword(password)],
     });
 
-    const uid = Number(result.lastInsertRowid);
+    const uid = Number(result.rows[0].id);
     const token = createSessionToken(uid, email);
 
     const response = NextResponse.json(

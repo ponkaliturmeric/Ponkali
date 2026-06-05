@@ -156,7 +156,7 @@ export default function OrderConfirmationPage() {
         {/* Actions */}
         <div className="flex flex-col gap-3">
           <a
-            href={`https://wa.me/919876543210?text=${whatsappMsg}`}
+            href={`https://wa.me/919944033696?text=${whatsappMsg}`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-2.5 bg-[#25D366] text-white py-4 rounded-full font-semibold text-[15px] hover:bg-[#1fba58] transition-colors"
@@ -173,7 +173,7 @@ export default function OrderConfirmationPage() {
         </div>
 
         <p className="text-center text-gray-400 text-[12px] mt-8 leading-relaxed">
-          Questions? Contact us at ponkalimasalas@gmail.com or WhatsApp +91 98765 43210
+          Questions? Contact us at ponkaliturmeric@gmail.com or WhatsApp +91 99440 33696
         </p>
       </div>
     </div>

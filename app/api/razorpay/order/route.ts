@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
 
     // Amounts are computed server-side from the catalogue — client totals are ignored.
-    const cart = priceCart(body.items, { cod: false });
+    const cart = await priceCart(body.items, { cod: false });
     if (!cart) {
       return NextResponse.json({ error: 'Your cart is empty or contains an unavailable item.' }, { status: 400 });
     }

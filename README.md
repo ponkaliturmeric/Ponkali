@@ -1,6 +1,6 @@
 # Ponkali Masalas — E-Commerce Website
 
-Premium Indian spice brand from Erode, Tamil Nadu. Built with Next.js 14, Tailwind CSS, and SQLite.
+Premium Indian spice brand from Erode, Tamil Nadu. Built with Next.js 14, Tailwind CSS, and Supabase (PostgreSQL).
 
 ## Quick Start
 
@@ -79,13 +79,21 @@ URL: [http://localhost:3000/admin](http://localhost:3000/admin)
 
 - **Framework:** Next.js 14 (App Router)
 - **Styling:** Tailwind CSS
-- **Database:** SQLite via better-sqlite3
+- **Database:** Supabase (PostgreSQL) via the `postgres` driver
 - **State:** React Context (cart persisted in localStorage)
 - **Export:** exceljs (XLSX), built-in CSV generation
 
-## Database
+## Database (Supabase / PostgreSQL)
 
-Auto-created at `database/ponkali.db` on first run. Products are seeded automatically.
+Set `DATABASE_URL` (see [`.env.example`](.env.example)) to your Supabase
+**Transaction pooler** connection string. On the first request the app creates
+all tables and seeds the products automatically — no manual SQL needed.
+
+Setup:
+1. Create a free project at [supabase.com](https://supabase.com).
+2. Project Settings → Database → Connection string → **Transaction pooler**.
+3. Copy the URI, replace `[YOUR-PASSWORD]` with your DB password, and put it in
+   `.env.local` (local) and in Vercel → Settings → Environment Variables (prod).
 
 ## Export Orders
 

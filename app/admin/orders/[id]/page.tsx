@@ -115,7 +115,7 @@ export default function AdminOrderDetailPage({ params }: { params: { id: string 
                 ['Email', order.email || '—'],
                 ['City', `${order.city}, ${order.state}`],
                 ['PIN', order.pincode],
-                ['Payment', order.payment_method === 'upi' ? `UPI: ${order.upi_id || '—'}` : 'Cash on Delivery'],
+                ['Payment', order.payment_method === 'cod' ? 'Cash on Delivery' : 'Online (Razorpay)'],
               ].map(([label, value]) => (
                 <div key={label}>
                   <p className="text-gray-500 font-medium">{label}</p>

@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server';
-import { PRODUCTS } from '@/lib/products';
+import { getCatalog } from '@/lib/catalog';
+
+// Always read live prices/stock from the DB (admin can edit them at any time).
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  return NextResponse.json(PRODUCTS);
+  const products = await getCatalog();
+  return NextResponse.json(products);
 }

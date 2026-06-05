@@ -1,12 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyPaymentSignature } from '@/lib/razorpay';
 import { priceCart } from '@/lib/pricing';
-
-function generateOrderId(): string {
-  const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-  const rand = Math.floor(1000 + Math.random() * 9000);
-  return `PKL-${date}-${rand}`;
-}
+import { createOrder, missingCustomerField, type CustomerDetails } from '@/lib/orders';
 
 export async function POST(request: NextRequest) {
   try {
@@ -27,22 +22,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Payment verification failed.' }, { status: 400 });
     }
 
-    // Recompute the order total server-side for the record of truth.
-    const cart = priceCart(customer?.items, { cod: false });
-    const order_id = generateOrderId();
+    const missing = missingCustomerField(customer ?? {});
+    if (missing) {
+      return NextResponse.json({ error: `Missing required field: ${missing}` }, { status: 400 });
+    }
 
-    // No DB in the request path yet — log a confirmed/paid order (visible in Vercel logs).
-    console.log('[ORDER PAID]', JSON.stringify({
-      order_id,
-      razorpay_order_id,
-      razorpay_payment_id,
-      paid: true,
-      total: cart?.total ?? null,
-      customer_name: customer?.customer_name,
-      phone: customer?.phone,
-      email: customer?.email,
-      created_at: new Date().toISOString(),
-    }));
+    // Recompute the order total server-side for the record of truth.
+    const cart = await priceCart(customer?.items, { cod: false });
+    if (!cart) {
+      return NextResponse.json({ error: 'Cart could not be priced.' }, { status: 400 });
+    }
+
+    const order_id = await createOrder({
+      customer: customer as CustomerDetails,
+      cart,
+      payment_method: 'online',
+      status: 'Paid',
+      notes: `Razorpay payment ${razorpay_payment_id} (order ${razorpay_order_id})`,
+    });
 
     return NextResponse.json({ success: true, order_id });
   } catch (error) {

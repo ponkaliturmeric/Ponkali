@@ -135,7 +135,7 @@ export default function AdminOrdersPage() {
                   <td className="px-4 py-3 font-medium whitespace-nowrap">{order.customer_name}</td>
                   <td className="px-4 py-3 text-gray-600">{order.phone}</td>
                   <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{order.city}</td>
-                  <td className="px-4 py-3 text-gray-600 text-xs max-w-32 truncate">—</td>
+                  <td className="px-4 py-3 text-gray-600 text-xs max-w-32 truncate">{order.item_count ?? '—'}</td>
                   <td className="px-4 py-3 font-bold whitespace-nowrap">₹{order.total}</td>
                   <td className="px-4 py-3 text-gray-600 capitalize">{order.payment_method}</td>
                   <td className="px-4 py-3">

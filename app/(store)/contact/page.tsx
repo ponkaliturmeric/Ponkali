@@ -30,9 +30,9 @@ export default function ContactPage() {
 
   return (
     <div className="min-h-screen bg-cream">
-      <div className="relative overflow-hidden py-24 px-5 text-center" style={{ backgroundColor: '#013A2B' }}>
+      <div className="relative overflow-hidden py-24 px-5 text-center bg-dark-brown" >
         <Mandala className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[640px] h-[640px] text-white opacity-[0.08] pointer-events-none select-none" />
-        <div className="relative z-10">
+        <div className="relative z-10 bg-dark-brown">
           <p className="text-gold text-[11px] font-semibold tracking-[0.35em] uppercase mb-5">Reach Us</p>
           <h1 className="font-hero text-[42px] md:text-[56px] font-extrabold text-white tracking-tight mb-4">Get in Touch</h1>
           <p className="text-white/75 text-[17px] max-w-md mx-auto leading-[1.7]">

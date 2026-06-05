@@ -84,16 +84,8 @@ export default function CheckoutPage() {
         body: JSON.stringify({
           ...form,
           payment_method: 'cod',
-          subtotal,
-          shipping,
-          cod_charge: codCharge,
-          total,
-          items: items.map(i => ({
-            product_name: i.product.name,
-            weight: i.product.weight,
-            quantity: i.quantity,
-            price: i.product.price,
-          })),
+          // Server recomputes prices/shipping/total from these slug+qty pairs.
+          items: cartPayload(),
         }),
       });
       const data = await res.json();

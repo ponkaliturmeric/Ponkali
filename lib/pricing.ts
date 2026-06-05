@@ -1,9 +1,9 @@
-import { PRODUCTS } from './products';
+import { getCatalog } from './catalog';
 
 /**
  * Server-authoritative cart pricing. The client may send slugs + quantities,
  * but prices, shipping and totals are ALWAYS recomputed here from the trusted
- * product catalogue — never taken from the request body.
+ * product catalogue (the database) — never taken from the request body.
  */
 export const FREE_SHIPPING_THRESHOLD = 399;
 export const SHIPPING_FEE = 60;
@@ -36,12 +36,13 @@ export interface PricedCart {
  * Validates and prices a cart. Returns null if the cart is empty or contains
  * an unknown / out-of-stock product, so callers can reject the request.
  */
-export function priceCart(
+export async function priceCart(
   items: unknown,
   opts: { cod?: boolean } = {},
-): PricedCart | null {
+): Promise<PricedCart | null> {
   if (!Array.isArray(items) || items.length === 0) return null;
 
+  const catalog = await getCatalog();
   const lines: PricedLine[] = [];
   let subtotal = 0;
 
@@ -53,7 +54,7 @@ export function priceCart(
       return null;
     }
 
-    const product = PRODUCTS.find((p) => p.slug === slug);
+    const product = catalog.find((p) => p.slug === slug);
     if (!product || !product.in_stock) return null;
 
     subtotal += product.price * quantity;
