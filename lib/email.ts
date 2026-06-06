@@ -151,7 +151,7 @@ export async function sendOrderEmails(o: OrderEmailData): Promise<void> {
     const firstName = esc(o.customer_name.split(' ')[0] || 'there');
     const body = `
       <p style="font-size:15px;line-height:1.7;margin:0 0 16px;color:#444;">
-        Hi ${firstName}, thank you for your order — we've received it and will dispatch within 1–2 business days.
+        Hi ${firstName}, thank you for your order. We've received it and will dispatch within 1 to 2 business days.
       </p>
       <p style="font-size:13px;color:#6b6b6b;margin:0 0 4px;">Order ID</p>
       <p style="font-size:17px;font-weight:700;letter-spacing:1px;margin:0 0 16px;color:${BRAND};">${esc(o.order_id)}</p>
@@ -170,7 +170,7 @@ export async function sendOrderEmails(o: OrderEmailData): Promise<void> {
     tasks.push(
       sendEmail({
         to: o.email,
-        subject: `Order confirmed — ${o.order_id}`,
+        subject: `Order confirmed: ${o.order_id}`,
         html: shell('Order Confirmed', body),
         replyTo: BUSINESS_EMAIL,
       }),
@@ -194,7 +194,7 @@ export async function sendOrderEmails(o: OrderEmailData): Promise<void> {
   tasks.push(
     sendEmail({
       to: BUSINESS_EMAIL,
-      subject: `New order ${o.order_id} — ${inr(o.total)}${isCOD ? ' (COD)' : ''}`,
+      subject: `New order ${o.order_id}: ${inr(o.total)}${isCOD ? ' (COD)' : ''}`,
       html: shell('New Order', bizBody),
       replyTo: o.email || undefined,
     }),

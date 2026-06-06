@@ -14,7 +14,7 @@ export const SITE_NAME = 'Ponkali Masalas';
 export const SITE_TAGLINE = 'Pure Erode Turmeric, Farm Direct';
 
 export const DEFAULT_DESCRIPTION =
-  'GI-tagged Erode turmeric powder, stone ground on our ancestral mill. Three generations of farm-direct purity with 2.5–4.5% natural curcumin. FSSAI certified. Free shipping above ₹399.';
+  'GI-tagged Erode turmeric powder, stone ground on our family mill and grown over three generations. Naturally high in curcumin at 2.5% to 3.5%, with nothing added. FSSAI certified. Free shipping above ₹399.';
 
 export const TWITTER_HANDLE = '@ponkalimasalas';
 
@@ -75,14 +75,14 @@ export function buildMetadata({
       type: 'website',
       url: canonical,
       siteName: SITE_NAME,
-      title: title ?? `${SITE_NAME} — ${SITE_TAGLINE}`,
+      title: title ?? `${SITE_NAME}: ${SITE_TAGLINE}`,
       description,
       locale: 'en_IN',
       ...(images ? { images } : {}),
     },
     twitter: {
       card: 'summary_large_image',
-      title: title ?? `${SITE_NAME} — ${SITE_TAGLINE}`,
+      title: title ?? `${SITE_NAME}: ${SITE_TAGLINE}`,
       description,
       ...(images ? { images: images.map((i) => i.url) } : {}),
     },
@@ -176,14 +176,14 @@ export function productJsonLd(product: Product) {
     ],
     description:
       product.description ??
-      'Single-origin Erode turmeric powder, stone ground on our ancestral mill. GI-tagged variety with 2.5–4.5% natural curcumin. No additives, no fillers.',
+      'Single-origin Erode turmeric powder, stone ground on our family mill. A GI-tagged variety with 2.5% to 3.5% natural curcumin, no additives and no fillers.',
     sku: product.slug,
     mpn: product.slug,
     brand: { '@type': 'Brand', name: BUSINESS.brand },
     category: 'Spices > Turmeric Powder',
     additionalProperty: [
       { '@type': 'PropertyValue', name: 'Net Weight', value: product.weight },
-      { '@type': 'PropertyValue', name: 'Curcumin Content', value: '2.5–4.5%' },
+      { '@type': 'PropertyValue', name: 'Curcumin Content', value: '2.5% to 3.5%' },
       { '@type': 'PropertyValue', name: 'FSSAI Licence', value: BUSINESS.fssai },
     ],
     offers: {

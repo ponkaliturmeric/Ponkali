@@ -15,7 +15,7 @@ export default function ShopPage() {
         </h1>
         <p className="text-cream/50 text-[16px] max-w-md mx-auto leading-relaxed">
           Naturally grown in Erode. GI tagged. Zero adulteration.
-          Choose your weight — every pack ships direct from our farm.
+          Choose your weight, and every pack ships direct from our farm.
         </p>
       </div>
 

@@ -36,7 +36,7 @@ export default function ContactPage() {
           <p className="text-gold text-[11px] font-semibold tracking-[0.35em] uppercase mb-5">Reach Us</p>
           <h1 className="font-hero text-[42px] md:text-[56px] font-extrabold text-white tracking-tight mb-4">Get in Touch</h1>
           <p className="text-white/75 text-[17px] max-w-md mx-auto leading-[1.7]">
-            Questions, bulk orders, or just want to say hello — we&apos;re here.
+            Questions, bulk orders, or just want to say hello? We&apos;re here.
           </p>
         </div>
       </div>
@@ -51,7 +51,7 @@ export default function ContactPage() {
               {[
                 { Icon: MailIcon, label: 'Email', value: 'ponkaliturmeric@gmail.com', href: 'mailto:ponkaliturmeric@gmail.com' },
                 { Icon: PhoneIcon, label: 'Phone', value: '+91 99440 33696', href: 'tel:9944033696' },
-                { Icon: MapPinIcon, label: 'Address', value: 'The Native, Perundurai\nErode — 638055, Tamil Nadu', href: null },
+                { Icon: MapPinIcon, label: 'Address', value: 'The Native, Perundurai\nErode, 638055, Tamil Nadu', href: null },
               ].map(({ Icon, label, value, href }) => (
                 <div key={label} className="flex gap-4">
                   <div className="w-10 h-10 rounded-full bg-gold/10 flex items-center justify-center flex-shrink-0 mt-0.5">

@@ -3,7 +3,7 @@ import { SITE_NAME, SITE_TAGLINE } from '@/lib/seo';
 
 // Site-wide default social share image (used for Open Graph + Twitter).
 export const runtime = 'edge';
-export const alt = `${SITE_NAME} — ${SITE_TAGLINE}`;
+export const alt = `${SITE_NAME}: ${SITE_TAGLINE}`;
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -64,7 +64,7 @@ export default function OgImage() {
             lineHeight: 1.4,
           }}
         >
-          GI-tagged · naturally grown · 2.5–3.5% natural curcumin · FSSAI certified
+          GI-tagged · naturally grown · 2.5% to 3.5% natural curcumin · FSSAI certified
         </div>
 
         <div

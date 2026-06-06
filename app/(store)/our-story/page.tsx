@@ -36,7 +36,7 @@ export default function OurStoryPage() {
             <div className="rounded-2xl overflow-hidden bg-white border border-black/6 shadow-sm aspect-square relative">
               <Image
                 src="/images/product-1.jpeg"
-                alt="Ponkali Turmeric — Ponnamal and Kaaliappa Gounder"
+                alt="Ponkali Turmeric, Ponnamal and Kaaliappa Gounder"
                 fill
                 className="object-contain p-4"
                 sizes="(max-width: 768px) 90vw, 45vw"
@@ -44,20 +44,20 @@ export default function OurStoryPage() {
               />
             </div>
             <p className="text-center text-[12px] text-gray-400 mt-3 font-medium">
-              Ponnamal &amp; Kaaliappa — Perundurai, Erode
+              Ponnamal &amp; Kaaliappa, Perundurai, Erode
             </p>
           </div>
 
           <div>
             <p className="text-gold text-[11px] font-semibold tracking-[0.3em] uppercase mb-4">The People Behind the Brand</p>
             <h2 className="font-hero text-[32px] md:text-[40px] font-extrabold text-dark-brown tracking-tight leading-[1.05] mb-6">
-              Ponnamal &amp; Kaaliappa — their names are on every packet
+              Ponnamal &amp; Kaaliappa: their names are on every packet
             </h2>
             <p className="text-gray-600 leading-[1.9] text-[16px] mb-5">
-              Our grandmother <strong className="text-dark-brown font-semibold">Ponnamal</strong> tended these turmeric fields before we could walk. She knew every row, every plant, every season. She would say turmeric is not just a spice — it is medicine, it is prayer, it is the smell of home.
+              Our grandmother <strong className="text-dark-brown font-semibold">Ponnamal</strong> tended these turmeric fields before we could walk. She knew every row, every plant and every season. She would say turmeric is not just a spice. It is medicine, it is prayer, it is the smell of home.
             </p>
             <p className="text-gray-600 leading-[1.9] text-[16px] mb-5">
-              Our grandfather <strong className="text-dark-brown font-semibold">Kaaliappa</strong> built the stone mill with his own hands. He believed that turmeric ground by machine loses its soul — the oils, the fragrance, the depth. He was right. Forty years later, the same stone mill still runs.
+              Our grandfather <strong className="text-dark-brown font-semibold">Kaaliappa</strong> built the stone mill with his own hands. He believed that turmeric ground by machine loses its soul: the oils, the fragrance, the depth. He was right. Forty years later, the same stone mill still runs.
             </p>
             <p className="text-gray-600 leading-[1.9] text-[16px]">
               We carry their names so we never forget what this is about.
@@ -72,13 +72,13 @@ export default function OurStoryPage() {
           <div className="text-center mb-12">
             <p className="text-gold text-[11px] font-semibold tracking-[0.3em] uppercase mb-4">The Land</p>
             <h2 className="font-hero text-[32px] md:text-[40px] font-extrabold text-dark-brown tracking-tight">
-              Perundurai, Erode — The Yellow City
+              Perundurai, Erode, the Yellow City
             </h2>
           </div>
           <div className="grid md:grid-cols-2 gap-8">
             <div className="bg-cream rounded-2xl p-8 border border-black/6">
               <p className="text-gray-600 leading-[1.9] text-[16px]">
-                Erode is not called the Yellow City for nothing. This district in Tamil Nadu produces some of the world&apos;s finest turmeric — with curcumin levels of 2.5–3.5%, double the national average. The Erode variety is GI-tagged, meaning it can only come from here. There is no substitute.
+                Erode is not called the Yellow City for nothing. This district in Tamil Nadu produces some of the world&apos;s finest turmeric, with curcumin levels of 2.5% to 3.5%, double the national average. The Erode variety is GI-tagged, meaning it can only come from here. There is no substitute.
               </p>
             </div>
             <div className="bg-cream rounded-2xl p-8 border border-black/6">
@@ -96,7 +96,7 @@ export default function OurStoryPage() {
           <div className="text-center mb-10">
             <p className="text-gold/70 text-[11px] font-semibold tracking-[0.3em] uppercase mb-3">Real Photos</p>
             <h2 className="font-hero text-[28px] md:text-[36px] font-extrabold text-white tracking-tight mb-3">
-              See Our Farm — Exactly as It Is
+              See Our Farm, Exactly as It Is
             </h2>
             <p className="text-cream/40 text-[15px]">The fields, the harvest, the processing. No stock photos.</p>
           </div>
@@ -107,7 +107,7 @@ export default function OurStoryPage() {
               <Link key={n} href="/farm" className="relative aspect-square rounded-xl overflow-hidden group">
                 <Image
                   src={`/images/farm/farm-${String(n).padStart(2, '0')}.jpeg`}
-                  alt="Ponkali farm — Perundurai, Erode"
+                  alt="Ponkali farm in Perundurai, Erode"
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-500"
                   sizes="(max-width: 768px) 33vw, 20vw"
@@ -137,7 +137,7 @@ export default function OurStoryPage() {
           </h2>
           <div className="space-y-5 text-cream/70 leading-[1.9] text-[16px]">
             <p>
-              We are the third generation. We grew up watching our grandparents farm, our parents grind, and now we carry this forward — not with nostalgia, but with pride. The world changed. Distribution changed. But we did not change what matters: the land, the stone, the purity.
+              We are the third generation. We grew up watching our grandparents farm and our parents grind, and now we carry this forward, not with nostalgia but with pride. The world changed. Distribution changed. But we did not change what matters: the land, the stone, the purity.
             </p>
             <p>
               Ponkali Masalas was born from a simple question: why should a Chennai family not be able to buy the same turmeric that our grandmother grew? Why should it pass through four middlemen, lose its freshness, and arrive on your shelf mixed with starch and artificial colour?
@@ -188,7 +188,7 @@ export default function OurStoryPage() {
               What you read on the back is what&apos;s inside
             </h2>
             <p className="text-gray-600 leading-[1.9] text-[16px] mb-5">
-              The back of every Ponkali pack carries the full heritage story — in English, Tamil, Hindi, and Telugu. We believe you should know exactly where your food comes from, who grew it, and how it was made.
+              The back of every Ponkali pack carries the full heritage story in English, Tamil, Hindi and Telugu. We believe you should know exactly where your food comes from, who grew it and how it was made.
             </p>
             <p className="text-gray-600 leading-[1.9] text-[16px] mb-8">
               Ingredients: 100% pure turmeric powder. That is the entire list.
@@ -196,7 +196,7 @@ export default function OurStoryPage() {
             <div className="border border-black/8 rounded-2xl p-5">
               <p className="text-[11px] text-gray-400 mb-1 tracking-wider uppercase font-medium">FSSAI Licensed</p>
               <p className="font-bold text-dark-brown text-[15px]">Lic. No. 22426064000154</p>
-              <p className="text-[13px] text-gray-500 mt-1">The Native, Perundurai, Erode — 638055, Tamil Nadu</p>
+              <p className="text-[13px] text-gray-500 mt-1">The Native, Perundurai, Erode, 638055, Tamil Nadu</p>
             </div>
           </div>
 
@@ -204,7 +204,7 @@ export default function OurStoryPage() {
           <div className="rounded-2xl overflow-hidden bg-white border border-black/6 shadow-sm aspect-square relative max-w-sm mx-auto md:max-w-none">
             <Image
               src="/images/product-2.jpeg"
-              alt="Ponkali Turmeric Powder — front and back packaging"
+              alt="Ponkali Turmeric Powder, front and back packaging"
               fill
               className="object-contain p-6"
               sizes="(max-width: 768px) 100vw, 50vw"
@@ -220,7 +220,7 @@ export default function OurStoryPage() {
           Taste What Three Generations Built
         </h2>
         <p className="text-cream/50 text-[16px] mb-8 max-w-md mx-auto">
-          Free shipping above ₹399. Delivered in 3–5 days anywhere in India.
+          Free shipping above ₹399. Delivered in 3 to 5 days anywhere in India.
         </p>
         <Link
           href="/shop"

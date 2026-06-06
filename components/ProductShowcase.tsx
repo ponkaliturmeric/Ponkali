@@ -54,7 +54,7 @@ export default function ProductShowcase() {
   };
 
   const waMessage = encodeURIComponent(
-    `Hi! I'd like to order Ponkali Erode Turmeric Powder ${selected.weight} — ₹${selected.price}. Please confirm.`
+    `Hi! I'd like to order Ponkali Erode Turmeric Powder ${selected.weight} for ₹${selected.price}. Please confirm.`
   );
 
   return (
@@ -112,7 +112,7 @@ export default function ProductShowcase() {
             </h1>
 
             <p className="text-gray-500 text-[14px] sm:text-[15px] mb-5 leading-relaxed">
-              Naturally grown in Erode. 2.5–3.5% natural curcumin.
+              Naturally grown in Erode with 2.5% to 3.5% natural curcumin.
               Zero additives. FSSAI certified. Direct from our family farm.
             </p>
 
@@ -180,7 +180,7 @@ export default function ProductShowcase() {
               disabled={selected.in_stock === 0}
               className="w-full bg-gold text-dark-brown py-4 rounded-full font-bold text-[16px] hover:bg-yellow-400 active:scale-[0.98] transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed mb-2.5"
             >
-              {selected.in_stock === 1 ? `Buy Now — ₹${selected.price}` : 'Out of Stock'}
+              {selected.in_stock === 1 ? `Buy Now for ₹${selected.price}` : 'Out of Stock'}
             </button>
 
             {/* Add to Cart */}
@@ -233,7 +233,7 @@ export default function ProductShowcase() {
                 <div className="w-7 h-7 rounded-full bg-dark-brown/6 flex items-center justify-center flex-shrink-0">
                   <CheckIcon className="w-3.5 h-3.5 text-dark-brown" />
                 </div>
-                <p className="text-[13px] text-gray-600">Delivered in 3–5 days anywhere in India</p>
+                <p className="text-[13px] text-gray-600">Delivered in 3 to 5 days anywhere in India</p>
               </div>
               <div className="flex items-center gap-3">
                 <div className="w-7 h-7 rounded-full bg-dark-brown/6 flex items-center justify-center flex-shrink-0">

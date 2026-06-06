@@ -110,7 +110,7 @@ export default function ProductDetail({ slug }: { slug: string }) {
             <div className="relative mt-3 rounded-2xl overflow-hidden bg-[#F5E8A0] h-36">
               <Image
                 src="/images/product-2.jpeg"
-                alt="Ponkali Turmeric Powder — front and back packaging"
+                alt="Ponkali Turmeric Powder, front and back packaging"
                 fill
                 className="object-contain px-4 py-2"
                 sizes="(max-width: 768px) 100vw, 50vw"
@@ -226,7 +226,7 @@ export default function ProductDetail({ slug }: { slug: string }) {
             <div className="flex items-center gap-2.5 bg-green-50 border border-green-100 rounded-xl px-4 py-3 mb-8">
               <TruckIcon className="w-4 h-4 text-green-600 flex-shrink-0" />
               <p className="text-[13px] text-green-700 font-medium">
-                Free delivery on orders above ₹399 · Usually ships in 1–2 days
+                Free delivery on orders above ₹399 · Usually ships in 1 to 2 days
               </p>
             </div>
 
@@ -235,7 +235,7 @@ export default function ProductDetail({ slug }: { slug: string }) {
               <div className="border-t border-black/8 py-5">
                 <h2 className="font-bold text-dark-brown mb-3 text-[15px]">About This Product</h2>
                 <p className="text-gray-600 leading-[1.8] text-[15px]">
-                  {selected.description ?? 'Single-origin Erode turmeric powder, naturally grown in Perundurai. GI-tagged variety with naturally high curcumin content (2.5–3.5%). No additives, no fillers — just pure turmeric as it has been grown for three generations.'}
+                  {selected.description ?? 'Single-origin Erode turmeric powder, naturally grown in Perundurai. A GI-tagged variety with naturally high curcumin content (2.5% to 3.5%). No additives, no fillers, just pure turmeric as it has been grown for three generations.'}
                 </p>
               </div>
 
@@ -243,7 +243,7 @@ export default function ProductDetail({ slug }: { slug: string }) {
                 <h2 className="font-bold text-dark-brown mb-3 text-[15px]">What Makes It Different</h2>
                 <ul className="space-y-2.5">
                   {[
-                    'GI-tagged Erode variety — certified origin',
+                    'GI-tagged Erode variety with certified origin',
                     'Naturally grown, chemical-free farm practices',
                     'No synthetic colours, fillers, or additives',
                     'FSSAI certified · Lic. No. 22426064000154',

@@ -135,7 +135,7 @@ export default function Header() {
                 </div>
 
                 <p className="font-bold text-dark-brown text-[15px] mb-1">Track Your Order</p>
-                <p className="text-[12px] text-gray-400 mb-4">No account needed — enter your order ID</p>
+                <p className="text-[12px] text-gray-400 mb-4">No account needed, just enter your order ID</p>
 
                 <div className="flex gap-2 mb-3">
                   <input

@@ -147,8 +147,8 @@ export default function OrderConfirmationPage() {
             </p>
             <p className={`text-[13px] leading-relaxed ${isCOD ? 'text-amber-700' : 'text-blue-700'}`}>
               {isCOD
-                ? `Please keep ₹${order.total} ready at the time of delivery. Your order will be dispatched within 1–2 business days.`
-                : 'Payment received. Your order will be dispatched within 1–2 business days.'}
+                ? `Please keep ₹${order.total} ready at the time of delivery. Your order will be dispatched within 1 to 2 business days.`
+                : 'Payment received. Your order will be dispatched within 1 to 2 business days.'}
             </p>
           </div>
         </div>

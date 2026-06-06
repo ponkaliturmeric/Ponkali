@@ -1,6 +1,6 @@
 import { Product } from './types';
 
-const description = 'Pure Erode turmeric powder, stone ground on our ancestral mill. GI-recognised region. 2.5–4.5% natural curcumin. No additives. No adulteration. FSSAI certified. Directly from our family farm in Perundurai, Erode.';
+const description = 'Pure Erode turmeric powder, stone ground on our family mill. Grown in the GI-tagged Erode region with 2.5% to 3.5% natural curcumin. No added colour, no fillers and no adulteration. FSSAI certified and packed fresh from our farm in Perundurai, Erode.';
 
 export const PRODUCTS: Product[] = [
   { id: 1, slug: 'turmeric-100g', name: 'Erode Turmeric Powder', weight: '100g', price: 149, in_stock: 1, is_bestseller: 0, description },

@@ -16,15 +16,15 @@ import HeroVideo from '@/components/HeroVideo';
 export const metadata: Metadata = buildMetadata({
   title: 'Pure Erode Turmeric, Farm Direct',
   description:
-    'Buy GI-tagged Erode turmeric powder, naturally grown and freshly processed. 2.5–3.5% natural curcumin, zero additives, FSSAI certified. Shipped direct from our family farm. Free shipping above ₹399.',
+    'Buy GI-tagged Erode turmeric powder, naturally grown and freshly ground. 2.5% to 3.5% natural curcumin, zero additives and FSSAI certified. Shipped direct from our family farm. Free shipping above ₹399.',
   path: '/',
 });
 
 const TRUST_BADGES = [
-  { Icon: MapPinIcon,      title: 'GI Recognised',    desc: 'Erode — India\'s turmeric capital' },
+  { Icon: MapPinIcon,      title: 'GI Recognised',    desc: 'Erode, India\'s turmeric capital' },
   { Icon: LeafIcon,        title: 'Naturally Grown',  desc: 'Chemical-free farm practices' },
   { Icon: TruckIcon,       title: 'Farm Direct',      desc: 'Zero middlemen' },
-  { Icon: DropletIcon,     title: 'High Curcumin',    desc: '2.5–3.5% natural curcumin' },
+  { Icon: DropletIcon,     title: 'High Curcumin',    desc: '2.5% to 3.5% natural curcumin' },
   { Icon: ShieldCheckIcon, title: 'FSSAI Certified',  desc: 'Lic. 22426064000154' },
 ];
 
@@ -38,15 +38,15 @@ const REVIEWS = [
 const FAQ_ITEMS = [
   {
     question: "Is Ponkali turmeric 100% pure and free from adulteration?",
-    answer: "Yes. Ponkali is single-origin Erode turmeric powder, naturally grown and freshly processed with nothing added — no synthetic colour, no starch, no fillers, no lead chromate. It is FSSAI certified (Lic. No. 22426064000154) and checked for purity.",
+    answer: "Yes. Ponkali is single-origin Erode turmeric powder, naturally grown and freshly processed with nothing added: no synthetic colour, no starch, no fillers and no lead chromate. It is FSSAI certified (Lic. No. 22426064000154) and checked for purity.",
   },
   {
     question: "What is the curcumin content of Ponkali turmeric?",
-    answer: "Our GI-tagged Erode turmeric naturally contains 2.5–3.5% curcumin — much higher than the 0.5–1.5% typical of mass-market supermarket brands. Curcumin is the active compound behind turmeric’s deep colour and health benefits.",
+    answer: "Our GI-tagged Erode turmeric naturally contains 2.5% to 3.5% curcumin, much higher than the 0.5% to 1.5% you find in most supermarket brands. Curcumin is the active compound behind turmeric's deep colour and health benefits.",
   },
   {
     question: "Where is Ponkali turmeric grown?",
-    answer: "It is grown on our own family farm in Perundurai, Erode — the GI-recognised turmeric capital of Tamil Nadu. We have farmed this same land for three generations.",
+    answer: "It is grown on our own family farm in Perundurai, Erode, the GI-recognised turmeric capital of Tamil Nadu. We have farmed this same land for three generations.",
   },
   {
     question: "How is it different from supermarket turmeric powder?",
@@ -54,11 +54,11 @@ const FAQ_ITEMS = [
   },
   {
     question: "Is Ponkali turmeric FSSAI certified?",
-    answer: "Yes — FSSAI Licence No. 22426064000154, manufactured by The Native, Perundurai, Erode 638055, Tamil Nadu.",
+    answer: "Yes. FSSAI Licence No. 22426064000154, manufactured by The Native, Perundurai, Erode 638055, Tamil Nadu.",
   },
   {
     question: "How long does delivery take and is shipping free?",
-    answer: "We ship across India in 3–5 working days. Shipping is free on orders above ₹399; below that a flat ₹60 applies. Both Cash on Delivery and online payment (UPI, cards, netbanking) are available.",
+    answer: "We ship across India in 3 to 5 working days. Shipping is free on orders above ₹399, and below that a flat ₹60 applies. Both Cash on Delivery and online payment (UPI, cards, netbanking) are available.",
   },
   {
     question: "How should I store turmeric powder, and how do I use it?",
@@ -120,8 +120,8 @@ export default function HomePage() {
 
             <p className="text-cream/60 text-[16px] leading-[1.8] mb-8 max-w-[460px]">
               Three generations of naturally grown turmeric from Erode.
-              2.5–3.5% natural curcumin. Zero additives, zero middlemen —
-              shipped direct from our family farm to your kitchen.
+              2.5% to 3.5% natural curcumin, zero additives and zero middlemen.
+              Shipped direct from our family farm to your kitchen.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 mb-8">
@@ -129,7 +129,7 @@ export default function HomePage() {
                 href="/shop"
                 className="bg-cream text-dark-brown px-9 py-4 rounded-full font-bold text-[15px] hover:bg-white transition-all duration-150 text-center tracking-wide shadow-md"
               >
-                Shop Now — from ₹{FROM_PRICE}
+                Shop Now, from ₹{FROM_PRICE}
               </Link>
               <Link
                 href="/our-story"
@@ -167,7 +167,7 @@ export default function HomePage() {
             {/* Floating badges — desktop only */}
             <div className="hidden md:block absolute -left-8 top-1/3 bg-white rounded-2xl px-4 py-3.5 shadow-2xl shadow-black/20">
               <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider mb-0.5">Curcumin</p>
-              <p className="text-[22px] font-extrabold text-dark-brown leading-none">2.5–3.5%</p>
+              <p className="text-[22px] font-extrabold text-dark-brown leading-none">2.5-3.5%</p>
               <p className="text-[10px] text-gray-400 mt-0.5">Lab Tested</p>
             </div>
             <div className="hidden md:block absolute -right-5 bottom-1/4 bg-dark-brown border border-gold/20 rounded-2xl px-4 py-3.5 shadow-2xl">
@@ -207,7 +207,7 @@ export default function HomePage() {
           <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-y md:divide-y-0 divide-black/5">
             {[
               { value: '3rd Gen', label: 'Family Farm' },
-              { value: '2.5–3.5%', label: 'Curcumin Content' },
+              { value: '2.5-3.5%', label: 'Curcumin Content' },
               { value: 'Zero',    label: 'Additives Added' },
               { value: '200+',   label: 'Families Served' },
             ].map(({ value, label }) => (
@@ -229,7 +229,7 @@ export default function HomePage() {
           <div className="mb-14 text-center">
             <p className="text-gold text-[11px] font-semibold tracking-[0.3em] uppercase mb-3">Full Transparency</p>
             <h2 className="font-hero text-[32px] md:text-[40px] font-extrabold text-dark-brown">
-              Farm to Kitchen — Our Way
+              From Our Farm to Your Kitchen
             </h2>
             <p className="text-gray-400 mt-3 text-[16px]">Every step is ours. No outsourcing. No compromise.</p>
           </div>
@@ -238,7 +238,7 @@ export default function HomePage() {
               { step: '01', title: 'Grown in Erode', desc: 'GI-recognised soil in Perundurai, nurtured by our family for three generations.' },
               { step: '02', title: 'Freshly Ground',  desc: 'Cleanly processed and freshly ground. No excess heat, no shortcuts, no compromise on aroma.' },
               { step: '03', title: 'Packed Fresh',   desc: 'Sealed within 24 hours of grinding. No warehouses, no long storage.' },
-              { step: '04', title: 'Shipped Direct', desc: 'From our farm to your doorstep. 3–5 days, anywhere in India.' },
+              { step: '04', title: 'Shipped Direct', desc: 'From our farm to your doorstep in 3 to 5 days, anywhere in India.' },
             ].map(({ step, title, desc }) => (
               <div key={step} className="bg-white p-8 md:p-10">
                 <p className="text-[48px] font-extrabold text-gold/35 leading-none mb-5 select-none">{step}</p>
@@ -260,7 +260,7 @@ export default function HomePage() {
             <div className="rounded-2xl overflow-hidden bg-cream h-80 md:h-[500px] relative border border-none">
               <Image
                 src="/images/product-2.jpeg"
-                alt="Ponkali Turmeric Powder — front and back of packaging"
+                alt="Ponkali Turmeric Powder, front and back of packaging"
                 fill
                 className="object-contain p-6"
                 sizes="(max-width: 768px) 100vw, 50vw"
@@ -272,10 +272,10 @@ export default function HomePage() {
                 Their names are on every packet
               </h2>
               <p className="text-gray-600 leading-[1.8] mb-5 text-[16px]">
-                Ponkali is named after our grandparents — <strong className="text-dark-brown font-semibold">Ponnamal</strong> and <strong className="text-dark-brown font-semibold">Kaaliappa </strong> — who farmed this same Erode land for over 40 years. They knew every row, every plant, every season.
+                Ponkali is named after our grandparents, <strong className="text-dark-brown font-semibold">Ponnamal</strong> and <strong className="text-dark-brown font-semibold">Kaaliappa</strong>, who farmed this same Erode land for over 40 years. They knew every row, every plant and every season.
               </p>
               <p className="text-gray-600 leading-[1.8] mb-8 text-[16px]">
-                Same land. Same seeds. Same promise. What reaches your kitchen is not just turmeric — it is our family&apos;s legacy, packed with nothing added.
+                Same land. Same seeds. Same promise. What reaches your kitchen is not just turmeric. It is our family&apos;s legacy, packed with nothing added.
               </p>
               <Link
                 href="/our-story"
@@ -358,7 +358,7 @@ export default function HomePage() {
             Taste the Difference Today
           </h2>
           <p className="text-dark-brown/60 mb-8 text-[16px]">
-            Free shipping above ₹399. Delivered in 3–5 working days anywhere in India.
+            Free shipping above ₹399. Delivered in 3 to 5 working days anywhere in India.
           </p>
           <Link
             href="/shop"
@@ -367,7 +367,7 @@ export default function HomePage() {
             Shop Now
           </Link>
           <p className="text-dark-brown/40 text-[13px] mt-6 leading-relaxed">
-            If you don&apos;t love it, we&apos;ll make it right — no questions asked.
+            If you don&apos;t love it, we&apos;ll make it right. No questions asked.
           </p>
         </div>
       </section>

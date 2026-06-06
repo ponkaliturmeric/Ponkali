@@ -28,15 +28,25 @@ function rowToProduct(r: Record<string, unknown>): Product {
 }
 
 export async function getCatalog(): Promise<Product[]> {
+  // Product copy (name, description) is owned by the code in lib/products.ts, not
+  // by the admin, so we always source it from there. The DB only governs the
+  // fields the admin can change (price, in_stock, is_bestseller). This keeps the
+  // marketing copy editable in one place and prevents stale seeded descriptions.
+  const staticBySlug = new Map(PRODUCTS.map((p) => [p.slug, p]));
   try {
     const db = await getDb();
     const { rows } = await db.execute(
       'SELECT id, slug, name, weight, price, original_price, in_stock, is_bestseller, description FROM products ORDER BY id',
     );
     if (rows.length === 0) return PRODUCTS;
-    return rows.map((r) => rowToProduct(r as unknown as Record<string, unknown>));
+    return rows.map((r) => {
+      const p = rowToProduct(r as unknown as Record<string, unknown>);
+      const s = staticBySlug.get(p.slug);
+      if (s) { p.name = s.name; p.description = s.description; }
+      return p;
+    });
   } catch (err) {
-    console.error('getCatalog failed — falling back to static catalogue:', err);
+    console.error('getCatalog failed, falling back to static catalogue:', err);
     return PRODUCTS;
   }
 }

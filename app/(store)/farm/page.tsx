@@ -7,13 +7,13 @@ import { FROM_PRICE } from '@/lib/products';
 
 export const metadata: Metadata = buildMetadata({
   title: 'From Our Farm',
-  description: 'Real photos from our turmeric farm in Perundurai, Erode — the fields, the harvest, the traditional processing. This is where your Ponkali turmeric begins.',
+  description: 'Real photos from our turmeric farm in Perundurai, Erode: the fields, the harvest and the traditional processing. This is where your Ponkali turmeric begins.',
   path: '/farm',
 });
 
 const FARM_IMAGES = Array.from({ length: 17 }, (_, i) => ({
   src: `/images/farm/farm-${String(i + 1).padStart(2, '0')}.jpeg`,
-  alt: `Ponkali turmeric farm — Perundurai, Erode`,
+  alt: `Ponkali turmeric farm in Perundurai, Erode`,
 }));
 
 export default function FarmPage() {
@@ -29,8 +29,8 @@ export default function FarmPage() {
           From Our Farm
         </h1>
         <p className="text-cream/50 text-[16px] md:text-[18px] max-w-xl mx-auto leading-[1.7]">
-          Real photos from our fields in Perundurai — the same soil, the same people,
-          the same process that has produced Erode turmeric for generations.
+          Real photos from our fields in Perundurai. The same soil, the same people
+          and the same process that has produced Erode turmeric for generations.
         </p>
       </div>
 
@@ -71,7 +71,7 @@ export default function FarmPage() {
           href="/shop"
           className="inline-flex items-center gap-2 bg-gold text-dark-brown px-10 py-4 rounded-full font-bold text-[15px] hover:bg-yellow-400 transition-all mb-6"
         >
-          Shop Now — from ₹{FROM_PRICE}
+          Shop Now, from ₹{FROM_PRICE}
           <ArrowRightIcon className="w-4 h-4" />
         </Link>
 

@@ -3,7 +3,7 @@ import { buildMetadata } from '@/lib/seo';
 
 export const metadata: Metadata = buildMetadata({
   title: 'Contact',
-  description: 'Get in touch with Ponkali Masalas. For orders, questions, or wholesale enquiries — we\'re a family farm and we\'re happy to talk.',
+  description: 'Get in touch with Ponkali Masalas. For orders, questions or wholesale enquiries, we\'re a family farm and we\'re happy to talk.',
   path: '/contact',
 });
 

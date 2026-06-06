@@ -135,7 +135,7 @@ export default function CheckoutPage() {
         amount: data.amount,
         currency: data.currency,
         name: 'Ponkali Masalas',
-        description: 'Pure Erode Turmeric — Order Payment',
+        description: 'Pure Erode Turmeric Order Payment',
         image: '/images/logo.jpg',
         order_id: data.orderId,
         prefill: {
@@ -298,7 +298,7 @@ export default function CheckoutPage() {
                       onChange={() => setPaymentMethod('online')} className="mt-1 accent-gold" />
                     <div className="flex-1">
                       <p className="font-semibold text-dark-brown text-[15px]">Pay Online</p>
-                      <p className="text-[13px] text-gray-400 mt-0.5">UPI · Cards · Netbanking · Wallets — secured by Razorpay</p>
+                      <p className="text-[13px] text-gray-400 mt-0.5">UPI · Cards · Netbanking · Wallets, secured by Razorpay</p>
                     </div>
                   </label>
 
@@ -373,7 +373,7 @@ export default function CheckoutPage() {
 
                 <div className="mt-4 flex items-center gap-2 justify-center">
                   <ShieldCheckIcon className="w-3.5 h-3.5 text-gray-300" />
-                  <p className="text-[11px] text-gray-300">Secure checkout · 3–5 day delivery</p>
+                  <p className="text-[11px] text-gray-300">Secure checkout · 3 to 5 day delivery</p>
                 </div>
 
                 <div className="mt-4 flex items-center gap-2 text-[12px] text-green-600 bg-green-50 rounded-xl px-3 py-2.5">

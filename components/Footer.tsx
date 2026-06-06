@@ -32,11 +32,11 @@ export default function Footer() {
               <span className="font-extrabold text-[22px] tracking-widest text-warm-white leading-none">PONKALI</span>
             </div>
             <p className="text-[14px] font-medium text-warm-white/75 leading-[1.8] mb-5">
-              From Our Farm — Into Your Kitchen. Three generations of turmeric farming in Erode, Tamil Nadu.
+              From our farm to your kitchen. Three generations of turmeric farming in Erode, Tamil Nadu.
             </p>
             <p className="text-[13px] font-medium text-warm-white/50 leading-[1.8] mb-6">
               The Native, Perundurai<br />
-              Erode — 638055, Tamil Nadu
+              Erode, 638055, Tamil Nadu
             </p>
 
             {/* Social media icons */}
@@ -92,7 +92,7 @@ export default function Footer() {
               {PRODUCTS.map((p) => (
                 <li key={p.slug}>
                   <Link href={`/product/${p.slug}`} className="text-[14px] font-medium text-warm-white/60 hover:text-warm-white transition-colors">
-                    {`Turmeric ${p.weight} — ₹${p.price}`}
+                    {`Turmeric ${p.weight}, ₹${p.price}`}
                   </Link>
                 </li>
               ))}
