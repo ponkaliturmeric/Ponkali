@@ -3,18 +3,21 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import {
+  Box, Typography, Button, Stack, TextField, Chip, Table, TableHead,
+  TableBody, TableRow, TableCell, TableContainer, Select, MenuItem,
+  InputAdornment, Pagination, CircularProgress,
+} from '@mui/material';
+import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
+import SearchIcon from '@mui/icons-material/Search';
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import AdminLayout from '@/components/AdminLayout';
-import { Download } from 'lucide-react';
+import PageHeader from '@/components/admin/PageHeader';
+import MainCard from '@/components/admin/MainCard';
+import StatusChip from '@/components/admin/StatusChip';
 import { Order } from '@/lib/types';
 
 const STATUS_OPTIONS = ['All', 'Pending', 'Confirmed', 'Packed', 'Shipped', 'Delivered'];
-const STATUS_COLORS: Record<string, string> = {
-  Pending: 'bg-yellow-100 text-yellow-800',
-  Confirmed: 'bg-blue-100 text-blue-800',
-  Packed: 'bg-purple-100 text-purple-800',
-  Shipped: 'bg-indigo-100 text-indigo-800',
-  Delivered: 'bg-green-100 text-green-800',
-};
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -25,32 +28,30 @@ export default function AdminOrdersPage() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
+  // Pick up ?search= passed from the header search box.
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get('search');
+    if (q) setSearch(q);
+  }, []);
+
   const fetchOrders = useCallback(async () => {
     setLoading(true);
     const params = new URLSearchParams({ page: String(page) });
     if (statusFilter !== 'All') params.set('status', statusFilter);
     if (search) params.set('search', search);
-
     const res = await fetch(`/api/orders?${params}`);
-    if (res.status === 401) {
-      router.push('/admin/login');
-      return;
-    }
+    if (res.status === 401) { router.push('/admin/login'); return; }
     const data = await res.json();
     setOrders(data.orders || []);
     setTotal(data.total || 0);
     setLoading(false);
   }, [page, statusFilter, search, router]);
 
-  useEffect(() => {
-    fetchOrders();
-  }, [fetchOrders]);
+  useEffect(() => { fetchOrders(); }, [fetchOrders]);
 
   const updateStatus = async (orderId: string, status: string) => {
     await fetch(`/api/orders/${orderId}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status }),
+      method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }),
     });
     fetchOrders();
   };
@@ -59,132 +60,93 @@ export default function AdminOrdersPage() {
 
   return (
     <AdminLayout>
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-[22px] font-extrabold text-gray-900 tracking-tight">Orders</h1>
-          <p className="text-gray-400 text-[13px] mt-0.5">{total} total orders</p>
-        </div>
-        <div className="flex gap-2">
-          <a
-            href="/api/orders/export?format=csv"
-            className="flex items-center gap-1.5 border border-gray-200 text-gray-600 px-4 py-2 rounded-xl text-[13px] font-semibold hover:border-gold hover:text-gold transition-colors"
-          >
-            <Download size={13} />
-            CSV
-          </a>
-          <a
-            href="/api/orders/export?format=xlsx"
-            className="flex items-center gap-1.5 bg-dark-brown text-cream px-4 py-2 rounded-xl text-[13px] font-semibold hover:bg-black transition-colors"
-          >
-            <Download size={13} />
-            Excel
-          </a>
-        </div>
-      </div>
+      <PageHeader
+        title="Orders"
+        breadcrumbs={[{ label: 'Orders' }]}
+        action={
+          <Stack direction="row" spacing={1.5}>
+            <Button variant="outlined" color="inherit" startIcon={<FileDownloadOutlinedIcon />} href="/api/orders/export?format=csv" sx={{ color: 'text.secondary' }}>CSV</Button>
+            <Button variant="contained" startIcon={<FileDownloadOutlinedIcon />} href="/api/orders/export?format=xlsx">Excel</Button>
+          </Stack>
+        }
+      />
 
       {/* Filters */}
-      <div className="bg-white rounded-2xl p-4 border border-gray-100 mb-6 flex flex-col sm:flex-row gap-3">
-        <input
-          type="text"
-          placeholder="Search order ID or customer name..."
-          value={search}
-          onChange={e => { setSearch(e.target.value); setPage(1); }}
-          className="flex-1 border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-gold"
-        />
-        <div className="flex gap-2 flex-wrap">
-          {STATUS_OPTIONS.map(s => (
-            <button
-              key={s}
-              onClick={() => { setStatusFilter(s); setPage(1); }}
-              className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
-                statusFilter === s ? 'bg-gold text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              {s}
-            </button>
-          ))}
-        </div>
-      </div>
+      <Box sx={{ mb: 2.5 }}>
+        <MainCard contentSx={{ py: 2 }}>
+          <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems={{ md: 'center' }}>
+            <TextField
+              fullWidth placeholder="Search order ID or customer name…"
+              value={search} onChange={e => { setSearch(e.target.value); setPage(1); }}
+              InputProps={{ startAdornment: <InputAdornment position="start"><SearchIcon fontSize="small" color="action" /></InputAdornment> }}
+            />
+            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+              {STATUS_OPTIONS.map(s => (
+                <Chip
+                  key={s} label={s}
+                  onClick={() => { setStatusFilter(s); setPage(1); }}
+                  color={statusFilter === s ? 'primary' : 'default'}
+                  variant={statusFilter === s ? 'filled' : 'outlined'}
+                />
+              ))}
+            </Stack>
+          </Stack>
+        </MainCard>
+      </Box>
 
       {/* Table */}
-      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50">
-              <tr>
-                {['Order ID', 'Date', 'Customer', 'Phone', 'City', 'Items', 'Amount', 'Payment', 'Status', 'Actions'].map(h => (
-                  <th key={h} className="px-4 py-3 text-left font-semibold text-gray-500 whitespace-nowrap">{h}</th>
+      <MainCard noPadding>
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow>
+                {['Order ID', 'Date', 'Customer', 'Phone', 'City', 'Items', 'Amount', 'Payment', 'Status', ''].map((h, i) => (
+                  <TableCell key={i}>{h}</TableCell>
                 ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
+              </TableRow>
+            </TableHead>
+            <TableBody>
               {loading ? (
-                <tr>
-                  <td colSpan={10} className="text-center py-10 text-gray-400">Loading orders...</td>
-                </tr>
+                <TableRow><TableCell colSpan={10} align="center" sx={{ py: 6 }}><CircularProgress size={26} /></TableCell></TableRow>
               ) : orders.length === 0 ? (
-                <tr>
-                  <td colSpan={10} className="text-center py-10 text-gray-400">No orders found.</td>
-                </tr>
+                <TableRow><TableCell colSpan={10} align="center" sx={{ py: 6, color: 'text.disabled' }}>No orders found.</TableCell></TableRow>
               ) : orders.map(order => (
-                <tr key={order.order_id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 font-mono text-xs font-bold text-dark-brown whitespace-nowrap">{order.order_id}</td>
-                  <td className="px-4 py-3 text-gray-500 whitespace-nowrap">
-                    {new Date(order.created_at).toLocaleDateString('en-IN')}
-                  </td>
-                  <td className="px-4 py-3 font-medium whitespace-nowrap">{order.customer_name}</td>
-                  <td className="px-4 py-3 text-gray-600">{order.phone}</td>
-                  <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{order.city}</td>
-                  <td className="px-4 py-3 text-gray-600 text-xs max-w-32 truncate">{order.item_count ?? '—'}</td>
-                  <td className="px-4 py-3 font-bold whitespace-nowrap">₹{order.total}</td>
-                  <td className="px-4 py-3 text-gray-600 capitalize">{order.payment_method}</td>
-                  <td className="px-4 py-3">
-                    <select
+                <TableRow key={order.order_id} hover>
+                  <TableCell sx={{ fontFamily: 'monospace', fontWeight: 700, color: 'primary.main' }}>{order.order_id}</TableCell>
+                  <TableCell sx={{ color: 'text.secondary' }}>{new Date(order.created_at).toLocaleDateString('en-IN')}</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>{order.customer_name}</TableCell>
+                  <TableCell sx={{ color: 'text.secondary' }}>{order.phone}</TableCell>
+                  <TableCell sx={{ color: 'text.secondary' }}>{order.city}</TableCell>
+                  <TableCell sx={{ color: 'text.secondary' }}>{order.item_count ?? '—'}</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }}>₹{order.total}</TableCell>
+                  <TableCell><StatusChip status={order.payment_method} /></TableCell>
+                  <TableCell>
+                    <Select
                       value={order.status}
                       onChange={e => updateStatus(order.order_id, e.target.value)}
-                      className={`text-xs font-semibold px-2 py-1 rounded-full border-0 focus:outline-none cursor-pointer ${STATUS_COLORS[order.status] || 'bg-gray-100 text-gray-700'}`}
+                      size="small" variant="outlined"
+                      sx={{ minWidth: 130, '& .MuiSelect-select': { py: 0.75 } }}
+                      renderValue={v => <StatusChip status={v} />}
                     >
-                      {STATUS_OPTIONS.slice(1).map(s => (
-                        <option key={s} value={s}>{s}</option>
-                      ))}
-                    </select>
-                  </td>
-                  <td className="px-4 py-3">
-                    <Link href={`/admin/orders/${order.order_id}`} className="text-gold hover:underline text-xs font-semibold">
-                      View
-                    </Link>
-                  </td>
-                </tr>
+                      {STATUS_OPTIONS.slice(1).map(s => <MenuItem key={s} value={s}>{s}</MenuItem>)}
+                    </Select>
+                  </TableCell>
+                  <TableCell>
+                    <Button component={Link} href={`/admin/orders/${order.order_id}`} size="small" startIcon={<VisibilityOutlinedIcon sx={{ fontSize: 16 }} />}>View</Button>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </TableBody>
+          </Table>
+        </TableContainer>
 
-        {/* Pagination */}
         {totalPages > 1 && (
-          <div className="p-4 border-t border-gray-100 flex items-center justify-between">
-            <p className="text-sm text-gray-500">
-              Page {page} of {totalPages} · {total} orders
-            </p>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setPage(p => Math.max(1, p - 1))}
-                disabled={page === 1}
-                className="px-3 py-1.5 rounded-lg border border-gray-200 text-sm disabled:opacity-50 hover:border-gold"
-              >
-                Previous
-              </button>
-              <button
-                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                disabled={page === totalPages}
-                className="px-3 py-1.5 rounded-lg border border-gray-200 text-sm disabled:opacity-50 hover:border-gold"
-              >
-                Next
-              </button>
-            </div>
-          </div>
+          <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ p: 2, borderTop: '1px solid', borderColor: 'divider' }}>
+            <Typography variant="body1" color="text.secondary">Page {page} of {totalPages} · {total} orders</Typography>
+            <Pagination count={totalPages} page={page} onChange={(_, p) => setPage(p)} shape="rounded" color="primary" />
+          </Stack>
         )}
-      </div>
+      </MainCard>
     </AdminLayout>
   );
 }

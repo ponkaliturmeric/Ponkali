@@ -3,11 +3,21 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  ShoppingBag, IndianRupee, Clock, CalendarDays,
-  TrendingUp, PackageCheck, BarChart3, Download,
-  ArrowUpRight, Percent
-} from 'lucide-react';
+  Box, Typography, Button, Stack, CircularProgress, LinearProgress,
+} from '@mui/material';
+import ShoppingBagOutlinedIcon from '@mui/icons-material/ShoppingBagOutlined';
+import CurrencyRupeeRoundedIcon from '@mui/icons-material/CurrencyRupeeRounded';
+import AccessTimeRoundedIcon from '@mui/icons-material/AccessTimeRounded';
+import TrendingUpRoundedIcon from '@mui/icons-material/TrendingUpRounded';
+import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
+import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
+import PercentRoundedIcon from '@mui/icons-material/PercentRounded';
+import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
+import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
 import AdminLayout from '@/components/AdminLayout';
+import PageHeader from '@/components/admin/PageHeader';
+import StatCard from '@/components/admin/StatCard';
+import MainCard from '@/components/admin/MainCard';
 import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -20,80 +30,22 @@ interface AnalyticsData {
   topProducts: { product_name: string; weight: string; qty_sold: number; revenue: number }[];
   monthly: { month: string; orders: number; revenue: number }[];
   totals: {
-    total_orders: number;
-    total_revenue: number;
-    avg_order_value: number;
-    pending: number;
-    delivered: number;
-    today_orders: number;
-    today_revenue: number;
+    total_orders: number; total_revenue: number; avg_order_value: number;
+    pending: number; delivered: number; today_orders: number; today_revenue: number;
   };
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  Pending: '#F59E0B',
-  Confirmed: '#3B82F6',
-  Packed: '#8B5CF6',
-  Shipped: '#06B6D4',
-  Delivered: '#10B981',
-  Cancelled: '#EF4444',
+  Pending: '#FFBF00', Confirmed: '#00A2AE', Packed: '#1C3311',
+  Shipped: '#4A7A3A', Delivered: '#00A854', Cancelled: '#F04134',
 };
+const PIE_COLORS = ['#1C3311', '#E8950A', '#00A854', '#00A2AE', '#4A7A3A'];
 
-const PIE_COLORS = ['#D4960A', '#2C1000', '#10B981', '#3B82F6', '#8B5CF6'];
+const formatDate = (d: string) => { const dt = new Date(d); return `${dt.getDate()} ${dt.toLocaleString('en', { month: 'short' })}`; };
+const formatMonth = (m: string) => { const [y, mo] = m.split('-'); return new Date(Number(y), Number(mo) - 1).toLocaleString('en', { month: 'short', year: '2-digit' }); };
+const formatINR = (v: number) => v >= 100000 ? `₹${(v / 100000).toFixed(1)}L` : v >= 1000 ? `₹${(v / 1000).toFixed(1)}k` : `₹${v}`;
 
-function StatCard({
-  label, value, sub, Icon, trend, color,
-}: {
-  label: string;
-  value: string | number;
-  sub?: string;
-  Icon: React.ElementType;
-  trend?: string;
-  color: string;
-}) {
-  return (
-    <div className="bg-white rounded-2xl p-5 border border-gray-100 flex flex-col gap-3">
-      <div className="flex items-start justify-between">
-        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${color}`}>
-          <Icon size={18} strokeWidth={1.75} />
-        </div>
-        {trend && (
-          <span className="flex items-center gap-1 text-[12px] font-semibold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
-            <ArrowUpRight size={12} />
-            {trend}
-          </span>
-        )}
-      </div>
-      <div>
-        <p className="text-[26px] font-extrabold text-gray-900 tracking-tight leading-none">{value}</p>
-        <p className="text-gray-400 text-[13px] mt-1 font-medium">{label}</p>
-        {sub && <p className="text-gray-300 text-[11px] mt-0.5">{sub}</p>}
-      </div>
-    </div>
-  );
-}
-
-function SectionHeader({ title, sub }: { title: string; sub?: string }) {
-  return (
-    <div className="mb-5">
-      <h2 className="text-[16px] font-extrabold text-gray-900 tracking-tight">{title}</h2>
-      {sub && <p className="text-[13px] text-gray-400 mt-0.5">{sub}</p>}
-    </div>
-  );
-}
-
-const formatDate = (d: string) => {
-  const dt = new Date(d);
-  return `${dt.getDate()} ${dt.toLocaleString('en', { month: 'short' })}`;
-};
-
-const formatMonth = (m: string) => {
-  const [y, mo] = m.split('-');
-  return new Date(Number(y), Number(mo) - 1).toLocaleString('en', { month: 'short', year: '2-digit' });
-};
-
-const formatINR = (v: number) =>
-  v >= 100000 ? `₹${(v / 100000).toFixed(1)}L` : v >= 1000 ? `₹${(v / 1000).toFixed(1)}k` : `₹${v}`;
+const tooltipStyle = { borderRadius: 8, border: '1px solid #F0F0F0', fontSize: 12, boxShadow: '0px 8px 24px rgba(38,38,38,0.12)' };
 
 export default function AdminDashboardPage() {
   const [data, setData] = useState<AnalyticsData | null>(null);
@@ -104,427 +56,224 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     let active = true;
     fetch('/api/admin/analytics')
-      .then(r => {
-        if (r.status === 401) { router.push('/admin/login'); return null; }
-        if (!r.ok) throw new Error(`Analytics request failed (${r.status})`);
-        return r.json();
-      })
-      .then(d => {
-        if (active && d) { setData(d); setLoading(false); }
-      })
-      .catch(() => {
-        // Don't leave the admin staring at a spinner forever on a failed/empty response.
-        if (active) { setError(true); setLoading(false); }
-      });
+      .then(r => { if (r.status === 401) { router.push('/admin/login'); return null; } if (!r.ok) throw new Error(); return r.json(); })
+      .then(d => { if (active && d) { setData(d); setLoading(false); } })
+      .catch(() => { if (active) { setError(true); setLoading(false); } });
     return () => { active = false; };
   }, [router]);
 
   if (error) {
     return (
       <AdminLayout>
-        <div className="flex flex-col items-center justify-center h-64 gap-4 text-center">
-          <p className="text-gray-500 text-[14px]">Couldn&apos;t load dashboard data.</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="bg-dark-brown text-cream px-5 py-2.5 rounded-xl text-[13px] font-semibold hover:bg-black transition-colors"
-          >
-            Retry
-          </button>
-        </div>
+        <Stack alignItems="center" justifyContent="center" spacing={2} sx={{ height: 256 }}>
+          <Typography color="text.secondary">Couldn&apos;t load dashboard data.</Typography>
+          <Button variant="contained" onClick={() => window.location.reload()}>Retry</Button>
+        </Stack>
       </AdminLayout>
     );
   }
 
   if (loading || !data) {
-    return (
-      <AdminLayout>
-        <div className="flex items-center justify-center h-64">
-          <div className="w-7 h-7 border-2 border-gold border-t-transparent rounded-full animate-spin" />
-        </div>
-      </AdminLayout>
-    );
+    return <AdminLayout><Stack alignItems="center" justifyContent="center" sx={{ height: 256 }}><CircularProgress /></Stack></AdminLayout>;
   }
 
   const { totals, daily, byStatus, byPayment, topProducts, monthly } = data;
-  const deliveryRate = totals.total_orders > 0
-    ? Math.round((totals.delivered / totals.total_orders) * 100)
-    : 0;
+  const deliveryRate = totals.total_orders > 0 ? Math.round((totals.delivered / totals.total_orders) * 100) : 0;
+  const prev7 = daily.slice(-14, -7).reduce((s, d) => s + d.revenue, 0);
+  const curr7 = daily.slice(-7).reduce((s, d) => s + d.revenue, 0);
+  const revenueTrend = prev7 > 0 ? Math.round((curr7 - prev7) / prev7 * 100) : undefined;
 
-  const last7 = daily.slice(-7);
-  const prev7Revenue = daily.slice(-14, -7).reduce((s, d) => s + d.revenue, 0);
-  const curr7Revenue = last7.reduce((s, d) => s + d.revenue, 0);
-  const revenueChange = prev7Revenue > 0
-    ? `${((curr7Revenue - prev7Revenue) / prev7Revenue * 100).toFixed(0)}%`
-    : null;
+  const today = new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
   return (
     <AdminLayout>
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-        <div>
-          <h1 className="text-[22px] font-extrabold text-gray-900 tracking-tight">Dashboard</h1>
-          <p className="text-gray-400 text-[13px] mt-0.5">
-            {new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <a
-            href="/api/orders/export?format=csv"
-            className="flex items-center gap-1.5 border border-gray-200 text-gray-600 px-4 py-2 rounded-xl text-[13px] font-semibold hover:border-gold hover:text-gold transition-colors"
-          >
-            <Download size={14} />
-            CSV
-          </a>
-          <a
-            href="/api/orders/export?format=xlsx"
-            className="flex items-center gap-1.5 bg-dark-brown text-cream px-4 py-2 rounded-xl text-[13px] font-semibold hover:bg-black transition-colors"
-          >
-            <Download size={14} />
-            Excel
-          </a>
-        </div>
-      </div>
+      <PageHeader
+        title="Dashboard"
+        subtitle={today}
+        action={
+          <Stack direction="row" spacing={1.5}>
+            <Button variant="outlined" color="inherit" startIcon={<FileDownloadOutlinedIcon />} href="/api/orders/export?format=csv" sx={{ color: 'text.secondary' }}>CSV</Button>
+            <Button variant="contained" startIcon={<FileDownloadOutlinedIcon />} href="/api/orders/export?format=xlsx">Excel</Button>
+          </Stack>
+        }
+      />
 
-      {/* Stat cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <StatCard
-          label="Total Orders"
-          value={totals.total_orders}
-          sub={`${totals.today_orders} today`}
-          Icon={ShoppingBag}
-          color="text-blue-600 bg-blue-50"
-        />
-        <StatCard
-          label="Total Revenue"
-          value={`₹${(totals.total_revenue || 0).toLocaleString('en-IN')}`}
-          sub={`₹${(totals.today_revenue || 0).toLocaleString('en-IN')} today`}
-          Icon={IndianRupee}
-          trend={revenueChange ?? undefined}
-          color="text-gold bg-amber-50"
-        />
-        <StatCard
-          label="Pending Orders"
-          value={totals.pending}
-          sub="Awaiting action"
-          Icon={Clock}
-          color="text-orange-500 bg-orange-50"
-        />
-        <StatCard
-          label="Avg Order Value"
-          value={`₹${Math.round(totals.avg_order_value || 0)}`}
-          sub={`${deliveryRate}% delivered`}
-          Icon={TrendingUp}
-          color="text-purple-600 bg-purple-50"
-        />
-      </div>
+      {/* KPI cards */}
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', lg: 'repeat(4, 1fr)' }, gap: 2.5, mb: 2.5 }}>
+        <StatCard title="Total Orders" value={totals.total_orders} icon={ShoppingBagOutlinedIcon} color="primary" caption={`${totals.today_orders} today`} />
+        <StatCard title="Total Revenue" value={`₹${(totals.total_revenue || 0).toLocaleString('en-IN')}`} icon={CurrencyRupeeRoundedIcon} color="secondary" trend={revenueTrend} caption="vs last week" />
+        <StatCard title="Pending Orders" value={totals.pending} icon={AccessTimeRoundedIcon} color="warning" caption="Awaiting action" />
+        <StatCard title="Avg Order Value" value={`₹${Math.round(totals.avg_order_value || 0)}`} icon={TrendingUpRoundedIcon} color="info" caption={`${deliveryRate}% delivered`} />
+      </Box>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', lg: 'repeat(4, 1fr)' }, gap: 2.5, mb: 3 }}>
+        <StatCard title="Today's Orders" value={totals.today_orders} icon={CalendarMonthOutlinedIcon} color="primary" />
+        <StatCard title="Delivered" value={totals.delivered} icon={Inventory2OutlinedIcon} color="success" caption={`${deliveryRate}% success rate`} />
+        <StatCard title="Today's Revenue" value={`₹${(totals.today_revenue || 0).toLocaleString('en-IN')}`} icon={CurrencyRupeeRoundedIcon} color="secondary" />
+        <StatCard title="Delivery Rate" value={`${deliveryRate}%`} icon={PercentRoundedIcon} color="info" caption={`${totals.total_orders} total orders`} />
+      </Box>
 
-      {/* Secondary stat row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <StatCard
-          label="Today's Orders"
-          value={totals.today_orders}
-          Icon={CalendarDays}
-          color="text-indigo-600 bg-indigo-50"
-        />
-        <StatCard
-          label="Delivered"
-          value={totals.delivered}
-          sub={`${deliveryRate}% success rate`}
-          Icon={PackageCheck}
-          color="text-green-600 bg-green-50"
-        />
-        <StatCard
-          label="Today's Revenue"
-          value={`₹${(totals.today_revenue || 0).toLocaleString('en-IN')}`}
-          Icon={IndianRupee}
-          color="text-teal-600 bg-teal-50"
-        />
-        <StatCard
-          label="Delivery Rate"
-          value={`${deliveryRate}%`}
-          sub={`${totals.total_orders} total orders`}
-          Icon={Percent}
-          color="text-rose-600 bg-rose-50"
-        />
-      </div>
+      {/* Revenue area */}
+      <Box sx={{ mb: 3 }}>
+        <MainCard title="Revenue — Last 30 Days">
+          <ResponsiveContainer width="100%" height={240}>
+            <AreaChart data={daily} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+              <defs>
+                <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#E8950A" stopOpacity={0.25} />
+                  <stop offset="95%" stopColor="#E8950A" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#F5F5F5" />
+              <XAxis dataKey="date" tickFormatter={formatDate} tick={{ fontSize: 11, fill: '#8C8C8C' }} axisLine={false} tickLine={false} interval={4} />
+              <YAxis tickFormatter={formatINR} tick={{ fontSize: 11, fill: '#8C8C8C' }} axisLine={false} tickLine={false} width={48} />
+              <Tooltip formatter={(v: unknown) => [`₹${Number(v).toLocaleString('en-IN')}`, 'Revenue']} labelFormatter={d => formatDate(String(d))} contentStyle={tooltipStyle} />
+              <Area type="monotone" dataKey="revenue" stroke="#E8950A" strokeWidth={2.5} fill="url(#revGrad)" dot={false} activeDot={{ r: 4, fill: '#E8950A' }} />
+            </AreaChart>
+          </ResponsiveContainer>
+        </MainCard>
+      </Box>
 
-      {/* Revenue chart — 30 days */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-6 mb-6">
-        <SectionHeader title="Revenue — Last 30 Days" sub="Daily revenue trend" />
-        <ResponsiveContainer width="100%" height={240}>
-          <AreaChart data={daily} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
-            <defs>
-              <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#D4960A" stopOpacity={0.15} />
-                <stop offset="95%" stopColor="#D4960A" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
-            <XAxis
-              dataKey="date"
-              tickFormatter={formatDate}
-              tick={{ fontSize: 11, fill: '#9CA3AF' }}
-              axisLine={false}
-              tickLine={false}
-              interval={4}
-            />
-            <YAxis
-              tickFormatter={formatINR}
-              tick={{ fontSize: 11, fill: '#9CA3AF' }}
-              axisLine={false}
-              tickLine={false}
-              width={48}
-            />
-            <Tooltip
-              formatter={(v: unknown) => [`₹${Number(v).toLocaleString('en-IN')}`, 'Revenue']}
-              labelFormatter={(d) => formatDate(String(d))}
-              contentStyle={{ borderRadius: 12, border: '1px solid #E5E7EB', fontSize: 12 }}
-            />
-            <Area
-              type="monotone"
-              dataKey="revenue"
-              stroke="#D4960A"
-              strokeWidth={2}
-              fill="url(#revenueGrad)"
-              dot={false}
-              activeDot={{ r: 4, fill: '#D4960A' }}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
-
-      {/* Orders chart + Status breakdown */}
-      <div className="grid md:grid-cols-2 gap-6 mb-6">
-
-        {/* Daily orders bar chart */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6">
-          <SectionHeader title="Orders — Last 30 Days" sub="Daily order volume" />
+      {/* Orders + status */}
+      <Box sx={{ display: 'grid', gridTemplateColumns: { md: '1fr 1fr' }, gap: 2.5, mb: 3 }}>
+        <MainCard title="Orders — Last 30 Days">
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={daily} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" vertical={false} />
-              <XAxis
-                dataKey="date"
-                tickFormatter={formatDate}
-                tick={{ fontSize: 11, fill: '#9CA3AF' }}
-                axisLine={false}
-                tickLine={false}
-                interval={6}
-              />
-              <YAxis
-                tick={{ fontSize: 11, fill: '#9CA3AF' }}
-                axisLine={false}
-                tickLine={false}
-                width={28}
-                allowDecimals={false}
-              />
-              <Tooltip
-                formatter={(v: unknown) => [Number(v), 'Orders']}
-                labelFormatter={(d) => formatDate(String(d))}
-                contentStyle={{ borderRadius: 12, border: '1px solid #E5E7EB', fontSize: 12 }}
-              />
-              <Bar dataKey="orders" fill="#2C1000" radius={[4, 4, 0, 0]} maxBarSize={24} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#F5F5F5" vertical={false} />
+              <XAxis dataKey="date" tickFormatter={formatDate} tick={{ fontSize: 11, fill: '#8C8C8C' }} axisLine={false} tickLine={false} interval={6} />
+              <YAxis tick={{ fontSize: 11, fill: '#8C8C8C' }} axisLine={false} tickLine={false} width={28} allowDecimals={false} />
+              <Tooltip formatter={(v: unknown) => [Number(v), 'Orders']} labelFormatter={d => formatDate(String(d))} contentStyle={tooltipStyle} />
+              <Bar dataKey="orders" fill="#1C3311" radius={[4, 4, 0, 0]} maxBarSize={24} />
             </BarChart>
           </ResponsiveContainer>
-        </div>
+        </MainCard>
 
-        {/* Status breakdown pie */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6">
-          <SectionHeader title="Orders by Status" sub="Current distribution" />
+        <MainCard title="Orders by Status">
           {byStatus.length === 0 ? (
-            <div className="flex items-center justify-center h-[220px] text-gray-300 text-[14px]">No orders yet</div>
+            <Stack alignItems="center" justifyContent="center" sx={{ height: 220, color: 'text.disabled' }}>No orders yet</Stack>
           ) : (
-            <div className="flex items-center gap-4">
-              <ResponsiveContainer width="55%" height={200}>
-                <PieChart>
-                  <Pie
-                    data={byStatus}
-                    dataKey="count"
-                    nameKey="status"
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={55}
-                    outerRadius={85}
-                    paddingAngle={2}
-                  >
-                    {byStatus.map((entry) => (
-                      <Cell key={entry.status} fill={STATUS_COLORS[entry.status] || '#9CA3AF'} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    formatter={(v: unknown) => [Number(v), 'Orders']}
-                    contentStyle={{ borderRadius: 12, border: '1px solid #E5E7EB', fontSize: 12 }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="flex-1 space-y-2">
+            <Stack direction="row" alignItems="center" spacing={2}>
+              <Box sx={{ width: '55%' }}>
+                <ResponsiveContainer width="100%" height={200}>
+                  <PieChart>
+                    <Pie data={byStatus} dataKey="count" nameKey="status" cx="50%" cy="50%" innerRadius={55} outerRadius={85} paddingAngle={2}>
+                      {byStatus.map(e => <Cell key={e.status} fill={STATUS_COLORS[e.status] || '#BFBFBF'} />)}
+                    </Pie>
+                    <Tooltip formatter={(v: unknown) => [Number(v), 'Orders']} contentStyle={tooltipStyle} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </Box>
+              <Stack spacing={1.25} sx={{ flex: 1 }}>
                 {byStatus.map(s => (
-                  <div key={s.status} className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span
-                        className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                        style={{ background: STATUS_COLORS[s.status] || '#9CA3AF' }}
-                      />
-                      <span className="text-[12px] text-gray-600 font-medium">{s.status}</span>
-                    </div>
-                    <span className="text-[12px] font-bold text-gray-900">{s.count}</span>
-                  </div>
+                  <Stack key={s.status} direction="row" alignItems="center" justifyContent="space-between">
+                    <Stack direction="row" alignItems="center" spacing={1}>
+                      <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: STATUS_COLORS[s.status] || '#BFBFBF' }} />
+                      <Typography variant="body1" color="text.secondary" fontWeight={500}>{s.status}</Typography>
+                    </Stack>
+                    <Typography variant="body1" fontWeight={700}>{s.count}</Typography>
+                  </Stack>
                 ))}
-              </div>
-            </div>
+              </Stack>
+            </Stack>
           )}
-        </div>
-      </div>
+        </MainCard>
+      </Box>
 
-      {/* Monthly revenue + Payment breakdown */}
-      <div className="grid md:grid-cols-2 gap-6 mb-6">
-
-        {/* Monthly bar chart */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6">
-          <SectionHeader title="Monthly Revenue" sub="Last 6 months" />
+      {/* Monthly + payment */}
+      <Box sx={{ display: 'grid', gridTemplateColumns: { md: '1fr 1fr' }, gap: 2.5, mb: 3 }}>
+        <MainCard title="Monthly Revenue">
           {monthly.length === 0 ? (
-            <div className="flex items-center justify-center h-[220px] text-gray-300 text-[14px]">No data yet</div>
+            <Stack alignItems="center" justifyContent="center" sx={{ height: 220, color: 'text.disabled' }}>No data yet</Stack>
           ) : (
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={monthly} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" vertical={false} />
-                <XAxis
-                  dataKey="month"
-                  tickFormatter={formatMonth}
-                  tick={{ fontSize: 11, fill: '#9CA3AF' }}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <YAxis
-                  tickFormatter={formatINR}
-                  tick={{ fontSize: 11, fill: '#9CA3AF' }}
-                  axisLine={false}
-                  tickLine={false}
-                  width={48}
-                />
-                <Tooltip
-                  formatter={(v: unknown) => [`₹${Number(v).toLocaleString('en-IN')}`, 'Revenue']}
-                  labelFormatter={(m) => formatMonth(String(m))}
-                  contentStyle={{ borderRadius: 12, border: '1px solid #E5E7EB', fontSize: 12 }}
-                />
-                <Bar dataKey="revenue" fill="#D4960A" radius={[6, 6, 0, 0]} maxBarSize={40} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#F5F5F5" vertical={false} />
+                <XAxis dataKey="month" tickFormatter={formatMonth} tick={{ fontSize: 11, fill: '#8C8C8C' }} axisLine={false} tickLine={false} />
+                <YAxis tickFormatter={formatINR} tick={{ fontSize: 11, fill: '#8C8C8C' }} axisLine={false} tickLine={false} width={48} />
+                <Tooltip formatter={(v: unknown) => [`₹${Number(v).toLocaleString('en-IN')}`, 'Revenue']} labelFormatter={m => formatMonth(String(m))} contentStyle={tooltipStyle} />
+                <Bar dataKey="revenue" fill="#E8950A" radius={[6, 6, 0, 0]} maxBarSize={40} />
               </BarChart>
             </ResponsiveContainer>
           )}
-        </div>
+        </MainCard>
 
-        {/* Payment method */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6">
-          <SectionHeader title="Payment Methods" sub="Revenue by method" />
+        <MainCard title="Payment Methods">
           {byPayment.length === 0 ? (
-            <div className="flex items-center justify-center h-[220px] text-gray-300 text-[14px]">No data yet</div>
+            <Stack alignItems="center" justifyContent="center" sx={{ height: 220, color: 'text.disabled' }}>No data yet</Stack>
           ) : (
-            <div className="flex items-center gap-4">
-              <ResponsiveContainer width="55%" height={200}>
-                <PieChart>
-                  <Pie
-                    data={byPayment}
-                    dataKey="revenue"
-                    nameKey="payment_method"
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={55}
-                    outerRadius={85}
-                    paddingAngle={2}
-                  >
-                    {byPayment.map((_, i) => (
-                      <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    formatter={(v: unknown) => [`₹${Number(v).toLocaleString('en-IN')}`, 'Revenue']}
-                    contentStyle={{ borderRadius: 12, border: '1px solid #E5E7EB', fontSize: 12 }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="flex-1 space-y-3">
+            <Stack direction="row" alignItems="center" spacing={2}>
+              <Box sx={{ width: '55%' }}>
+                <ResponsiveContainer width="100%" height={200}>
+                  <PieChart>
+                    <Pie data={byPayment} dataKey="revenue" nameKey="payment_method" cx="50%" cy="50%" innerRadius={55} outerRadius={85} paddingAngle={2}>
+                      {byPayment.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
+                    </Pie>
+                    <Tooltip formatter={(v: unknown) => [`₹${Number(v).toLocaleString('en-IN')}`, 'Revenue']} contentStyle={tooltipStyle} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </Box>
+              <Stack spacing={1.75} sx={{ flex: 1 }}>
                 {byPayment.map((p, i) => (
-                  <div key={p.payment_method}>
-                    <div className="flex items-center justify-between mb-1">
-                      <div className="flex items-center gap-2">
-                        <span
-                          className="w-2.5 h-2.5 rounded-full"
-                          style={{ background: PIE_COLORS[i % PIE_COLORS.length] }}
-                        />
-                        <span className="text-[12px] text-gray-600 font-medium capitalize">
+                  <Box key={p.payment_method}>
+                    <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 0.5 }}>
+                      <Stack direction="row" alignItems="center" spacing={1}>
+                        <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: PIE_COLORS[i % PIE_COLORS.length] }} />
+                        <Typography variant="body1" color="text.secondary" fontWeight={500} sx={{ textTransform: 'capitalize' }}>
                           {p.payment_method === 'cod' ? 'Cash on Delivery' : 'UPI'}
-                        </span>
-                      </div>
-                      <span className="text-[12px] font-bold text-gray-900">{p.count}</span>
-                    </div>
-                    <p className="text-[11px] text-gray-400 pl-4">₹{Number(p.revenue).toLocaleString('en-IN')}</p>
-                  </div>
+                        </Typography>
+                      </Stack>
+                      <Typography variant="body1" fontWeight={700}>{p.count}</Typography>
+                    </Stack>
+                    <Typography variant="caption" color="text.disabled" sx={{ pl: 2.25 }}>₹{Number(p.revenue).toLocaleString('en-IN')}</Typography>
+                  </Box>
                 ))}
-              </div>
-            </div>
+              </Stack>
+            </Stack>
           )}
-        </div>
-      </div>
+        </MainCard>
+      </Box>
 
       {/* Top products */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-6 mb-6">
-        <div className="flex items-center justify-between mb-5">
-          <div>
-            <h2 className="text-[16px] font-extrabold text-gray-900 tracking-tight">Top Products</h2>
-            <p className="text-[13px] text-gray-400 mt-0.5">By units sold</p>
-          </div>
-          <BarChart3 size={18} className="text-gray-300" />
-        </div>
-        {topProducts.length === 0 ? (
-          <p className="text-gray-300 text-[14px] text-center py-8">No sales data yet</p>
-        ) : (
-          <div className="space-y-3">
-            {topProducts.map((p, i) => {
-              const maxQty = topProducts[0].qty_sold;
-              return (
-                <div key={i} className="flex items-center gap-4">
-                  <span className="text-[12px] font-bold text-gray-300 w-4">{i + 1}</span>
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-[13px] font-semibold text-gray-800">
-                        {p.product_name} <span className="font-normal text-gray-400">({p.weight})</span>
-                      </span>
-                      <div className="text-right">
-                        <span className="text-[13px] font-bold text-gray-900">{p.qty_sold} units</span>
-                        <span className="text-[11px] text-gray-400 ml-2">₹{Number(p.revenue).toLocaleString('en-IN')}</span>
-                      </div>
-                    </div>
-                    <div className="w-full bg-gray-100 rounded-full h-1.5">
-                      <div
-                        className="h-1.5 rounded-full bg-gold transition-all"
-                        style={{ width: `${(p.qty_sold / maxQty) * 100}%` }}
+      <Box sx={{ mb: 3 }}>
+        <MainCard title="Top Products">
+          {topProducts.length === 0 ? (
+            <Typography color="text.disabled" sx={{ textAlign: 'center', py: 4 }}>No sales data yet</Typography>
+          ) : (
+            <Stack spacing={2}>
+              {topProducts.map((p, i) => {
+                const maxQty = topProducts[0].qty_sold;
+                return (
+                  <Stack key={i} direction="row" alignItems="center" spacing={2}>
+                    <Typography sx={{ width: 18, fontWeight: 700, color: 'text.disabled' }}>{i + 1}</Typography>
+                    <Box sx={{ flex: 1 }}>
+                      <Stack direction="row" justifyContent="space-between" sx={{ mb: 0.75 }}>
+                        <Typography variant="body1" fontWeight={600}>
+                          {p.product_name} <Typography component="span" variant="body1" color="text.disabled">({p.weight})</Typography>
+                        </Typography>
+                        <Box sx={{ textAlign: 'right' }}>
+                          <Typography component="span" variant="body1" fontWeight={700}>{p.qty_sold} units</Typography>
+                          <Typography component="span" variant="caption" color="text.disabled" sx={{ ml: 1 }}>₹{Number(p.revenue).toLocaleString('en-IN')}</Typography>
+                        </Box>
+                      </Stack>
+                      <LinearProgress
+                        variant="determinate" value={(p.qty_sold / maxQty) * 100}
+                        sx={{ '& .MuiLinearProgress-bar': { bgcolor: 'secondary.main', borderRadius: 8 } }}
                       />
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
+                    </Box>
+                  </Stack>
+                );
+              })}
+            </Stack>
+          )}
+        </MainCard>
+      </Box>
 
       {/* Quick actions */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {[
-          { href: '/admin/orders', label: 'All Orders', Icon: ShoppingBag, color: 'bg-dark-brown text-cream hover:bg-black' },
-          { href: '/admin/products', label: 'Products', Icon: PackageCheck, color: 'bg-white text-gray-700 border border-gray-200 hover:border-gold hover:text-gold' },
-          { href: '/api/orders/export?format=csv', label: 'Export CSV', Icon: Download, color: 'bg-white text-gray-700 border border-gray-200 hover:border-gold hover:text-gold' },
-          { href: '/api/orders/export?format=xlsx', label: 'Export Excel', Icon: Download, color: 'bg-white text-gray-700 border border-gray-200 hover:border-gold hover:text-gold' },
-        ].map(({ href, label, Icon, color }) => (
-          <a
-            key={href}
-            href={href}
-            className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-[13px] font-semibold transition-colors ${color}`}
-          >
-            <Icon size={14} />
-            {label}
-          </a>
-        ))}
-      </div>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', sm: 'repeat(4, 1fr)' }, gap: 1.5 }}>
+        <Button variant="contained" startIcon={<ShoppingBagOutlinedIcon />} href="/admin/orders" sx={{ py: 1.5 }}>All Orders</Button>
+        <Button variant="outlined" color="inherit" startIcon={<LocalShippingOutlinedIcon />} href="/admin/products" sx={{ py: 1.5, color: 'text.secondary' }}>Products</Button>
+        <Button variant="outlined" color="inherit" startIcon={<FileDownloadOutlinedIcon />} href="/api/orders/export?format=csv" sx={{ py: 1.5, color: 'text.secondary' }}>Export CSV</Button>
+        <Button variant="outlined" color="inherit" startIcon={<FileDownloadOutlinedIcon />} href="/api/orders/export?format=xlsx" sx={{ py: 1.5, color: 'text.secondary' }}>Export Excel</Button>
+      </Box>
     </AdminLayout>
   );
 }
