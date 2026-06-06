@@ -98,18 +98,42 @@ const formatINR = (v: number) =>
 export default function AdminDashboardPage() {
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
+    let active = true;
     fetch('/api/admin/analytics')
       .then(r => {
         if (r.status === 401) { router.push('/admin/login'); return null; }
+        if (!r.ok) throw new Error(`Analytics request failed (${r.status})`);
         return r.json();
       })
       .then(d => {
-        if (d) { setData(d); setLoading(false); }
+        if (active && d) { setData(d); setLoading(false); }
+      })
+      .catch(() => {
+        // Don't leave the admin staring at a spinner forever on a failed/empty response.
+        if (active) { setError(true); setLoading(false); }
       });
+    return () => { active = false; };
   }, [router]);
+
+  if (error) {
+    return (
+      <AdminLayout>
+        <div className="flex flex-col items-center justify-center h-64 gap-4 text-center">
+          <p className="text-gray-500 text-[14px]">Couldn&apos;t load dashboard data.</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-dark-brown text-cream px-5 py-2.5 rounded-xl text-[13px] font-semibold hover:bg-black transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      </AdminLayout>
+    );
+  }
 
   if (loading || !data) {
     return (

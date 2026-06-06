@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import Mandala2 from './Mandala2';
 import { InstagramIcon, FacebookIcon, YouTubeIcon } from './Icons';
+import { PRODUCTS } from '@/lib/products';
 
 export default function Footer() {
   return (
@@ -88,15 +89,10 @@ export default function Footer() {
           <div>
             <h4 className="font-semibold text-[11px] tracking-[0.2em] uppercase text-warm-white/40 mb-5">Shop</h4>
             <ul className="space-y-3">
-              {[
-                ['Turmeric 100g — ₹169', '/product/turmeric-100g'],
-                ['Turmeric 250g — ₹329', '/product/turmeric-250g'],
-                ['Turmeric 500g — ₹599', '/product/turmeric-500g'],
-                ['Turmeric 1kg — ₹849',  '/product/turmeric-1kg'],
-              ].map(([label, href]) => (
-                <li key={href}>
-                  <Link href={href} className="text-[14px] font-medium text-warm-white/60 hover:text-warm-white transition-colors">
-                    {label}
+              {PRODUCTS.map((p) => (
+                <li key={p.slug}>
+                  <Link href={`/product/${p.slug}`} className="text-[14px] font-medium text-warm-white/60 hover:text-warm-white transition-colors">
+                    {`Turmeric ${p.weight} — ₹${p.price}`}
                   </Link>
                 </li>
               ))}

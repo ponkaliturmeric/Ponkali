@@ -5,6 +5,7 @@ import {
   ADMIN_COOKIE,
   ADMIN_SESSION_SECRET,
   ADMIN_SESSION_DURATION_MS,
+  ADMIN_AUTH_CONFIGURED,
   validateCredentials,
   encodePayload,
   decodePayload,
@@ -27,6 +28,9 @@ export function generateSessionToken(): string {
 }
 
 export function validateSessionToken(token: string): boolean {
+  // Fail closed when admin auth isn't configured (production missing env vars).
+  if (!ADMIN_AUTH_CONFIGURED) return false;
+
   const [data, signature] = token.split('.');
   if (!data || !signature) return false;
 

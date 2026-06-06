@@ -1,5 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ADMIN_COOKIE, ADMIN_SESSION_SECRET, decodePayload } from '@/lib/admin-session';
+import { ADMIN_COOKIE, ADMIN_SESSION_SECRET, ADMIN_AUTH_CONFIGURED, decodePayload } from '@/lib/admin-session';
+
+/** Constant-time compare of two equal-length hex strings (Edge-safe, no Node crypto). */
+function timingSafeEqualHex(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let mismatch = 0;
+  for (let i = 0; i < a.length; i++) {
+    mismatch |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return mismatch === 0;
+}
 
 /**
  * Edge verification of the admin session token. Recomputes the HMAC-SHA256 with
@@ -7,6 +17,8 @@ import { ADMIN_COOKIE, ADMIN_SESSION_SECRET, decodePayload } from '@/lib/admin-s
  * Node side (lib/auth.ts) uses to sign, so tokens validate identically here.
  */
 async function isValidAdminToken(token: string | undefined): Promise<boolean> {
+  // Fail closed when admin auth isn't configured (production missing env vars).
+  if (!ADMIN_AUTH_CONFIGURED) return false;
   if (!token) return false;
   const [data, signature] = token.split('.');
   if (!data || !signature) return false;
@@ -23,7 +35,7 @@ async function isValidAdminToken(token: string | undefined): Promise<boolean> {
     .map((b) => b.toString(16).padStart(2, '0'))
     .join('');
 
-  if (signature !== expected) return false;
+  if (!timingSafeEqualHex(signature, expected)) return false;
 
   const payload = decodePayload(data);
   return !!payload && payload.exp > Date.now();

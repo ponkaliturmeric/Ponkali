@@ -110,8 +110,16 @@ async function initialize(db: Db) {
       cod_charge REAL DEFAULT 0,
       total REAL NOT NULL,
       status TEXT DEFAULT 'Pending',
-      notes TEXT
+      notes TEXT,
+      user_id INTEGER
     );
+
+    -- Link orders to a customer account when one is signed in at checkout.
+    -- Idempotent so already-deployed databases (created before this column
+    -- existed) get it too. Indexed for the order-history lookup.
+    ALTER TABLE orders ADD COLUMN IF NOT EXISTS user_id INTEGER;
+    CREATE INDEX IF NOT EXISTS idx_orders_user_id ON orders (user_id);
+    CREATE INDEX IF NOT EXISTS idx_orders_email ON orders (lower(email));
 
     CREATE TABLE IF NOT EXISTS order_items (
       id SERIAL PRIMARY KEY,

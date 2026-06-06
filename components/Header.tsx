@@ -100,6 +100,13 @@ export default function Header() {
                     <>
                       <p className="text-[12px] text-gray-400 mb-0.5">Signed in as</p>
                       <p className="font-semibold text-dark-brown text-[14px] truncate mb-3">{user.email}</p>
+                      <Link
+                        href="/account"
+                        onClick={() => setProfileOpen(false)}
+                        className="block w-full text-center bg-dark-brown text-cream py-2 rounded-xl text-[13px] font-semibold hover:bg-gold hover:text-dark-brown transition-all mb-2"
+                      >
+                        My Orders
+                      </Link>
                       <button
                         onClick={handleLogout}
                         className="w-full border border-dark-brown/20 text-dark-brown py-2 rounded-xl text-[13px] font-semibold hover:bg-dark-brown hover:text-cream transition-all"
@@ -203,14 +210,23 @@ export default function Header() {
           ))}
           <div className="border-t border-black/8 pt-4 mt-1">
             {user ? (
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-[13px] text-dark-brown/70 truncate">{user.email}</span>
-                <button
-                  onClick={handleLogout}
-                  className="text-[13px] font-semibold text-dark-brown border border-dark-brown/20 px-3 py-1.5 rounded-xl"
+              <div className="mb-4">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-[13px] text-dark-brown/70 truncate">{user.email}</span>
+                  <button
+                    onClick={handleLogout}
+                    className="text-[13px] font-semibold text-dark-brown border border-dark-brown/20 px-3 py-1.5 rounded-xl"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+                <Link
+                  href="/account"
+                  onClick={() => setMenuOpen(false)}
+                  className="block w-full text-center bg-dark-brown text-cream py-2.5 rounded-xl text-[14px] font-semibold"
                 >
-                  Sign Out
-                </button>
+                  My Orders
+                </Link>
               </div>
             ) : (
               <div className="flex gap-2 mb-4">

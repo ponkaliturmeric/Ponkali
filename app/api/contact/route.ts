@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
+import { sendContactNotification } from '@/lib/email';
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,6 +18,14 @@ export async function POST(request: NextRequest) {
       sql: 'INSERT INTO contact_messages (name, email, message) VALUES (?, ?, ?)',
       args: [name, email || null, message],
     });
+
+    // Notify the business by email. Never let an email failure fail the request —
+    // the message is already safely saved in the database above.
+    try {
+      await sendContactNotification({ name, email: email || null, message });
+    } catch (err) {
+      console.error('[contact] notification email failed (message still saved):', err);
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {

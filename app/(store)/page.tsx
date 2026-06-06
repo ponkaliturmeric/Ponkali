@@ -5,12 +5,13 @@ import ProductShowcase from '@/components/ProductShowcase';
 import FarmGallery from '@/components/FarmGallery';
 import JsonLd from '@/components/JsonLd';
 import { buildMetadata, productListJsonLd, faqJsonLd } from '@/lib/seo';
-import { PRODUCTS } from '@/lib/products';
+import { PRODUCTS, FROM_PRICE } from '@/lib/products';
 import {
   MapPinIcon, LeafIcon, TruckIcon, DropletIcon,
   ShieldCheckIcon, StarIcon, ArrowRightIcon,
 } from '@/components/Icons';
 import Mandala from '@/components/Mandala';
+import HeroVideo from '@/components/HeroVideo';
 
 export const metadata: Metadata = buildMetadata({
   title: 'Pure Erode Turmeric, Farm Direct',
@@ -86,16 +87,8 @@ export default function HomePage() {
 
       {/* ─── 1. HERO ─── */}
       <section className="bg-dark-brown relative overflow-hidden">
-        {/* Background video */}
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover opacity-30"
-        >
-          <source src="/videos/farm-video.mp4" type="video/mp4" />
-        </video>
+        {/* Decorative background video — desktop & non-metered connections only */}
+        <HeroVideo />
         {/* Dark overlay to keep text readable over video */}
         <div className="absolute inset-0 bg-dark-brown/60 pointer-events-none" />
         <div className="absolute inset-0 pointer-events-none" style={{
@@ -136,7 +129,7 @@ export default function HomePage() {
                 href="/shop"
                 className="bg-cream text-dark-brown px-9 py-4 rounded-full font-bold text-[15px] hover:bg-white transition-all duration-150 text-center tracking-wide shadow-md"
               >
-                Shop Now — from ₹169
+                Shop Now — from ₹{FROM_PRICE}
               </Link>
               <Link
                 href="/our-story"
@@ -179,7 +172,7 @@ export default function HomePage() {
             </div>
             <div className="hidden md:block absolute -right-5 bottom-1/4 bg-dark-brown border border-gold/20 rounded-2xl px-4 py-3.5 shadow-2xl">
               <p className="text-[10px] text-gold/50 font-semibold uppercase tracking-wider mb-0.5">Starting at</p>
-              <p className="text-[22px] font-extrabold text-gold leading-none">₹169</p>
+              <p className="text-[22px] font-extrabold text-gold leading-none">₹{FROM_PRICE}</p>
               <p className="text-[10px] text-cream/30 mt-0.5">Free ship ₹399+</p>
             </div>
           </div>

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAdminSession } from '@/lib/auth';
+import { getCustomerSession } from '@/lib/customer-auth';
 import { getDb } from '@/lib/db';
 import { priceCart } from '@/lib/pricing';
 import { createOrder, missingCustomerField, type CustomerDetails } from '@/lib/orders';
@@ -79,11 +80,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // If the shopper is signed in, link the order to their account for history.
+    const session = getCustomerSession();
+
     const order_id = await createOrder({
       customer: customer as CustomerDetails,
       cart,
       payment_method,
       status: 'Pending',
+      user_id: session?.uid ?? null,
     });
 
     return NextResponse.json({ order_id, success: true, total: cart.total }, { status: 201 });

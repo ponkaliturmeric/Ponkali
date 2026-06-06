@@ -1,5 +1,6 @@
 import { getDb } from './db';
 import type { PricedCart } from './pricing';
+import { sendOrderEmails } from './email';
 
 /**
  * Order persistence — shared by the Cash-on-Delivery route (/api/orders) and the
@@ -44,6 +45,8 @@ export async function createOrder(input: {
   status: string;
   order_id?: string;
   notes?: string;
+  /** Account id of the signed-in customer, if any — links the order to their history. */
+  user_id?: number | null;
 }): Promise<string> {
   const db = await getDb();
   const { customer: c, cart, payment_method, status } = input;
@@ -53,8 +56,8 @@ export async function createOrder(input: {
     sql: `INSERT INTO orders (
             order_id, customer_name, phone, email,
             address_line1, address_line2, city, state, pincode, landmark,
-            payment_method, upi_id, subtotal, shipping, cod_charge, total, status, notes
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            payment_method, upi_id, subtotal, shipping, cod_charge, total, status, notes, user_id
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     args: [
       order_id,
       c.customer_name,
@@ -74,6 +77,7 @@ export async function createOrder(input: {
       cart.total,
       status,
       input.notes ?? null,
+      input.user_id ?? null,
     ],
   });
 
@@ -86,6 +90,26 @@ export async function createOrder(input: {
     args: [order_id, status, 'Order placed'],
   });
   await db.batch(stmts, 'write');
+
+  // Fire the confirmation + business-notification emails. Awaited so they
+  // actually run on serverless, but never allowed to fail the order.
+  try {
+    await sendOrderEmails({
+      order_id,
+      customer_name: c.customer_name,
+      email: c.email ?? null,
+      phone: c.phone,
+      payment_method,
+      status,
+      lines: cart.lines,
+      subtotal: cart.subtotal,
+      shipping: cart.shipping,
+      codCharge: cart.codCharge,
+      total: cart.total,
+    });
+  } catch (err) {
+    console.error('[orders] sendOrderEmails failed (order still created):', err);
+  }
 
   return order_id;
 }

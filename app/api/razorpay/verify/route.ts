@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyPaymentSignature } from '@/lib/razorpay';
+import { getCustomerSession } from '@/lib/customer-auth';
 import { priceCart } from '@/lib/pricing';
 import { createOrder, missingCustomerField, type CustomerDetails } from '@/lib/orders';
 
@@ -33,12 +34,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Cart could not be priced.' }, { status: 400 });
     }
 
+    const session = getCustomerSession();
+
     const order_id = await createOrder({
       customer: customer as CustomerDetails,
       cart,
       payment_method: 'online',
       status: 'Paid',
       notes: `Razorpay payment ${razorpay_payment_id} (order ${razorpay_order_id})`,
+      user_id: session?.uid ?? null,
     });
 
     return NextResponse.json({ success: true, order_id });

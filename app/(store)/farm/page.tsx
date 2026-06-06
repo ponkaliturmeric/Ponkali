@@ -3,6 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRightIcon } from '@/components/Icons';
 import { buildMetadata } from '@/lib/seo';
+import { FROM_PRICE } from '@/lib/products';
 
 export const metadata: Metadata = buildMetadata({
   title: 'From Our Farm',
@@ -70,7 +71,7 @@ export default function FarmPage() {
           href="/shop"
           className="inline-flex items-center gap-2 bg-gold text-dark-brown px-10 py-4 rounded-full font-bold text-[15px] hover:bg-yellow-400 transition-all mb-6"
         >
-          Shop Now — from ₹169
+          Shop Now — from ₹{FROM_PRICE}
           <ArrowRightIcon className="w-4 h-4" />
         </Link>
 
