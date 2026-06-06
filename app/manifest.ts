@@ -11,11 +11,10 @@ export default function manifest(): MetadataRoute.Manifest {
     background_color: '#FBF5E5',
     theme_color: '#3A2A18',
     icons: [
-      {
-        src: '/images/logo.jpg',
-        sizes: '512x512',
-        type: 'image/jpeg',
-      },
+      // The brand logo asset is 256×256 — declare the real size so installable
+      // PWA / Android add-to-home-screen doesn't reject a size mismatch.
+      { src: '/icon.jpg', sizes: '256x256', type: 'image/jpeg' },
+      { src: '/favicon.ico', sizes: '48x48', type: 'image/x-icon' },
     ],
   };
 }

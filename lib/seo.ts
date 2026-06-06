@@ -7,7 +7,7 @@ import { Product } from './types';
  * Defaults to the production domain so builds and previews resolve correctly.
  */
 export const SITE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ponkali.in'
+  process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.ponkali.in'
 ).replace(/\/$/, '');
 
 export const SITE_NAME = 'Ponkali Masalas';
@@ -158,16 +158,7 @@ export function organizationJsonLd() {
   };
 }
 
-/** Aggregate rating + reviews shown on every product page (must match visible content). */
-const PRODUCT_RATING = { value: 4.9, count: 240 };
-const PRODUCT_REVIEWS = [
-  { author: 'Meena R.', rating: 5, body: 'The colour and aroma are completely different from what you buy in supermarkets. You can tell immediately this is real turmeric.' },
-  { author: 'Arvind K.', rating: 5, body: 'Bought the 500g pack and have already ordered again. The difference in quality is remarkable — deeply fragrant, bright yellow.' },
-  { author: 'Lakshmi S.', rating: 5, body: 'As someone from Erode, I know what real turmeric smells like. This is as close as you can get without going to the farm yourself.' },
-  { author: 'Priya N.', rating: 5, body: 'Excellent quality, well packed, arrived quickly. The golden colour is so vibrant — makes every curry look restaurant quality.' },
-];
-
-/** Product schema with Offer, AggregateRating and Reviews for a single SKU. */
+/** Product schema with Offer for a single SKU. */
 export function productJsonLd(product: Product) {
   const url = absoluteUrl(`/product/${product.slug}`);
   const priceValidUntil = new Date(new Date().getFullYear() + 1, 11, 31)
@@ -219,24 +210,6 @@ export function productJsonLd(product: Product) {
         },
       },
     },
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: PRODUCT_RATING.value,
-      reviewCount: PRODUCT_RATING.count,
-      bestRating: 5,
-      worstRating: 1,
-    },
-    review: PRODUCT_REVIEWS.map((r) => ({
-      '@type': 'Review',
-      author: { '@type': 'Person', name: r.author },
-      reviewRating: {
-        '@type': 'Rating',
-        ratingValue: r.rating,
-        bestRating: 5,
-        worstRating: 1,
-      },
-      reviewBody: r.body,
-    })),
   };
 }
 

@@ -6,7 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useCart } from '@/components/CartContext';
 import { Product } from '@/lib/types';
-import { StarIcon, TruckIcon, ShieldCheckIcon, LeafIcon, MinusIcon, PlusIcon, CheckIcon } from '@/components/Icons';
+import { TruckIcon, ShieldCheckIcon, LeafIcon, MinusIcon, PlusIcon, CheckIcon } from '@/components/Icons';
 
 const WEIGHT_ORDER = ['100g', '250g', '500g', '1kg'];
 
@@ -140,16 +140,6 @@ export default function ProductDetail({ slug }: { slug: string }) {
             <h1 className="text-[32px] md:text-[40px] font-extrabold text-dark-brown tracking-tight leading-tight mb-4">
               Erode Turmeric Powder
             </h1>
-
-            {/* Stars */}
-            <div className="flex items-center gap-2 mb-5">
-              <div className="flex">
-                {[1,2,3,4,5].map(i => (
-                  <StarIcon key={i} filled className="w-4 h-4 text-gold" />
-                ))}
-              </div>
-              <span className="text-[13px] text-gray-500">4.9 · 240 reviews</span>
-            </div>
 
             {/* Price */}
             <div className="flex items-baseline gap-3 mb-6">
@@ -285,44 +275,6 @@ export default function ProductDetail({ slug }: { slug: string }) {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Reviews */}
-      <div className="border-t border-black/8 bg-white py-16">
-        <div className="max-w-4xl mx-auto px-5">
-          <div className="text-center mb-10">
-            <h2 className="text-[28px] font-extrabold text-dark-brown tracking-tight mb-2">Customer Reviews</h2>
-            <div className="flex items-center justify-center gap-2">
-              <div className="flex">
-                {[1,2,3,4,5].map(i => <StarIcon key={i} filled className="w-5 h-5 text-gold" />)}
-              </div>
-              <span className="text-gray-500 text-[14px] font-medium">4.9 out of 5 · 240 reviews</span>
-            </div>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-5">
-            {[
-              { name: 'Meena R.', location: 'Chennai', text: 'The colour and aroma are completely different from what you buy in supermarkets. You can tell immediately this is real turmeric. My sambhar has never smelled better.', date: '3 weeks ago' },
-              { name: 'Arvind K.', location: 'Bengaluru', text: 'Bought the 500g pack and have already ordered again. The difference in quality is remarkable — deeply fragrant, bright yellow. I use it in milk every night.', date: '1 month ago' },
-              { name: 'Lakshmi S.', location: 'Coimbatore', text: 'As someone from Erode, I know what real turmeric smells like. This is as close as you can get without going to the farm yourself. Highly recommend.', date: '2 weeks ago' },
-              { name: 'Priya N.', location: 'Mumbai', text: 'Ordered the 1kg. Excellent quality, well packed, arrived quickly. The golden colour is so vibrant — makes every curry look restaurant quality.', date: '5 days ago' },
-            ].map(review => (
-              <div key={review.name} className="bg-cream rounded-2xl p-6 border border-black/6">
-                <div className="flex items-center gap-0.5 mb-3">
-                  {[1,2,3,4,5].map(i => <StarIcon key={i} filled className="w-3.5 h-3.5 text-gold" />)}
-                </div>
-                <p className="text-gray-700 text-[14px] leading-[1.8] mb-4">&ldquo;{review.text}&rdquo;</p>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-semibold text-dark-brown text-[13px]">{review.name}</p>
-                    <p className="text-gray-400 text-[12px]">{review.location}</p>
-                  </div>
-                  <span className="text-gray-400 text-[12px]">{review.date}</span>
-                </div>
-              </div>
-            ))}
           </div>
         </div>
       </div>
