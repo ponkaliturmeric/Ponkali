@@ -14,7 +14,23 @@
 
 const RESEND_ENDPOINT = 'https://api.resend.com/emails';
 
-const FROM = process.env.EMAIL_FROM ?? 'Ponkali Masalas <onboarding@resend.dev>';
+const DEFAULT_FROM = 'Ponkali Masalas <onboarding@resend.dev>';
+
+/**
+ * Resend requires the "from" as either `email@domain` or `Name <email@domain>`.
+ * A bare `<email@domain>` (a common misconfiguration) is rejected, which makes
+ * every send fail silently. Normalise the env value so those cases still work.
+ */
+function normalizeFrom(raw?: string): string {
+  const v = (raw ?? '').trim();
+  if (!v) return DEFAULT_FROM;
+  // Just an email, or an email wrapped in stray angle brackets -> add a name.
+  const bare = v.match(/^<?\s*([^<>\s]+@[^<>\s]+?)\s*>?$/);
+  if (bare) return `Ponkali Masalas <${bare[1]}>`;
+  return v;
+}
+
+const FROM = normalizeFrom(process.env.EMAIL_FROM);
 export const BUSINESS_EMAIL = process.env.BUSINESS_EMAIL ?? 'ponkaliturmeric@gmail.com';
 
 interface SendInput {
