@@ -40,7 +40,7 @@ export default function CheckoutPage() {
     upi_id: '',
   });
 
-  const shipping = subtotal >= 399 ? 0 : 60;
+  const shipping = 0; // Free shipping on every order.
   const codCharge = paymentMethod === 'cod' ? 30 : 0;
   const total = subtotal + shipping + codCharge;
 
@@ -344,9 +344,7 @@ export default function CheckoutPage() {
                   </div>
                   <div className="flex justify-between text-[13px]">
                     <span className="text-gray-500">Shipping</span>
-                    <span className={`font-semibold ${shipping === 0 ? 'text-green-600' : ''}`}>
-                      {shipping === 0 ? 'Free' : `₹${shipping}`}
-                    </span>
+                    <span className="font-semibold text-green-600">Free</span>
                   </div>
                   {paymentMethod === 'cod' && (
                     <div className="flex justify-between text-[13px]">
@@ -378,9 +376,7 @@ export default function CheckoutPage() {
 
                 <div className="mt-4 flex items-center gap-2 text-[12px] text-green-600 bg-green-50 rounded-xl px-3 py-2.5">
                   <TruckIcon className="w-3.5 h-3.5 flex-shrink-0" />
-                  {subtotal >= 399
-                    ? 'Free shipping applied'
-                    : `Add ₹${399 - subtotal} more for free shipping`}
+                  Free shipping on every order
                 </div>
               </div>
             </div>

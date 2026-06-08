@@ -149,7 +149,25 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row justify-between items-center gap-3 pt-8">
+        {/* Policy links */}
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 pt-8">
+          {[
+            ['Privacy Policy', '/privacy-policy'],
+            ['Shipping Policy', '/shipping-policy'],
+            ['Refund & Returns', '/refund-policy'],
+            ['Terms of Service', '/terms-of-service'],
+          ].map(([label, href]) => (
+            <Link
+              key={href}
+              href={href}
+              className="text-[12px] font-medium text-warm-white/45 hover:text-warm-white transition-colors"
+            >
+              {label}
+            </Link>
+          ))}
+        </div>
+
+        <div className="flex flex-col md:flex-row justify-between items-center gap-3 pt-6">
           <p className="text-[12px] font-medium text-warm-white/30">
             FSSAI Lic. No. 22426064000154 · © {new Date().getFullYear()} Ponkali Masalas
           </p>

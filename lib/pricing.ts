@@ -4,9 +4,9 @@ import { getCatalog } from './catalog';
  * Server-authoritative cart pricing. The client may send slugs + quantities,
  * but prices, shipping and totals are ALWAYS recomputed here from the trusted
  * product catalogue (the database) — never taken from the request body.
+ *
+ * Shipping is always free — we never add a delivery charge.
  */
-export const FREE_SHIPPING_THRESHOLD = 399;
-export const SHIPPING_FEE = 60;
 export const COD_CHARGE = 30;
 
 const MAX_QTY_PER_LINE = 50;
@@ -67,7 +67,7 @@ export async function priceCart(
     });
   }
 
-  const shipping = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
+  const shipping = 0; // Free shipping on every order.
   const codCharge = opts.cod ? COD_CHARGE : 0;
   const total = subtotal + shipping + codCharge;
 

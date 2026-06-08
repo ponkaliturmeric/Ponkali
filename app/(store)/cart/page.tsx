@@ -7,9 +7,8 @@ import { MinusIcon, PlusIcon, TrashIcon } from '@/components/Icons';
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, subtotal, clearCart } = useCart();
-  const shipping = subtotal >= 399 ? 0 : (subtotal === 0 ? 0 : 60);
+  const shipping = 0; // Free shipping on every order.
   const total = subtotal + shipping;
-  const remaining = 399 - subtotal;
 
   if (items.length === 0) {
     return (
@@ -38,23 +37,10 @@ export default function CartPage() {
           Cart <span className="text-gray-300 font-normal text-[24px]">({items.reduce((s, i) => s + i.quantity, 0)})</span>
         </h1>
 
-        {/* Free shipping progress */}
-        {subtotal > 0 && subtotal < 399 && (
-          <div className="bg-white rounded-2xl p-5 mb-6 border border-black/6">
-            <p className="text-[14px] font-medium text-dark-brown mb-2.5">
-              Add <span className="font-bold text-gold">₹{remaining}</span> more for free shipping
-            </p>
-            <div className="w-full bg-black/5 rounded-full h-1.5">
-              <div
-                className="bg-gold h-1.5 rounded-full transition-all duration-500"
-                style={{ width: `${Math.min((subtotal / 399) * 100, 100)}%` }}
-              />
-            </div>
-          </div>
-        )}
-        {subtotal >= 399 && (
+        {/* Free shipping on every order */}
+        {subtotal > 0 && (
           <div className="bg-green-50 border border-green-100 rounded-2xl p-4 mb-6">
-            <p className="text-[14px] font-semibold text-green-700">Free shipping unlocked</p>
+            <p className="text-[14px] font-semibold text-green-700">Free shipping on every order</p>
           </div>
         )}
 
@@ -124,9 +110,7 @@ export default function CartPage() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500">Shipping</span>
-                  <span className={shipping === 0 && subtotal > 0 ? 'text-green-600 font-semibold' : 'font-semibold'}>
-                    {subtotal === 0 ? '—' : shipping === 0 ? 'Free' : `₹${shipping}`}
-                  </span>
+                  <span className="text-green-600 font-semibold">Free</span>
                 </div>
               </div>
               <div className="border-t border-black/6 mt-4 pt-4 flex justify-between font-extrabold text-dark-brown text-[18px]">

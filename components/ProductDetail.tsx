@@ -226,7 +226,7 @@ export default function ProductDetail({ slug }: { slug: string }) {
             <div className="flex items-center gap-2.5 bg-green-50 border border-green-100 rounded-xl px-4 py-3 mb-8">
               <TruckIcon className="w-4 h-4 text-green-600 flex-shrink-0" />
               <p className="text-[13px] text-green-700 font-medium">
-                Free delivery on orders above ₹399 · Usually ships in 1 to 2 days
+                Free delivery on every order · Usually ships in 1 to 2 days
               </p>
             </div>
 

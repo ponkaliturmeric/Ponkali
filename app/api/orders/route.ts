@@ -32,15 +32,13 @@ export async function GET(request: NextRequest) {
 
   const db = await getDb();
 
-  const countRes = await db.execute({
-    sql: `SELECT COUNT(*) AS count FROM orders ${whereSql}`,
-    args,
-  });
-  const total = Number(countRes.rows[0].count);
-
+  // Page rows and the total count come back in a SINGLE round-trip: COUNT(*) OVER()
+  // is evaluated over the full filtered set (before LIMIT), so each row carries the
+  // grand total. Avoids paying the pooler's network latency twice for a count + page.
   const offset = (page - 1) * PAGE_SIZE;
   const ordersRes = await db.execute({
-    sql: `SELECT o.*, COALESCE(SUM(oi.quantity), 0) AS item_count
+    sql: `SELECT o.*, COALESCE(SUM(oi.quantity), 0) AS item_count,
+                 COUNT(*) OVER() AS total_count
           FROM orders o
           LEFT JOIN order_items oi ON oi.order_id = o.order_id
           ${whereSql}
@@ -50,8 +48,15 @@ export async function GET(request: NextRequest) {
     args: [...args, PAGE_SIZE, offset],
   });
 
+  const total = ordersRes.rows.length ? Number(ordersRes.rows[0].total_count) : 0;
+  const orders = ordersRes.rows.map((row) => {
+    const order = { ...row };
+    delete order.total_count;
+    return order;
+  });
+
   return NextResponse.json({
-    orders: ordersRes.rows,
+    orders,
     total,
     page,
     pageSize: PAGE_SIZE,

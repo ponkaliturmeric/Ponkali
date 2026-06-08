@@ -7,9 +7,8 @@ import { XIcon, MinusIcon, PlusIcon, CartIcon } from './Icons';
 
 export default function MiniCart() {
   const { items, removeItem, updateQuantity, subtotal, totalItems, isOpen, setIsOpen } = useCart();
-  const shipping = subtotal >= 399 ? 0 : 60;
+  const shipping = 0; // Free shipping on every order.
   const total = subtotal + shipping;
-  const remaining = 399 - subtotal;
 
   if (!isOpen) return null;
 
@@ -46,22 +45,9 @@ export default function MiniCart() {
           </div>
         ) : (
           <>
-            {subtotal < 399 && subtotal > 0 && (
-              <div className="mx-5 mt-4 p-3.5 bg-cream rounded-xl">
-                <p className="text-[12px] text-dark-brown font-medium mb-2">
-                  Add <span className="font-bold">₹{remaining}</span> more for free shipping
-                </p>
-                <div className="w-full bg-light-gold rounded-full h-1.5">
-                  <div
-                    className="bg-gold h-1.5 rounded-full transition-all duration-500"
-                    style={{ width: `${Math.min((subtotal / 399) * 100, 100)}%` }}
-                  />
-                </div>
-              </div>
-            )}
-            {subtotal >= 399 && (
+            {subtotal > 0 && (
               <div className="mx-5 mt-4 p-3.5 bg-green-50 rounded-xl border border-green-100">
-                <p className="text-[12px] text-green-700 font-semibold">Free shipping unlocked</p>
+                <p className="text-[12px] text-green-700 font-semibold">Free shipping on every order</p>
               </div>
             )}
 
@@ -116,9 +102,7 @@ export default function MiniCart() {
               </div>
               <div className="flex justify-between text-[14px]">
                 <span className="text-gray-500">Shipping</span>
-                <span className={shipping === 0 ? 'text-green-600 font-semibold' : 'font-semibold'}>
-                  {shipping === 0 ? 'Free' : `₹${shipping}`}
-                </span>
+                <span className="text-green-600 font-semibold">Free</span>
               </div>
               <div className="flex justify-between font-bold text-dark-brown text-[16px] border-t border-gray-100 pt-2.5">
                 <span>Total</span>

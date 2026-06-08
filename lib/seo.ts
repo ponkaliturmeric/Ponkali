@@ -14,7 +14,7 @@ export const SITE_NAME = 'Ponkali Masalas';
 export const SITE_TAGLINE = 'Pure Erode Turmeric, Farm Direct';
 
 export const DEFAULT_DESCRIPTION =
-  'GI-tagged Erode turmeric powder, stone ground on our family mill and grown over three generations. Naturally high in curcumin at 2.5% to 3.5%, with nothing added. FSSAI certified. Free shipping above ₹399.';
+  'GI-tagged Erode turmeric powder, stone ground on our family mill and grown over three generations. Naturally high in curcumin at 2.5% to 3.5%, with nothing added. FSSAI certified. Free shipping on every order.';
 
 export const TWITTER_HANDLE = '@ponkalimasalas';
 
@@ -201,7 +201,7 @@ export function productJsonLd(product: Product) {
         '@type': 'OfferShippingDetails',
         shippingRate: {
           '@type': 'MonetaryAmount',
-          value: product.price >= 399 ? 0 : 60,
+          value: 0,
           currency: 'INR',
         },
         shippingDestination: {

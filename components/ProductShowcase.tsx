@@ -44,7 +44,6 @@ export default function ProductShowcase() {
   }, []);
 
   const info = VARIANT_INFO[selected.weight];
-  const freeShipping = selected.price >= 399;
 
   const handleBuyNow = () => {
     if (selected.in_stock === 1) {
@@ -223,10 +222,7 @@ export default function ProductShowcase() {
                   <TruckIcon className="w-3.5 h-3.5 text-dark-brown" />
                 </div>
                 <p className="text-[13px] text-gray-600">
-                  {freeShipping
-                    ? <span className="text-dark-green font-semibold">Free shipping on this order</span>
-                    : <>Add <strong className="text-dark-brown">₹{399 - selected.price}</strong> more for free shipping</>
-                  }
+                  <span className="text-dark-green font-semibold">Free shipping on every order</span>
                 </p>
               </div>
               <div className="flex items-center gap-3">

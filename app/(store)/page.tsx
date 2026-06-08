@@ -16,7 +16,7 @@ import HeroVideo from '@/components/HeroVideo';
 export const metadata: Metadata = buildMetadata({
   title: 'Pure Erode Turmeric, Farm Direct',
   description:
-    'Buy GI-tagged Erode turmeric powder, naturally grown and freshly ground. 2.5% to 3.5% natural curcumin, zero additives and FSSAI certified. Shipped direct from our family farm. Free shipping above ₹399.',
+    'Buy GI-tagged Erode turmeric powder, naturally grown and freshly ground. 2.5% to 3.5% natural curcumin, zero additives and FSSAI certified. Shipped direct from our family farm. Free shipping on every order.',
   path: '/',
 });
 
@@ -58,7 +58,7 @@ const FAQ_ITEMS = [
   },
   {
     question: "How long does delivery take and is shipping free?",
-    answer: "We ship across India in 3 to 5 working days. Shipping is free on orders above ₹399, and below that a flat ₹60 applies. Both Cash on Delivery and online payment (UPI, cards, netbanking) are available.",
+    answer: "We ship across India in 3 to 5 working days, and shipping is always free on every order. Both Cash on Delivery and online payment (UPI, cards, netbanking) are available.",
   },
   {
     question: "How should I store turmeric powder, and how do I use it?",
@@ -140,7 +140,7 @@ export default function HomePage() {
             </div>
 
             <div className="flex flex-wrap gap-2">
-              {['GI Tagged', 'FSSAI Certified', 'Lab Tested', 'Farm Direct', 'Free Ship ₹399+'].map(t => (
+              {['GI Tagged', 'FSSAI Certified', 'Lab Tested', 'Farm Direct', 'Free Shipping'].map(t => (
                 <span key={t} className="text-[11px] text-cream/50 border border-cream/20 px-3 py-1 rounded-full">
                   {t}
                 </span>
@@ -173,7 +173,7 @@ export default function HomePage() {
             <div className="hidden md:block absolute -right-5 bottom-1/4 bg-dark-brown border border-gold/20 rounded-2xl px-4 py-3.5 shadow-2xl">
               <p className="text-[10px] text-gold/50 font-semibold uppercase tracking-wider mb-0.5">Starting at</p>
               <p className="text-[22px] font-extrabold text-gold leading-none">₹{FROM_PRICE}</p>
-              <p className="text-[10px] text-cream/30 mt-0.5">Free ship ₹399+</p>
+              <p className="text-[10px] text-cream/30 mt-0.5">Free shipping</p>
             </div>
           </div>
         </div>
@@ -358,7 +358,7 @@ export default function HomePage() {
             Taste the Difference Today
           </h2>
           <p className="text-dark-brown/60 mb-8 text-[16px]">
-            Free shipping above ₹399. Delivered in 3 to 5 working days anywhere in India.
+            Free shipping on every order. Delivered in 3 to 5 working days anywhere in India.
           </p>
           <Link
             href="/shop"

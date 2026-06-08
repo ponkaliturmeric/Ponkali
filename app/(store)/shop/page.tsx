@@ -29,7 +29,7 @@ export default function ShopPage() {
             {[
               'GI-Tagged Erode Origin',
               'Naturally Grown',
-              'Free Shipping ₹399+',
+              'Free Shipping',
               'FSSAI Certified',
               '3rd Generation Farm',
               'Zero Additives',

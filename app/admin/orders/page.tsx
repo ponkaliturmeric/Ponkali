@@ -24,15 +24,13 @@ export default function AdminOrdersPage() {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState('All');
-  const [search, setSearch] = useState('');
+  // Seed from ?search= (passed by the header search box) on first render, so we
+  // don't fire an initial unfiltered fetch and then immediately refetch.
+  const [search, setSearch] = useState(() =>
+    typeof window === 'undefined' ? '' : new URLSearchParams(window.location.search).get('search') || '',
+  );
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-
-  // Pick up ?search= passed from the header search box.
-  useEffect(() => {
-    const q = new URLSearchParams(window.location.search).get('search');
-    if (q) setSearch(q);
-  }, []);
 
   const fetchOrders = useCallback(async () => {
     setLoading(true);
