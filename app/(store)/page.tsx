@@ -46,7 +46,7 @@ const FAQ_ITEMS = [
   },
   {
     question: "Where is Ponkali turmeric grown?",
-    answer: "It is grown on our own family farm in Perundurai, Erode, the GI-recognised turmeric capital of Tamil Nadu. We have farmed this same land for three generations.",
+    answer: "It is grown on our own family farm in Erode, the GI-recognised turmeric capital of Tamil Nadu. We have farmed this same land for three generations.",
   },
   {
     question: "How is it different from supermarket turmeric powder?",
@@ -54,7 +54,7 @@ const FAQ_ITEMS = [
   },
   {
     question: "Is Ponkali turmeric FSSAI certified?",
-    answer: "Yes. FSSAI Licence No. 22426064000154, manufactured by The Native, Perundurai, Erode 638055, Tamil Nadu.",
+    answer: "Yes. FSSAI Licence No. 22426064000154, manufactured by The Native, Erode 638055, Tamil Nadu.",
   },
   {
     question: "How long does delivery take and is shipping free?",
@@ -235,7 +235,7 @@ export default function HomePage() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-black/5 rounded-2xl overflow-hidden">
             {[
-              { step: '01', title: 'Grown in Erode', desc: 'GI-recognised soil in Perundurai, nurtured by our family for three generations.' },
+              { step: '01', title: 'Grown in Erode', desc: 'GI-recognised soil in Erode, nurtured by our family for three generations.' },
               { step: '02', title: 'Freshly Ground',  desc: 'Cleanly processed and freshly ground. No excess heat, no shortcuts, no compromise on aroma.' },
               { step: '03', title: 'Packed Fresh',   desc: 'Sealed within 24 hours of grinding. No warehouses, no long storage.' },
               { step: '04', title: 'Shipped Direct', desc: 'From our farm to your doorstep in 3 to 5 days, anywhere in India.' },

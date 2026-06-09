@@ -238,7 +238,7 @@ export default function ProductDetail({ slug }: { slug: string }) {
               <div className="border-t border-black/8 py-5">
                 <h2 className="font-bold text-dark-brown mb-3 text-[15px]">About This Product</h2>
                 <p className="text-gray-600 leading-[1.8] text-[15px]">
-                  {selected.description ?? 'Single-origin Erode turmeric powder, naturally grown in Perundurai. A GI-tagged variety with naturally high curcumin content (2.5% to 3.5%). No additives, no fillers, just pure turmeric as it has been grown for three generations.'}
+                  {selected.description ?? 'Single-origin Erode turmeric powder, naturally grown in Erode. A GI-tagged variety with naturally high curcumin content (2.5% to 3.5%). No additives, no fillers, just pure turmeric as it has been grown for three generations.'}
                 </p>
               </div>
 
@@ -274,7 +274,7 @@ export default function ProductDetail({ slug }: { slug: string }) {
                 <ShieldCheckIcon className="w-5 h-5 text-gold flex-shrink-0" />
                 <div>
                   <p className="text-[12px] font-bold text-dark-brown">FSSAI Licensed · Food Safe</p>
-                  <p className="text-[11px] text-gray-400">Lic. No. 22426064000154 · The Native, Perundurai, Erode</p>
+                  <p className="text-[11px] text-gray-400">Lic. No. 22426064000154 · The Native, Erode</p>
                 </div>
               </div>
             </div>

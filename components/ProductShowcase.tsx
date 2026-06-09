@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { PRODUCTS } from '@/lib/products';
 import { Product } from '@/lib/types';
 import { useCart } from './CartContext';
-import { TruckIcon, CheckIcon, ShieldCheckIcon } from './Icons';
+import { TruckIcon, CheckIcon } from './Icons';
 
 const WEIGHT_ORDER = ['100g', '250g', '500g', '1kg'];
 
@@ -103,7 +103,7 @@ export default function ProductShowcase() {
           {/* ── Right: Product info ── */}
           <div className="pt-0 md:pt-2">
             <p className="text-gold text-[11px] font-semibold tracking-[0.35em] uppercase mb-3">
-              GI Recognised · Perundurai, Erode
+              GI Recognised · Erode
             </p>
 
             <h1 className="font-hero text-[32px] sm:text-[38px] md:text-[44px] font-extrabold text-dark-brown leading-[1.05] tracking-tight mb-3">
@@ -234,12 +234,6 @@ export default function ProductShowcase() {
                   <CheckIcon className="w-3.5 h-3.5 text-dark-brown" />
                 </div>
                 <p className="text-[13px] text-gray-600">Delivered in 3 to 5 days anywhere in India</p>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-7 h-7 rounded-full bg-dark-brown/6 flex items-center justify-center flex-shrink-0">
-                  <ShieldCheckIcon className="w-3.5 h-3.5 text-dark-brown" />
-                </div>
-                <p className="text-[13px] text-gray-600">If you don&apos;t love it, we&apos;ll make it right</p>
               </div>
             </div>
           </div>

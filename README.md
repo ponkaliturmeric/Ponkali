@@ -106,4 +106,4 @@ From the admin panel, export all orders as:
 - **Email:** ponkaliturmeric@gmail.com
 - **Phone:** 9944033696
 - **FSSAI Lic:** 22426064000154
-- **Manufacturer:** The Native, Perundurai, Erode 638055, Tamil Nadu
+- **Manufacturer:** The Native, Erode 638055, Tamil Nadu

@@ -99,7 +99,7 @@ function shell(title: string, body: string): string {
         ${body}
       </div>
       <p style="text-align:center;font-size:12px;color:#9b9b9b;margin-top:24px;line-height:1.6;">
-        Ponkali Masalas · Perundurai, Erode, Tamil Nadu<br/>
+        Ponkali Masalas · Erode, Tamil Nadu<br/>
         Questions? Reply to this email or WhatsApp +91 99440 33696
       </p>
     </div>

@@ -25,7 +25,7 @@ export const BUSINESS = {
   phone: '+91-99440-33696',
   whatsapp: '919944033696',
   fssai: '22426064000154',
-  street: 'The Native, Perundurai',
+  street: 'The Native',
   locality: 'Erode',
   region: 'Tamil Nadu',
   postalCode: '638055',

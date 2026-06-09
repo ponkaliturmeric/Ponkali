@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 
 const SLIDES = [
-  { src: '/images/har.jpeg',          caption: 'Harvest time in Perundurai, Erode' },
+  { src: '/images/har.jpeg',          caption: 'Harvest time in Erode' },
   { src: '/images/harvest.jpeg',      caption: 'Three generations of farming' },
   { src: '/images/plant.jpeg',        caption: 'Turmeric fields in full growth' },
   { src: '/images/turmeric-har.jpeg', caption: 'The roots that reach your kitchen' },

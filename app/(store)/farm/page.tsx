@@ -7,13 +7,13 @@ import { FROM_PRICE } from '@/lib/products';
 
 export const metadata: Metadata = buildMetadata({
   title: 'From Our Farm',
-  description: 'Real photos from our turmeric farm in Perundurai, Erode: the fields, the harvest and the traditional processing. This is where your Ponkali turmeric begins.',
+  description: 'Real photos from our turmeric farm in Erode: the fields, the harvest and the traditional processing. This is where your Ponkali turmeric begins.',
   path: '/farm',
 });
 
 const FARM_IMAGES = Array.from({ length: 17 }, (_, i) => ({
   src: `/images/farm/farm-${String(i + 1).padStart(2, '0')}.jpeg`,
-  alt: `Ponkali turmeric farm in Perundurai, Erode`,
+  alt: `Ponkali turmeric farm in Erode`,
 }));
 
 export default function FarmPage() {
@@ -23,13 +23,13 @@ export default function FarmPage() {
       {/* ── Hero ── */}
       <div className="py-20 px-5 text-center border-b border-white/6">
         <p className="text-gold/70 text-[11px] font-semibold tracking-[0.35em] uppercase mb-5">
-          Perundurai, Erode · Tamil Nadu
+          Erode · Tamil Nadu
         </p>
         <h1 className="font-hero text-[44px] md:text-[68px] font-extrabold text-white tracking-tight leading-[1.0] mb-5">
           From Our Farm
         </h1>
         <p className="text-cream/50 text-[16px] md:text-[18px] max-w-xl mx-auto leading-[1.7]">
-          Real photos from our fields in Perundurai. The same soil, the same people
+          Real photos from our fields in Erode. The same soil, the same people
           and the same process that has produced Erode turmeric for generations.
         </p>
       </div>
@@ -60,7 +60,7 @@ export default function FarmPage() {
       {/* ── Bottom note + CTA ── */}
       <div className="py-16 px-5 text-center border-t border-white/6">
         <p className="text-cream/40 text-[14px] mb-2 max-w-md mx-auto leading-relaxed">
-          Every photo here is from our family&apos;s land in Perundurai.
+          Every photo here is from our family&apos;s land in Erode.
           No stock images. No outside sourcing. This is exactly where your turmeric comes from.
         </p>
         <p className="text-gold/60 text-[13px] font-medium mb-8">

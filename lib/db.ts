@@ -154,6 +154,10 @@ async function initialize(db: Db) {
       created_at TIMESTAMPTZ DEFAULT now()
     );
 
+    -- Read/unread flag for the admin Messages inbox. Idempotent so databases
+    -- created before this column existed pick it up on the next boot.
+    ALTER TABLE contact_messages ADD COLUMN IF NOT EXISTS is_read INTEGER DEFAULT 0;
+
     CREATE TABLE IF NOT EXISTS order_status_history (
       id SERIAL PRIMARY KEY,
       order_id TEXT NOT NULL,
@@ -172,7 +176,7 @@ async function initialize(db: Db) {
 
   const { rows } = await db.execute('SELECT COUNT(*) as count FROM products');
   if (Number(rows[0].count) === 0) {
-    const desc = 'Pure Erode turmeric powder, stone ground on our family mill. Grown in the GI-tagged Erode region with 2.5% to 3.5% natural curcumin. No added colour, no fillers and no adulteration. FSSAI certified and packed fresh from our farm in Perundurai, Erode.';
+    const desc = 'Pure Erode turmeric powder, stone ground on our family mill. Grown in the GI-tagged Erode region with 2.5% to 3.5% natural curcumin. No added colour, no fillers and no adulteration. FSSAI certified and packed fresh from our farm in Erode.';
     // Seed prices MUST match the static catalogue in lib/products.ts (the prices
     // shown on the storefront), so the DB and the displayed prices agree on day one.
     await db.batch([

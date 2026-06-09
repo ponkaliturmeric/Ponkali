@@ -14,6 +14,8 @@ import SearchIcon from '@mui/icons-material/Search';
 import SpaceDashboardOutlinedIcon from '@mui/icons-material/SpaceDashboardOutlined';
 import ReceiptLongOutlinedIcon from '@mui/icons-material/ReceiptLongOutlined';
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
+import GroupsOutlinedIcon from '@mui/icons-material/GroupsOutlined';
+import MailOutlineRoundedIcon from '@mui/icons-material/MailOutlineRounded';
 import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
 import LogoutIcon from '@mui/icons-material/Logout';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
@@ -31,7 +33,9 @@ const NAV_GROUPS = [
     group: 'Manage',
     items: [
       { title: 'Orders', url: '/admin/orders', icon: ReceiptLongOutlinedIcon },
+      { title: 'Customers', url: '/admin/customers', icon: GroupsOutlinedIcon },
       { title: 'Products', url: '/admin/products', icon: Inventory2OutlinedIcon },
+      { title: 'Messages', url: '/admin/messages', icon: MailOutlineRoundedIcon },
     ],
   },
 ];

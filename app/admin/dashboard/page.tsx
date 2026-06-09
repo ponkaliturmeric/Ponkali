@@ -14,6 +14,8 @@ import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import PercentRoundedIcon from '@mui/icons-material/PercentRounded';
 import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
+import GroupsOutlinedIcon from '@mui/icons-material/GroupsOutlined';
+import MailOutlineRoundedIcon from '@mui/icons-material/MailOutlineRounded';
 import AdminLayout from '@/components/AdminLayout';
 import PageHeader from '@/components/admin/PageHeader';
 import StatCard from '@/components/admin/StatCard';
@@ -268,10 +270,11 @@ export default function AdminDashboardPage() {
       </Box>
 
       {/* Quick actions */}
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', sm: 'repeat(4, 1fr)' }, gap: 1.5 }}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', sm: 'repeat(3, 1fr)', lg: 'repeat(5, 1fr)' }, gap: 1.5 }}>
         <Button variant="contained" startIcon={<ShoppingBagOutlinedIcon />} href="/admin/orders" sx={{ py: 1.5 }}>All Orders</Button>
+        <Button variant="outlined" color="inherit" startIcon={<GroupsOutlinedIcon />} href="/admin/customers" sx={{ py: 1.5, color: 'text.secondary' }}>Customers</Button>
         <Button variant="outlined" color="inherit" startIcon={<LocalShippingOutlinedIcon />} href="/admin/products" sx={{ py: 1.5, color: 'text.secondary' }}>Products</Button>
-        <Button variant="outlined" color="inherit" startIcon={<FileDownloadOutlinedIcon />} href="/api/orders/export?format=csv" sx={{ py: 1.5, color: 'text.secondary' }}>Export CSV</Button>
+        <Button variant="outlined" color="inherit" startIcon={<MailOutlineRoundedIcon />} href="/admin/messages" sx={{ py: 1.5, color: 'text.secondary' }}>Messages</Button>
         <Button variant="outlined" color="inherit" startIcon={<FileDownloadOutlinedIcon />} href="/api/orders/export?format=xlsx" sx={{ py: 1.5, color: 'text.secondary' }}>Export Excel</Button>
       </Box>
     </AdminLayout>

@@ -35,7 +35,7 @@ export default function Footer() {
               From our farm to your kitchen. Three generations of turmeric farming in Erode, Tamil Nadu.
             </p>
             <p className="text-[13px] font-medium text-warm-white/50 leading-[1.8] mb-6">
-              The Native, Perundurai<br />
+              The Native<br />
               Erode, 638055, Tamil Nadu
             </p>
 

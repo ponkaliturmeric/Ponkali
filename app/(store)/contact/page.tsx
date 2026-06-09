@@ -51,7 +51,7 @@ export default function ContactPage() {
               {[
                 { Icon: MailIcon, label: 'Email', value: 'ponkaliturmeric@gmail.com', href: 'mailto:ponkaliturmeric@gmail.com' },
                 { Icon: PhoneIcon, label: 'Phone', value: '+91 99440 33696', href: 'tel:9944033696' },
-                { Icon: MapPinIcon, label: 'Address', value: 'The Native, Perundurai\nErode, 638055, Tamil Nadu', href: null },
+                { Icon: MapPinIcon, label: 'Address', value: 'The Native\nErode, 638055, Tamil Nadu', href: null },
               ].map(({ Icon, label, value, href }) => (
                 <div key={label} className="flex gap-4">
                   <div className="w-10 h-10 rounded-full bg-gold/10 flex items-center justify-center flex-shrink-0 mt-0.5">

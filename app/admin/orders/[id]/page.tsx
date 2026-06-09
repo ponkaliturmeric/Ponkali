@@ -9,6 +9,8 @@ import {
 import PrintOutlinedIcon from '@mui/icons-material/PrintOutlined';
 import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
 import RadioButtonUncheckedRoundedIcon from '@mui/icons-material/RadioButtonUncheckedRounded';
+import WhatsAppIcon from '@mui/icons-material/WhatsApp';
+import ReceiptLongOutlinedIcon from '@mui/icons-material/ReceiptLongOutlined';
 import AdminLayout from '@/components/AdminLayout';
 import PageHeader from '@/components/admin/PageHeader';
 import MainCard from '@/components/admin/MainCard';
@@ -60,6 +62,10 @@ export default function AdminOrderDetailPage({ params }: { params: { id: string 
     );
   }
 
+  // Normalise the phone for a wa.me link — 10-digit Indian numbers get the 91 code.
+  const digits = String(order.phone || '').replace(/\D/g, '');
+  const waPhone = digits.length === 10 ? `91${digits}` : digits;
+
   return (
     <AdminLayout>
       <PageHeader
@@ -96,6 +102,23 @@ export default function AdminOrderDetailPage({ params }: { params: { id: string 
                 </Typography>
               </Box>
             </Box>
+            <Divider sx={{ my: 2 }} />
+            <Stack direction="row" spacing={1.5} flexWrap="wrap" useFlexGap>
+              <Button
+                size="small" variant="outlined" color="inherit" startIcon={<WhatsAppIcon sx={{ fontSize: 16 }} />}
+                href={`https://wa.me/${waPhone}`} target="_blank" rel="noopener noreferrer"
+                sx={{ color: 'text.secondary' }}
+              >
+                WhatsApp
+              </Button>
+              <Button
+                component={Link} size="small" variant="outlined" color="inherit" startIcon={<ReceiptLongOutlinedIcon sx={{ fontSize: 16 }} />}
+                href={`/admin/orders?search=${encodeURIComponent(order.phone)}`}
+                sx={{ color: 'text.secondary' }}
+              >
+                All orders from this customer
+              </Button>
+            </Stack>
           </MainCard>
 
           <MainCard title="Order Items">

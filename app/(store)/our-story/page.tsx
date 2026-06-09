@@ -6,7 +6,7 @@ import { buildMetadata } from '@/lib/seo';
 
 export const metadata: Metadata = buildMetadata({
   title: 'Our Story',
-  description: 'Named after grandparents Ponnamal and Kaaliappa Gounder, who farmed Erode turmeric for 40+ years. Three generations of farm-direct purity from Perundurai, Erode.',
+  description: 'Named after grandparents Ponnamal and Kaaliappa Gounder, who farmed Erode turmeric for 40+ years. Three generations of farm-direct purity from Erode.',
   path: '/our-story',
 });
 
@@ -17,7 +17,7 @@ export default function OurStoryPage() {
       {/* ── HERO ── */}
       <div className="bg-dark-brown py-24 px-5 text-center">
         <p className="text-gold/70 text-[11px] font-semibold tracking-[0.35em] uppercase mb-5">
-          Est. 1980s · Perundurai, Erode
+          Est. 1980s · Erode
         </p>
         <h1 className="font-hero text-[48px] md:text-[72px] font-extrabold text-white tracking-tight leading-[1.0] mb-5">
           Our Story
@@ -44,7 +44,7 @@ export default function OurStoryPage() {
               />
             </div>
             <p className="text-center text-[12px] text-gray-400 mt-3 font-medium">
-              Ponnamal &amp; Kaaliappa, Perundurai, Erode
+              Ponnamal &amp; Kaaliappa, Erode
             </p>
           </div>
 
@@ -72,7 +72,7 @@ export default function OurStoryPage() {
           <div className="text-center mb-12">
             <p className="text-gold text-[11px] font-semibold tracking-[0.3em] uppercase mb-4">The Land</p>
             <h2 className="font-hero text-[32px] md:text-[40px] font-extrabold text-dark-brown tracking-tight">
-              Perundurai, Erode, the Yellow City
+              Erode, the Yellow City
             </h2>
           </div>
           <div className="grid md:grid-cols-2 gap-8">
@@ -83,7 +83,7 @@ export default function OurStoryPage() {
             </div>
             <div className="bg-cream rounded-2xl p-8 border border-black/6">
               <p className="text-gray-600 leading-[1.9] text-[16px]">
-                Our fields in Perundurai have been farmed organically for generations. The same water, the same soil, the same sun. We use no synthetic fertilisers. We rotate crops. We respect the land as it has given to us.
+                Our fields in Erode have been farmed organically for generations. The same water, the same soil, the same sun. We use no synthetic fertilisers. We rotate crops. We respect the land as it has given to us.
               </p>
             </div>
           </div>
@@ -107,7 +107,7 @@ export default function OurStoryPage() {
               <Link key={n} href="/farm" className="relative aspect-square rounded-xl overflow-hidden group">
                 <Image
                   src={`/images/farm/farm-${String(n).padStart(2, '0')}.jpeg`}
-                  alt="Ponkali farm in Perundurai, Erode"
+                  alt="Ponkali farm in Erode"
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-500"
                   sizes="(max-width: 768px) 33vw, 20vw"
@@ -160,7 +160,7 @@ export default function OurStoryPage() {
           </div>
           <div className="grid md:grid-cols-2 gap-4">
             {[
-              { Icon: LeafIcon,    title: 'We grow it',  desc: 'Our own fields in Perundurai, Erode. We know every row, every harvest.' },
+              { Icon: LeafIcon,    title: 'We grow it',  desc: 'Our own fields in Erode. We know every row, every harvest.' },
               { Icon: CogIcon,     title: 'We grind it', desc: 'On the stone mill our grandfather built. Slow, cold, preserving every essential oil.' },
               { Icon: PackageIcon, title: 'We pack it',  desc: 'Within days of grinding. No warehouse. No long storage. Packed fresh.' },
               { Icon: TruckIcon,   title: 'We ship it',  desc: 'Direct to your door. No middlemen. Full traceability from farm to kitchen.' },
@@ -196,7 +196,7 @@ export default function OurStoryPage() {
             <div className="border border-black/8 rounded-2xl p-5">
               <p className="text-[11px] text-gray-400 mb-1 tracking-wider uppercase font-medium">FSSAI Licensed</p>
               <p className="font-bold text-dark-brown text-[15px]">Lic. No. 22426064000154</p>
-              <p className="text-[13px] text-gray-500 mt-1">The Native, Perundurai, Erode, 638055, Tamil Nadu</p>
+              <p className="text-[13px] text-gray-500 mt-1">The Native, Erode, 638055, Tamil Nadu</p>
             </div>
           </div>
 
