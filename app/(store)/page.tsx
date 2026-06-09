@@ -198,6 +198,23 @@ export default function HomePage() {
               </div>
             ))}
           </div>
+
+          {/* India Organic certification */}
+          <div className="flex items-center justify-center gap-4 py-7 border-t border-black/6">
+            <div className="bg-white border border-black/6 rounded-2xl p-2 shadow-sm flex-shrink-0">
+              <Image
+                src="/images/Organic-logo.jpg"
+                alt="India Organic and Jaivik Bharat certified"
+                width={300}
+                height={300}
+                className="w-[72px] h-[72px] object-contain"
+              />
+            </div>
+            <div className="text-left">
+              <p className="text-[14px] font-bold text-dark-brown leading-tight">India Organic Certified</p>
+              <p className="text-[12px] text-gray-500 mt-0.5">Jaivik Bharat · Naturally grown, certified organic</p>
+            </div>
+          </div>
         </div>
       </section>
 

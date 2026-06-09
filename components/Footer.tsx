@@ -39,6 +39,23 @@ export default function Footer() {
               Erode, 638055, Tamil Nadu
             </p>
 
+            {/* India Organic certification */}
+            <div className="flex items-center gap-3 mb-6">
+              <div className="bg-white rounded-xl p-1.5 flex-shrink-0">
+                <Image
+                  src="/images/Organic-logo.jpg"
+                  alt="India Organic and Jaivik Bharat certified"
+                  width={300}
+                  height={300}
+                  className="w-14 h-14 object-contain"
+                />
+              </div>
+              <div>
+                <p className="text-[13px] font-semibold text-warm-white/90 leading-tight">India Organic Certified</p>
+                <p className="text-[11px] text-warm-white/45 mt-0.5">Jaivik Bharat</p>
+              </div>
+            </div>
+
             {/* Social media icons */}
             <div>
               <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-warm-white/35 mb-3">Follow Us</p>

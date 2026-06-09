@@ -272,10 +272,17 @@ export default function ProductDetail({ slug }: { slug: string }) {
             <div className="mt-5 bg-white border border-black/8 rounded-xl px-5 py-4">
               <div className="flex items-center gap-3">
                 <ShieldCheckIcon className="w-5 h-5 text-gold flex-shrink-0" />
-                <div>
+                <div className="flex-1">
                   <p className="text-[12px] font-bold text-dark-brown">FSSAI Licensed · Food Safe</p>
                   <p className="text-[11px] text-gray-400">Lic. No. 22426064000154 · The Native, Erode</p>
                 </div>
+                <Image
+                  src="/images/Organic-logo.jpg"
+                  alt="India Organic and Jaivik Bharat certified"
+                  width={300}
+                  height={300}
+                  className="w-14 h-14 object-contain flex-shrink-0"
+                />
               </div>
             </div>
           </div>
