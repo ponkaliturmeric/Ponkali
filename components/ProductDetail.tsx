@@ -154,18 +154,21 @@ export default function ProductDetail({ slug }: { slug: string }) {
               )}
             </div>
 
-            {/* Weight Selector */}
-            <div className="mb-7">
-              <p className="text-[12px] font-semibold text-gray-500 uppercase tracking-wider mb-3">Select Size</p>
+            {/* Weight Selector — brightened so the size choice is unmistakable */}
+            <div className="mb-7 rounded-2xl bg-light-gold/30 border border-gold/40 p-4 shadow-sm">
+              <p className="flex items-center gap-2 text-[12px] font-extrabold text-dark-brown uppercase tracking-wider mb-3">
+                <span className="inline-block w-1.5 h-4 rounded-full bg-gold" />
+                Select Size
+              </p>
               <div className="flex flex-wrap gap-2">
                 {sortedProducts.map(p => (
                   <button
                     key={p.id}
                     onClick={() => { setSelected(p); setQuantity(1); }}
-                    className={`px-5 py-2.5 rounded-full border text-[14px] font-semibold transition-all ${
+                    className={`px-5 py-2.5 rounded-full border-2 text-[14px] font-semibold transition-all ${
                       selected.id === p.id
-                        ? 'bg-dark-brown text-cream border-dark-brown'
-                        : 'border-dark-brown/20 text-dark-brown hover:border-dark-brown/50'
+                        ? 'bg-dark-brown text-cream border-dark-brown shadow-md ring-2 ring-gold/50'
+                        : 'border-gold/40 bg-white text-dark-brown hover:border-gold hover:bg-light-gold/40 hover:-translate-y-0.5'
                     }`}
                   >
                     {p.weight}

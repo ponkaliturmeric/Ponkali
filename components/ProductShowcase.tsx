@@ -124,12 +124,16 @@ export default function ProductShowcase() {
               ))}
             </div>
 
-            {/* Weight selector */}
-            <div className="mb-5">
-              <div className="flex items-center justify-between mb-2.5">
-                <p className="text-[12px] font-bold text-dark-brown uppercase tracking-wider">Select Weight</p>
+            {/* Weight selector — highlighted so shoppers immediately see they
+                need to pick a size (brighter panel + bolder pills cut hesitation). */}
+            <div className="mb-5 rounded-2xl bg-light-gold/30 border border-gold/40 p-4 shadow-sm">
+              <div className="flex items-center justify-between mb-3">
+                <p className="flex items-center gap-2 text-[13px] font-extrabold text-dark-brown uppercase tracking-wider">
+                  <span className="inline-block w-1.5 h-4 rounded-full bg-gold" />
+                  Select Weight
+                </p>
                 {info && (
-                  <p className="text-[12px] text-gray-400">{info.label} · {info.supply}</p>
+                  <p className="text-[12px] font-semibold text-dark-brown/60">{info.label} · {info.supply}</p>
                 )}
               </div>
               <div className="grid grid-cols-4 gap-2">
@@ -140,19 +144,19 @@ export default function ProductShowcase() {
                     disabled={p.in_stock === 0}
                     className={`py-3 rounded-xl border-2 transition-all text-center flex flex-col items-center gap-0.5 ${
                       selected.weight === p.weight
-                        ? 'border-dark-brown bg-dark-brown text-cream'
-                        : 'border-dark-brown/12 text-dark-brown hover:border-dark-brown/50 bg-white'
+                        ? 'border-dark-brown bg-dark-brown text-cream shadow-md ring-2 ring-gold/50'
+                        : 'border-gold/40 bg-white text-dark-brown hover:border-gold hover:bg-light-gold/40 hover:-translate-y-0.5'
                     } disabled:opacity-40 disabled:cursor-not-allowed`}
                   >
                     <span className="font-bold text-[13px] sm:text-[15px]">{p.weight}</span>
-                    <span className={`text-[10px] sm:text-[11px] font-medium ${selected.weight === p.weight ? 'text-cream/60' : 'text-gray-400'}`}>
+                    <span className={`text-[10px] sm:text-[11px] font-semibold ${selected.weight === p.weight ? 'text-cream/70' : 'text-dark-brown/50'}`}>
                       ₹{p.price}
                     </span>
                   </button>
                 ))}
               </div>
               {info && (
-                <p className="text-[12px] text-gray-400 mt-2">{info.perGram}</p>
+                <p className="text-[12px] text-dark-brown/50 mt-2.5 font-medium">{info.perGram}</p>
               )}
             </div>
 

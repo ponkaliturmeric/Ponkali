@@ -21,46 +21,54 @@ export async function GET(request: NextRequest) {
   const where: string[] = [];
   const args: (string | number)[] = [];
   if (status && status !== 'All') {
-    where.push('status = ?');
+    where.push('o.status = ?');
     args.push(status);
   }
   if (search) {
-    where.push('(order_id ILIKE ? OR customer_name ILIKE ? OR phone ILIKE ?)');
+    // Columns are qualified with `o.` because order_items (joined below) also has
+    // an `order_id` column — an unqualified `order_id` here is ambiguous and makes
+    // Postgres throw, which surfaced as the admin search spinning forever.
+    where.push('(o.order_id ILIKE ? OR o.customer_name ILIKE ? OR o.phone ILIKE ?)');
     args.push(`%${search}%`, `%${search}%`, `%${search}%`);
   }
   const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
 
-  const db = await getDb();
+  try {
+    const db = await getDb();
 
-  // Page rows and the total count come back in a SINGLE round-trip: COUNT(*) OVER()
-  // is evaluated over the full filtered set (before LIMIT), so each row carries the
-  // grand total. Avoids paying the pooler's network latency twice for a count + page.
-  const offset = (page - 1) * PAGE_SIZE;
-  const ordersRes = await db.execute({
-    sql: `SELECT o.*, COALESCE(SUM(oi.quantity), 0) AS item_count,
-                 COUNT(*) OVER() AS total_count
-          FROM orders o
-          LEFT JOIN order_items oi ON oi.order_id = o.order_id
-          ${whereSql}
-          GROUP BY o.id
-          ORDER BY o.created_at DESC, o.id DESC
-          LIMIT ? OFFSET ?`,
-    args: [...args, PAGE_SIZE, offset],
-  });
+    // Page rows and the total count come back in a SINGLE round-trip: COUNT(*) OVER()
+    // is evaluated over the full filtered set (before LIMIT), so each row carries the
+    // grand total. Avoids paying the pooler's network latency twice for a count + page.
+    const offset = (page - 1) * PAGE_SIZE;
+    const ordersRes = await db.execute({
+      sql: `SELECT o.*, COALESCE(SUM(oi.quantity), 0) AS item_count,
+                   COUNT(*) OVER() AS total_count
+            FROM orders o
+            LEFT JOIN order_items oi ON oi.order_id = o.order_id
+            ${whereSql}
+            GROUP BY o.id
+            ORDER BY o.created_at DESC, o.id DESC
+            LIMIT ? OFFSET ?`,
+      args: [...args, PAGE_SIZE, offset],
+    });
 
-  const total = ordersRes.rows.length ? Number(ordersRes.rows[0].total_count) : 0;
-  const orders = ordersRes.rows.map((row) => {
-    const order = { ...row };
-    delete order.total_count;
-    return order;
-  });
+    const total = ordersRes.rows.length ? Number(ordersRes.rows[0].total_count) : 0;
+    const orders = ordersRes.rows.map((row) => {
+      const order = { ...row };
+      delete order.total_count;
+      return order;
+    });
 
-  return NextResponse.json({
-    orders,
-    total,
-    page,
-    pageSize: PAGE_SIZE,
-  });
+    return NextResponse.json({
+      orders,
+      total,
+      page,
+      pageSize: PAGE_SIZE,
+    });
+  } catch (error) {
+    console.error('Orders list error:', error);
+    return NextResponse.json({ error: 'Failed to load orders' }, { status: 500 });
+  }
 }
 
 export async function POST(request: NextRequest) {

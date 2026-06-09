@@ -34,15 +34,21 @@ export default function AdminOrdersPage() {
 
   const fetchOrders = useCallback(async () => {
     setLoading(true);
-    const params = new URLSearchParams({ page: String(page) });
-    if (statusFilter !== 'All') params.set('status', statusFilter);
-    if (search) params.set('search', search);
-    const res = await fetch(`/api/orders?${params}`);
-    if (res.status === 401) { router.push('/admin/login'); return; }
-    const data = await res.json();
-    setOrders(data.orders || []);
-    setTotal(data.total || 0);
-    setLoading(false);
+    try {
+      const params = new URLSearchParams({ page: String(page) });
+      if (statusFilter !== 'All') params.set('status', statusFilter);
+      if (search) params.set('search', search);
+      const res = await fetch(`/api/orders?${params}`);
+      if (res.status === 401) { router.push('/admin/login'); return; }
+      const data = await res.json().catch(() => ({}));
+      setOrders(data.orders || []);
+      setTotal(data.total || 0);
+    } catch {
+      setOrders([]);
+      setTotal(0);
+    } finally {
+      setLoading(false);
+    }
   }, [page, statusFilter, search, router]);
 
   useEffect(() => { fetchOrders(); }, [fetchOrders]);
