@@ -11,11 +11,15 @@ import {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+    const name = String(body.name ?? '').trim();
     const email = String(body.email ?? '').trim().toLowerCase();
     const password = String(body.password ?? '');
 
-    if (!email || !password) {
-      return NextResponse.json({ error: 'Email and password are required.' }, { status: 400 });
+    if (!name || !email || !password) {
+      return NextResponse.json({ error: 'Name, email and password are required.' }, { status: 400 });
+    }
+    if (name.length < 2) {
+      return NextResponse.json({ error: 'Please enter your name.' }, { status: 400 });
     }
     if (!isValidEmail(email)) {
       return NextResponse.json({ error: 'Please enter a valid email address.' }, { status: 400 });
@@ -39,15 +43,15 @@ export async function POST(request: NextRequest) {
     }
 
     const result = await db.execute({
-      sql: 'INSERT INTO users (email, password_hash) VALUES (?, ?) RETURNING id',
-      args: [email, hashPassword(password)],
+      sql: 'INSERT INTO users (email, password_hash, name) VALUES (?, ?, ?) RETURNING id',
+      args: [email, hashPassword(password), name],
     });
 
     const uid = Number(result.rows[0].id);
-    const token = createSessionToken(uid, email);
+    const token = createSessionToken(uid, email, name);
 
     const response = NextResponse.json(
-      { success: true, user: { id: uid, email } },
+      { success: true, user: { id: uid, email, name } },
       { status: 201 },
     );
     response.cookies.set(buildSessionCookie(token));

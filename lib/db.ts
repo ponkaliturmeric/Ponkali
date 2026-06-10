@@ -170,8 +170,13 @@ async function initialize(db: Db) {
       id SERIAL PRIMARY KEY,
       email TEXT UNIQUE NOT NULL,
       password_hash TEXT NOT NULL,
+      name TEXT,
       created_at TIMESTAMPTZ DEFAULT now()
     );
+
+    -- Customer's display name, collected at registration. Idempotent so
+    -- databases created before this column existed pick it up on next boot.
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS name TEXT;
   `);
 
   const { rows } = await db.execute('SELECT COUNT(*) as count FROM products');

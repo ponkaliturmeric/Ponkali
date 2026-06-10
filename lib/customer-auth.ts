@@ -40,6 +40,7 @@ export function verifyPassword(password: string, stored: string): boolean {
 interface SessionPayload {
   uid: number;
   email: string;
+  name?: string;
   exp: number;
 }
 
@@ -47,8 +48,8 @@ function sign(data: string): string {
   return crypto.createHmac('sha256', SESSION_SECRET).update(data).digest('base64url');
 }
 
-export function createSessionToken(uid: number, email: string): string {
-  const payload: SessionPayload = { uid, email, exp: Date.now() + SESSION_DURATION_MS };
+export function createSessionToken(uid: number, email: string, name?: string): string {
+  const payload: SessionPayload = { uid, email, name, exp: Date.now() + SESSION_DURATION_MS };
   const data = Buffer.from(JSON.stringify(payload)).toString('base64url');
   return `${data}.${sign(data)}`;
 }

@@ -3,11 +3,14 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { EyeIcon, EyeOffIcon } from '@/components/Icons';
 
 export default function RegisterPage() {
   const router = useRouter();
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -15,6 +18,10 @@ export default function RegisterPage() {
     e.preventDefault();
     setError('');
 
+    if (name.trim().length < 2) {
+      setError('Please enter your name.');
+      return;
+    }
     if (password.length < 8) {
       setError('Password must be at least 8 characters.');
       return;
@@ -25,7 +32,7 @@ export default function RegisterPage() {
       const res = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ name: name.trim(), email, password }),
       });
       const data = await res.json();
 
@@ -61,6 +68,21 @@ export default function RegisterPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-[12px] font-semibold text-dark-brown uppercase tracking-wider mb-1.5">
+                Full Name
+              </label>
+              <input
+                type="text"
+                value={name}
+                onChange={e => setName(e.target.value)}
+                required
+                autoComplete="name"
+                placeholder="Your name"
+                className="w-full border border-black/12 rounded-xl px-4 py-3 text-[14px] focus:outline-none focus:border-gold transition-colors bg-white"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[12px] font-semibold text-dark-brown uppercase tracking-wider mb-1.5">
                 Email
               </label>
               <input
@@ -78,16 +100,26 @@ export default function RegisterPage() {
               <label className="block text-[12px] font-semibold text-dark-brown uppercase tracking-wider mb-1.5">
                 Password
               </label>
-              <input
-                type="password"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                required
-                autoComplete="new-password"
-                minLength={8}
-                placeholder="At least 8 characters"
-                className="w-full border border-black/12 rounded-xl px-4 py-3 text-[14px] focus:outline-none focus:border-gold transition-colors bg-white"
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  required
+                  autoComplete="new-password"
+                  minLength={8}
+                  placeholder="At least 8 characters"
+                  className="w-full border border-black/12 rounded-xl px-4 py-3 pr-12 text-[14px] focus:outline-none focus:border-gold transition-colors bg-white"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(v => !v)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-dark-brown transition-colors"
+                >
+                  {showPassword ? <EyeOffIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
+                </button>
+              </div>
               <p className="text-[11px] text-gray-400 mt-1.5">Use at least 8 characters.</p>
             </div>
 

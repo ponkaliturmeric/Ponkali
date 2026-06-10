@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
 
     const db = await getDb();
     const result = await db.execute({
-      sql: 'SELECT id, email, password_hash FROM users WHERE email = ?',
+      sql: 'SELECT id, email, password_hash, name FROM users WHERE email = ?',
       args: [email],
     });
 
@@ -33,9 +33,10 @@ export async function POST(request: NextRequest) {
     }
 
     const uid = Number(user.id);
-    const token = createSessionToken(uid, email);
+    const name = user.name ? String(user.name) : undefined;
+    const token = createSessionToken(uid, email, name);
 
-    const response = NextResponse.json({ success: true, user: { id: uid, email } });
+    const response = NextResponse.json({ success: true, user: { id: uid, email, name } });
     response.cookies.set(buildSessionCookie(token));
     return response;
   } catch (error) {
