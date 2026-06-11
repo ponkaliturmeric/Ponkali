@@ -177,6 +177,15 @@ async function initialize(db: Db) {
     -- Customer's display name, collected at registration. Idempotent so
     -- databases created before this column existed pick it up on next boot.
     ALTER TABLE users ADD COLUMN IF NOT EXISTS name TEXT;
+
+    -- Mobile number — customers can now register and sign in with their phone,
+    -- and it's the key that links an account to its orders (orders are keyed by
+    -- phone). Stored normalised to a 10-digit number. Email becomes optional so
+    -- a phone-only account is possible; both stay unique when present.
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS phone TEXT;
+    ALTER TABLE users ALTER COLUMN email DROP NOT NULL;
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_users_phone ON users (phone) WHERE phone IS NOT NULL;
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users (lower(email)) WHERE email IS NOT NULL;
   `);
 
   const { rows } = await db.execute('SELECT COUNT(*) as count FROM products');

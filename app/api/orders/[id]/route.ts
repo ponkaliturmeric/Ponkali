@@ -36,16 +36,22 @@ export async function GET(_request: NextRequest, { params }: { params: { id: str
   }
 
   // Admins see any order; a signed-in customer may see their OWN orders
-  // (matched by the account link or the order's email). This keeps the address
-  // and phone on the order private to the owner while making order history and
-  // cross-device confirmation pages work.
+  // (matched by the account link, the order's email, or the order's phone). This
+  // keeps the address and phone on the order private to the owner while making
+  // order history and cross-device confirmation pages work.
   const isAdmin = await getAdminSession();
   if (!isAdmin) {
     const session = getCustomerSession();
     const row = order as Record<string, unknown>;
-    const email = typeof row.email === 'string' ? row.email.toLowerCase() : '';
+    const orderEmail = typeof row.email === 'string' ? row.email.toLowerCase() : '';
+    const orderPhone = typeof row.phone === 'string' ? row.phone.replace(/\D/g, '').slice(-10) : '';
+    const sessionEmail = session?.email ? session.email.toLowerCase() : '';
+    const sessionPhone = session?.phone ?? '';
     const ownsOrder =
-      !!session && (Number(row.user_id) === session.uid || email === session.email.toLowerCase());
+      !!session &&
+      (Number(row.user_id) === session.uid ||
+        (!!sessionEmail && orderEmail === sessionEmail) ||
+        (!!sessionPhone && orderPhone === sessionPhone));
     if (!ownsOrder) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

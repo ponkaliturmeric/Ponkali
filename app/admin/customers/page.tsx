@@ -22,7 +22,7 @@ import StatCard from '@/components/admin/StatCard';
 import { BRAND, GOLD } from '@/components/admin/theme';
 
 interface Customer {
-  phone: string;
+  phone: string | null;
   customer_name: string;
   email: string | null;
   city: string | null;
@@ -31,6 +31,7 @@ interface Customer {
   total_spent: number;
   first_order: string;
   last_order: string;
+  has_account: boolean;
 }
 
 interface Summary {
@@ -47,11 +48,12 @@ const SORT_OPTIONS = [
   { value: 'name', label: 'Name (A→Z)' },
 ];
 
-/** RFM-lite segment from order count — VIP / Returning / New. */
+/** RFM-lite segment from order count — Registered (no orders) / New / Returning / VIP. */
 function segment(orderCount: number): { label: string; bg: string; fg: string } {
   if (orderCount >= 3) return { label: 'VIP', bg: '#FCE7C7', fg: '#7E5207' };
   if (orderCount === 2) return { label: 'Returning', bg: '#E0F7F8', fg: '#00727B' };
-  return { label: 'New', bg: '#F0F0F0', fg: '#595959' };
+  if (orderCount === 1) return { label: 'New', bg: '#F0F0F0', fg: '#595959' };
+  return { label: 'Registered', bg: '#EDE7F6', fg: '#5E35B1' };
 }
 
 const formatINR = (v: number) => `₹${(v || 0).toLocaleString('en-IN')}`;
@@ -103,7 +105,7 @@ export default function AdminCustomersPage() {
 
   return (
     <AdminLayout>
-      <PageHeader title="Customers" subtitle="Everyone who has placed an order" breadcrumbs={[{ label: 'Customers' }]} />
+      <PageHeader title="Customers" subtitle="Everyone who registered an account or placed an order" breadcrumbs={[{ label: 'Customers' }]} />
 
       {/* KPIs */}
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', lg: 'repeat(4, 1fr)' }, gap: 2.5, mb: 2.5 }}>
@@ -152,10 +154,10 @@ export default function AdminCustomersPage() {
                 <TableRow><TableCell colSpan={8} align="center" sx={{ py: 6 }}><CircularProgress size={26} /></TableCell></TableRow>
               ) : customers.length === 0 ? (
                 <TableRow><TableCell colSpan={8} align="center" sx={{ py: 6, color: 'text.disabled' }}>No customers found.</TableCell></TableRow>
-              ) : customers.map(c => {
+              ) : customers.map((c, i) => {
                 const seg = segment(c.order_count);
                 return (
-                  <TableRow key={c.phone} hover>
+                  <TableRow key={c.phone || c.email || `cust-${i}`} hover>
                     <TableCell>
                       <Stack direction="row" spacing={1.5} alignItems="center">
                         <Avatar sx={{ width: 38, height: 38, fontSize: 13, fontWeight: 700, background: `linear-gradient(135deg, ${GOLD}, ${BRAND})` }}>
@@ -167,14 +169,18 @@ export default function AdminCustomersPage() {
                         </Box>
                       </Stack>
                     </TableCell>
-                    <TableCell sx={{ color: 'text.secondary', fontFamily: 'monospace' }}>{c.phone}</TableCell>
+                    <TableCell sx={{ color: 'text.secondary', fontFamily: 'monospace' }}>{c.phone || '—'}</TableCell>
                     <TableCell sx={{ color: 'text.secondary' }}>{[c.city, c.state].filter(Boolean).join(', ') || '—'}</TableCell>
                     <TableCell align="right" sx={{ fontWeight: 600 }}>{c.order_count}</TableCell>
                     <TableCell align="right" sx={{ fontWeight: 700 }}>{formatINR(c.total_spent)}</TableCell>
                     <TableCell sx={{ color: 'text.secondary' }}>{c.last_order ? new Date(c.last_order).toLocaleDateString('en-IN') : '—'}</TableCell>
                     <TableCell><Chip size="small" label={seg.label} sx={{ bgcolor: seg.bg, color: seg.fg, fontWeight: 700 }} /></TableCell>
                     <TableCell>
-                      <Button component={Link} href={`/admin/orders?search=${encodeURIComponent(c.phone)}`} size="small" startIcon={<ReceiptLongOutlinedIcon sx={{ fontSize: 16 }} />}>Orders</Button>
+                      {c.order_count > 0 && c.phone ? (
+                        <Button component={Link} href={`/admin/orders?search=${encodeURIComponent(c.phone)}`} size="small" startIcon={<ReceiptLongOutlinedIcon sx={{ fontSize: 16 }} />}>Orders</Button>
+                      ) : (
+                        <Typography variant="caption" color="text.disabled">No orders yet</Typography>
+                      )}
                     </TableCell>
                   </TableRow>
                 );

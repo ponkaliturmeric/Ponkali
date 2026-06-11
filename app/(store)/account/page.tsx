@@ -30,7 +30,7 @@ const formatDate = (d: string) =>
 export default function AccountPage() {
   const router = useRouter();
   const [orders, setOrders] = useState<OrderSummary[] | null>(null);
-  const [profile, setProfile] = useState<{ email: string | null; name: string | null }>({ email: null, name: null });
+  const [profile, setProfile] = useState<{ email: string | null; phone: string | null; name: string | null }>({ email: null, phone: null, name: null });
   const [error, setError] = useState(false);
 
   useEffect(() => {
@@ -40,7 +40,7 @@ export default function AccountPage() {
     fetch('/api/auth/me')
       .then((r) => r.json())
       .then((d) => {
-        if (active) setProfile({ email: d.user?.email ?? null, name: d.user?.name ?? null });
+        if (active) setProfile({ email: d.user?.email ?? null, phone: d.user?.phone ?? null, name: d.user?.name ?? null });
       })
       .catch(() => {});
 
@@ -84,6 +84,10 @@ export default function AccountPage() {
             {profile.name && (
               <p className="font-bold text-dark-brown text-[17px] truncate mb-0.5">{profile.name}</p>
             )}
+            <p className="text-[11px] text-gray-400 font-semibold uppercase tracking-wider mb-0.5">Mobile</p>
+            <p className="font-medium text-dark-brown text-[14px] truncate mb-2">
+              {profile.phone ?? '—'}
+            </p>
             <p className="text-[11px] text-gray-400 font-semibold uppercase tracking-wider mb-0.5">Email</p>
             <p className="font-medium text-dark-brown text-[14px] truncate">
               {profile.email ?? '—'}

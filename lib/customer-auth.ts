@@ -39,7 +39,9 @@ export function verifyPassword(password: string, stored: string): boolean {
 
 interface SessionPayload {
   uid: number;
-  email: string;
+  /** Email is optional — an account may have been created with a phone only. */
+  email: string | null;
+  phone?: string | null;
   name?: string;
   exp: number;
 }
@@ -48,8 +50,19 @@ function sign(data: string): string {
   return crypto.createHmac('sha256', SESSION_SECRET).update(data).digest('base64url');
 }
 
-export function createSessionToken(uid: number, email: string, name?: string): string {
-  const payload: SessionPayload = { uid, email, name, exp: Date.now() + SESSION_DURATION_MS };
+export function createSessionToken(
+  uid: number,
+  email: string | null,
+  name?: string,
+  phone?: string | null,
+): string {
+  const payload: SessionPayload = {
+    uid,
+    email: email ?? null,
+    phone: phone ?? null,
+    name,
+    exp: Date.now() + SESSION_DURATION_MS,
+  };
   const data = Buffer.from(JSON.stringify(payload)).toString('base64url');
   return `${data}.${sign(data)}`;
 }
@@ -106,4 +119,30 @@ export function isValidEmail(email: string): boolean {
 export function passwordError(password: string): string | null {
   if (password.length < 8) return 'Password must be at least 8 characters.';
   return null;
+}
+
+/* ──────────────────────────  Phone helpers  ─────────────────────────── */
+
+/**
+ * Reduce a phone number to a canonical 10-digit string: strip every non-digit,
+ * then drop a leading country code (91) or a 0 trunk prefix if it leaves 10
+ * digits. Returns '' when the result isn't a plausible 10-digit Indian mobile,
+ * so callers can treat '' as "invalid".
+ */
+export function normalizePhone(raw: string): string {
+  let digits = String(raw ?? '').replace(/\D/g, '');
+  if (digits.length === 12 && digits.startsWith('91')) digits = digits.slice(2);
+  if (digits.length === 11 && digits.startsWith('0')) digits = digits.slice(1);
+  return digits.length === 10 ? digits : '';
+}
+
+export function isValidPhone(raw: string): boolean {
+  const p = normalizePhone(raw);
+  // Indian mobile numbers start with 6–9.
+  return p.length === 10 && /^[6-9]/.test(p);
+}
+
+/** True when the identifier looks like an email rather than a phone number. */
+export function looksLikeEmail(identifier: string): boolean {
+  return identifier.includes('@');
 }

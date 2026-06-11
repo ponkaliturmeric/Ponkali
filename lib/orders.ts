@@ -1,6 +1,7 @@
 import { getDb } from './db';
 import type { PricedCart } from './pricing';
 import { sendOrderEmails } from './email';
+import { sendOrderWhatsApp } from './whatsapp';
 
 /**
  * Order persistence — shared by the Cash-on-Delivery route (/api/orders) and the
@@ -91,10 +92,14 @@ export async function createOrder(input: {
   });
   await db.batch(stmts, 'write');
 
-  // Fire the confirmation + business-notification emails. Awaited so they
-  // actually run on serverless, but never allowed to fail the order.
-  try {
-    await sendOrderEmails({
+  // Fire the customer/business notifications. Awaited so they actually run on
+  // serverless, but each is isolated so a failure (or one channel being
+  // unconfigured) never fails the order or blocks the other channel.
+  //  • Email  — confirmation to the customer (if they gave one) + business alert.
+  //  • WhatsApp — confirmation to the customer's phone (the required, reliable
+  //    channel). No-op until the WhatsApp Cloud API env vars are set.
+  await Promise.allSettled([
+    sendOrderEmails({
       order_id,
       customer_name: c.customer_name,
       email: c.email ?? null,
@@ -106,10 +111,15 @@ export async function createOrder(input: {
       shipping: cart.shipping,
       codCharge: cart.codCharge,
       total: cart.total,
-    });
-  } catch (err) {
-    console.error('[orders] sendOrderEmails failed (order still created):', err);
-  }
+    }).catch((err) => console.error('[orders] sendOrderEmails failed (order still created):', err)),
+    sendOrderWhatsApp({
+      order_id,
+      customer_name: c.customer_name,
+      phone: c.phone,
+      total: cart.total,
+      status,
+    }).catch((err) => console.error('[orders] sendOrderWhatsApp failed (order still created):', err)),
+  ]);
 
   return order_id;
 }

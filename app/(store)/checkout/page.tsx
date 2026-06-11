@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Script from 'next/script';
@@ -39,6 +39,25 @@ export default function CheckoutPage() {
     landmark: '',
     upi_id: '',
   });
+
+  // Prefill contact details for a signed-in customer so their order links to
+  // their account (and shows as one customer in the admin), saving them typing.
+  useEffect(() => {
+    let active = true;
+    fetch('/api/auth/me')
+      .then(r => r.json())
+      .then(d => {
+        if (!active || !d.user) return;
+        setForm(prev => ({
+          ...prev,
+          customer_name: prev.customer_name || (d.user.name ?? ''),
+          phone: prev.phone || (d.user.phone ?? ''),
+          email: prev.email || (d.user.email ?? ''),
+        }));
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, []);
 
   const shipping = 0; // Free shipping on every order.
   const codCharge = paymentMethod === 'cod' ? 30 : 0;

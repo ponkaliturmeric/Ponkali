@@ -8,6 +8,7 @@ import { EyeIcon, EyeOffIcon } from '@/components/Icons';
 export default function RegisterPage() {
   const router = useRouter();
   const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -22,6 +23,16 @@ export default function RegisterPage() {
       setError('Please enter your name.');
       return;
     }
+    // Normalise to a 10-digit mobile (mirror of the server's normalizePhone):
+    // strip non-digits, then drop a 12-digit "91…" country code or an 11-digit
+    // "0…" trunk prefix. Require a 10-digit number starting 6–9.
+    let digits = phone.replace(/\D/g, '');
+    if (digits.length === 12 && digits.startsWith('91')) digits = digits.slice(2);
+    if (digits.length === 11 && digits.startsWith('0')) digits = digits.slice(1);
+    if (!/^[6-9]\d{9}$/.test(digits)) {
+      setError('Please enter a valid 10-digit mobile number.');
+      return;
+    }
     if (password.length < 8) {
       setError('Password must be at least 8 characters.');
       return;
@@ -32,7 +43,7 @@ export default function RegisterPage() {
       const res = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name.trim(), email, password }),
+        body: JSON.stringify({ name: name.trim(), phone: digits, email: email.trim(), password }),
       });
       const data = await res.json();
 
@@ -83,13 +94,29 @@ export default function RegisterPage() {
 
             <div>
               <label className="block text-[12px] font-semibold text-dark-brown uppercase tracking-wider mb-1.5">
-                Email
+                Mobile Number
+              </label>
+              <input
+                type="tel"
+                value={phone}
+                onChange={e => setPhone(e.target.value)}
+                required
+                autoComplete="tel"
+                inputMode="numeric"
+                placeholder="9876543210"
+                className="w-full border border-black/12 rounded-xl px-4 py-3 text-[14px] focus:outline-none focus:border-gold transition-colors bg-white"
+              />
+              <p className="text-[11px] text-gray-400 mt-1.5">You can sign in with this number.</p>
+            </div>
+
+            <div>
+              <label className="block text-[12px] font-semibold text-dark-brown uppercase tracking-wider mb-1.5">
+                Email <span className="text-gray-400 normal-case font-normal">(optional)</span>
               </label>
               <input
                 type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                required
                 autoComplete="email"
                 placeholder="you@example.com"
                 className="w-full border border-black/12 rounded-xl px-4 py-3 text-[14px] focus:outline-none focus:border-gold transition-colors bg-white"

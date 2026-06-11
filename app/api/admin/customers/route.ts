@@ -3,19 +3,24 @@ import { getAdminSession } from '@/lib/auth';
 import { getDb } from '@/lib/db';
 
 /**
- * Customers list for the admin — there is no separate customers table, so a
- * "customer" is derived by grouping orders on `phone` (the most reliable key for
- * this store; email is optional at checkout). Each customer carries their order
- * count, lifetime spend and first/last order dates so the admin can spot repeat
- * and high-value buyers. Page rows + global KPI summary return in one round-trip.
+ * Customers list for the admin. A "customer" is the union of two sources:
+ *   1. Registered accounts (the `users` table) — including those who signed up
+ *      but have NOT placed an order yet.
+ *   2. Order history (the `orders` table) — guests who checked out, grouped by
+ *      phone (the most reliable key; email is optional at checkout).
+ * The two are merged on the phone number (normalised to its 10-digit form), so
+ * a registered customer who has also ordered shows as a single row carrying
+ * their order count, lifetime spend and first/last order dates. Page rows +
+ * global KPI summary return in one round-trip.
  */
 
 const PAGE_SIZE = 20;
 
 const SORTS: Record<string, string> = {
-  spent: 'total_spent DESC, order_count DESC',
-  orders: 'order_count DESC, total_spent DESC',
-  recent: 'last_order DESC',
+  spent: 'total_spent DESC, order_count DESC, customer_name ASC',
+  orders: 'order_count DESC, total_spent DESC, customer_name ASC',
+  // Newest activity first; accounts that never ordered (NULL last_order) sink to the bottom.
+  recent: 'last_activity DESC NULLS LAST, customer_name ASC',
   name: 'customer_name ASC',
 };
 
@@ -46,19 +51,45 @@ export async function GET(request: NextRequest) {
     const db = await getDb();
     const { rows } = await db.execute({
       sql: `
-        WITH cust AS (
+        WITH order_cust AS (
           SELECT
-            phone,
-            (array_agg(customer_name ORDER BY created_at DESC))[1] AS customer_name,
-            (array_agg(email        ORDER BY created_at DESC))[1] AS email,
-            (array_agg(city         ORDER BY created_at DESC))[1] AS city,
-            (array_agg(state        ORDER BY created_at DESC))[1] AS state,
+            right(regexp_replace(phone, '[^0-9]', '', 'g'), 10) AS phone_key,
+            (array_agg(phone               ORDER BY created_at DESC))[1] AS phone,
+            (array_agg(customer_name       ORDER BY created_at DESC))[1] AS customer_name,
+            (array_agg(NULLIF(email, '')   ORDER BY created_at DESC))[1] AS email,
+            (array_agg(city                ORDER BY created_at DESC))[1] AS city,
+            (array_agg(state               ORDER BY created_at DESC))[1] AS state,
             COUNT(*)                       AS order_count,
             COALESCE(SUM(total), 0)        AS total_spent,
             MIN(created_at)                AS first_order,
             MAX(created_at)                AS last_order
           FROM orders
-          GROUP BY phone
+          GROUP BY right(regexp_replace(phone, '[^0-9]', '', 'g'), 10)
+        ),
+        acct AS (
+          SELECT
+            NULLIF(phone, '')       AS phone_key,
+            NULLIF(phone, '')       AS phone,
+            lower(NULLIF(email, ''))AS email,
+            name                    AS customer_name,
+            created_at              AS registered_at
+          FROM users
+        ),
+        cust AS (
+          SELECT
+            COALESCE(o.phone, a.phone)                   AS phone,
+            COALESCE(o.customer_name, a.customer_name)   AS customer_name,
+            COALESCE(o.email, a.email)                   AS email,
+            o.city,
+            o.state,
+            COALESCE(o.order_count, 0)                   AS order_count,
+            COALESCE(o.total_spent, 0)                   AS total_spent,
+            o.first_order,
+            o.last_order,
+            COALESCE(o.last_order, a.registered_at)      AS last_activity,
+            (a.phone_key IS NOT NULL OR a.email IS NOT NULL) AS has_account
+          FROM order_cust o
+          FULL OUTER JOIN acct a ON o.phone_key = a.phone_key
         )
         SELECT
           (SELECT COALESCE(json_agg(p), '[]'::json) FROM (
@@ -72,7 +103,7 @@ export async function GET(request: NextRequest) {
             'total_customers', COUNT(*),
             'repeat_customers', COALESCE(SUM(CASE WHEN order_count >= 2 THEN 1 ELSE 0 END), 0),
             'total_spent',      COALESCE(SUM(total_spent), 0),
-            'avg_ltv',          COALESCE(AVG(total_spent), 0)
+            'avg_ltv',          COALESCE(AVG(total_spent) FILTER (WHERE order_count > 0), 0)
           ) FROM cust) AS summary
       `,
       args,
@@ -83,7 +114,7 @@ export async function GET(request: NextRequest) {
       summary: { total_customers: number; repeat_customers: number; total_spent: number; avg_ltv: number };
     };
     const list = (row.rows || []).map((r) => ({
-      phone: String(r.phone),
+      phone: r.phone != null ? String(r.phone) : null,
       customer_name: String(r.customer_name ?? ''),
       email: r.email != null ? String(r.email) : null,
       city: r.city != null ? String(r.city) : null,
@@ -92,6 +123,7 @@ export async function GET(request: NextRequest) {
       total_spent: Number(r.total_spent),
       first_order: r.first_order,
       last_order: r.last_order,
+      has_account: Boolean(r.has_account),
     }));
     const total = row.rows?.length ? Number(row.rows[0].total_count) : 0;
 

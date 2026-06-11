@@ -18,7 +18,7 @@ export default function Header() {
   const { totalItems, setIsOpen } = useCart();
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
-  const [user, setUser] = useState<{ email: string; name?: string | null } | null>(null);
+  const [user, setUser] = useState<{ email?: string | null; phone?: string | null; name?: string | null } | null>(null);
   const profileRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const pathname = usePathname();
@@ -97,7 +97,7 @@ export default function Header() {
                     {user.name && (
                       <p className="font-semibold text-dark-brown text-[14px] truncate">{user.name}</p>
                     )}
-                    <p className="text-[13px] text-gray-500 truncate mb-3">{user.email}</p>
+                    <p className="text-[13px] text-gray-500 truncate mb-3">{user.email || user.phone}</p>
                     <Link
                       href="/account"
                       onClick={() => setProfileOpen(false)}
@@ -179,7 +179,7 @@ export default function Header() {
                 {user.name && (
                   <p className="text-[14px] font-semibold text-dark-brown truncate">{user.name}</p>
                 )}
-                <p className="text-[13px] text-gray-500 truncate mb-3">{user.email}</p>
+                <p className="text-[13px] text-gray-500 truncate mb-3">{user.email || user.phone}</p>
                 <Link
                   href="/account"
                   onClick={() => setMenuOpen(false)}
