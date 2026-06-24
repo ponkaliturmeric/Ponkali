@@ -11,7 +11,7 @@ export const metadata: Metadata = buildMetadata({
   path: '/farm',
 });
 
-const FARM_IMAGES = Array.from({ length: 17 }, (_, i) => ({
+const FARM_IMAGES = Array.from({ length: 16 }, (_, i) => ({
   src: `/images/farm/farm-${String(i + 1).padStart(2, '0')}.jpeg`,
   alt: `Ponkali turmeric farm in Erode`,
 }));
