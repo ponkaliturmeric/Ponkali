@@ -28,58 +28,6 @@ const TRUST_BADGES = [
   { Icon: ShieldCheckIcon, title: 'FSSAI Certified',  desc: 'Lic. 22426064000154' },
 ];
 
-const REVIEWS = [
-  { name: 'Kavitha R.', location: 'Chennai',   text: 'The colour and smell is unlike anything from a supermarket. This is what real turmeric smells like.' },
-  { name: 'Priya M.',   location: 'Bengaluru', text: 'My mother asked where I bought this. She said it smells exactly like her village in Tamil Nadu.' },
-  { name: 'Rajan S.',   location: 'Mumbai',    text: 'Switched from Tata Sampann. Will never go back. The quality difference is visible immediately.' },
-];
-
-
-const FAQ_ITEMS = [
-  {
-    question: "Is Ponkali turmeric 100% pure and free from adulteration?",
-    answer: "Yes. Ponkali is single-origin Erode turmeric powder, naturally grown and freshly processed with nothing added: no synthetic colour, no starch, no fillers and no lead chromate. It is FSSAI certified (Lic. No. 22426064000154) and checked for purity.",
-  },
-  {
-    question: "What is the curcumin content of Ponkali turmeric?",
-    answer: "Our GI-tagged Erode turmeric naturally contains 2.5% to 3.5% curcumin, much higher than the 0.5% to 1.5% you find in most supermarket brands. Curcumin is the active compound behind turmeric's deep colour and health benefits.",
-  },
-  {
-    question: "Where is Ponkali turmeric grown?",
-    answer: "It is grown on our own family farm in Erode, the GI-recognised turmeric capital of Tamil Nadu. We have farmed this same land for three generations.",
-  },
-  {
-    question: "How is it different from supermarket turmeric powder?",
-    answer: "Most packaged brands blend turmeric from mixed or unknown origins, process it with high heat, and often add colour or starch. Ponkali is single-origin Erode turmeric, naturally grown and carefully processed to preserve its natural oils and aroma, and sold farm-direct with zero middlemen.",
-  },
-  {
-    question: "Is Ponkali turmeric FSSAI certified?",
-    answer: "Yes. FSSAI Licence No. 22426064000154, manufactured by The Native, Erode 638055, Tamil Nadu.",
-  },
-  {
-    question: "How long does delivery take and is shipping free?",
-    answer: "We ship across India in 3 to 5 working days, and shipping is always free on every order. Both Cash on Delivery and online payment (UPI, cards, netbanking) are available.",
-  },
-  {
-    question: "How should I store turmeric powder, and how do I use it?",
-    answer: "Store in a cool, dry place away from sunlight with the lid sealed, and use within 6 months for the best aroma. Use it in curries, sambhar and rasam, or stir half a teaspoon into warm milk for a daily golden-milk drink.",
-  },
-  {
-    question: "What pack sizes are available?",
-    answer: "Ponkali Erode Turmeric Powder comes in 100g, 250g, 500g and 1kg packs.",
-  },
-];
-
-function Stars({ count = 5 }: { count?: number }) {
-  return (
-    <div className="flex gap-0.5">
-      {Array(count).fill(0).map((_, i) => (
-        <StarIcon key={i} className="w-4 h-4 text-gold" filled />
-      ))}
-    </div>
-  );
-}
-
 export default function HomePage() {
   return (
     <>
