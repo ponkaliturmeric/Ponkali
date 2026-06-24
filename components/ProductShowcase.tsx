@@ -28,8 +28,12 @@ export default function ProductShowcase() {
   const ordered = WEIGHT_ORDER.map(w => products.find(p => p.weight === w)!).filter(Boolean);
   const defaultProduct = ordered.find(p => p.is_bestseller === 1) ?? ordered[1];
   const [selected, setSelected] = useState<Product>(defaultProduct);
-  const [activeImg, setActiveImg] = useState<1 | 2>(1);
+  const [activeImg, setActiveImg] = useState<0 | 1>(0);
   const { addItem } = useCart();
+
+  // State for image zoom tracking
+  const [zoomPos, setZoomPos] = useState({ x: 0, y: 0 });
+  const [isHovered, setIsHovered] = useState(false);
 
   useEffect(() => {
     fetch('/api/products')
@@ -52,6 +56,14 @@ export default function ProductShowcase() {
     }
   };
 
+  // Tracks cursor relative coordinates over the image container
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - left) / width) * 100;
+    const y = ((e.clientY - top) / height) * 100;
+    setZoomPos({ x, y });
+  };
+
   const waMessage = encodeURIComponent(
     `Hi! I'd like to order Ponkali Erode Turmeric Powder ${selected.weight} for ₹${selected.price}. Please confirm.`
   );
@@ -67,7 +79,7 @@ export default function ProductShowcase() {
 
               {/* Vertical thumbnails on the LEFT — smaller */}
               <div className="flex flex-col gap-2">
-                {([1, 2] as const).map(n => (
+                {([0, 1] as const).map(n => (
                   <button
                     key={n}
                     onClick={() => setActiveImg(n)}
@@ -76,7 +88,7 @@ export default function ProductShowcase() {
                     }`}
                   >
                     <Image
-                      src={`/images/product-${n}.jpeg`}
+                      src={`/images/new-prd-img${n}.png`}
                       alt={`View ${n}`}
                       fill
                       className="object-contain p-1"
@@ -86,15 +98,24 @@ export default function ProductShowcase() {
                 ))}
               </div>
 
-              {/* Main image — fills remaining width */}
-              <div className="flex-1 rounded-2xl overflow-hidden aspect-square relative bg-white border border-black/8 shadow-sm">
+              {/* Main image — fills remaining width with interactive zoom */}
+              <div 
+                className="flex-1 rounded-2xl overflow-hidden aspect-square relative bg-white border border-black/8 shadow-sm cursor-zoom-in"
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseMove={handleMouseMove}
+                onMouseLeave={() => setIsHovered(false)}
+              >
                 <Image
-                  src={activeImg === 1 ? '/images/new-prd-img.png' : '/images/new-prd-img1.png'}
+                  src={activeImg === 0 ? '/images/new-prd-img0.png' : '/images/new-prd-img1.png'}
                   alt={`Ponkali Erode Turmeric Powder ${selected.weight}`}
                   fill
-                  className="object-contain p-3 md:p-4 transition-opacity duration-300"
+                  className="object-contain p-3 md:p-4 transition-transform duration-150 ease-out"
+                  style={{
+                    transformOrigin: `${zoomPos.x}% ${zoomPos.y}%`,
+                    transform: isHovered ? 'scale(2)' : 'scale(1)',
+                  }}
                   priority
-                  sizes="(max-width: 768px) 90vw, 45vw"
+                  sizes="(max-width: 868px) 90vw, 45vw"
                 />
               </div>
             </div>
@@ -124,8 +145,7 @@ export default function ProductShowcase() {
               ))}
             </div>
 
-            {/* Weight selector — highlighted so shoppers immediately see they
-                need to pick a size (brighter panel + bolder pills cut hesitation). */}
+            {/* Weight selector */}
             <div className="mb-5 rounded-2xl bg-light-gold/30 border border-gold/40 p-4 shadow-sm">
               <div className="flex items-center justify-between mb-3">
                 <p className="flex items-center gap-2 text-[13px] font-extrabold text-dark-brown uppercase tracking-wider">

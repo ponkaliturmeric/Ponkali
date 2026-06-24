@@ -97,7 +97,7 @@ export default function ProductDetail({ slug }: { slug: string }) {
                 </div>
               )}
               <Image
-                src="/images/new-prd-img.png"
+                src="/images/new-prd-img0.png"
                 alt={`Ponkali Erode Turmeric Powder ${selected.weight}`}
                 fill
                 className="object-contain p-6"

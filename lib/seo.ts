@@ -139,7 +139,7 @@ export function organizationJsonLd() {
         '@type': 'Store',
         '@id': `${SITE_URL}/#store`,
         name: SITE_NAME,
-        image: absoluteUrl('/images/new-prd-img.png'),
+        image: absoluteUrl('/images/new-prd-img0.png'),
         url: SITE_URL,
         telephone: BUSINESS.phone,
         email: BUSINESS.email,
@@ -171,7 +171,7 @@ export function productJsonLd(product: Product) {
     '@id': `${url}#product`,
     name: `${product.name} ${product.weight}`,
     image: [
-      absoluteUrl('/images/new-prd-img.png'),
+      absoluteUrl('/images/new-prd-img0.png'),
       absoluteUrl('/images/new-prd-img1.png'),
     ],
     description:

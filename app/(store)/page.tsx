@@ -155,7 +155,7 @@ export default function HomePage() {
               aspect-square max-w-[260px] mx-auto
               md:max-w-none md:rounded-3xl">
               <Image
-                src="/images/new-prd-img.png"
+                src="/images/new-prd-img0.png"
                 alt="Ponkali Erode Turmeric Powder"
                 fill
                 className="object-contain p-4 md:p-8"
@@ -276,7 +276,7 @@ export default function HomePage() {
           <div className="grid md:grid-cols-2 gap-14 items-center">
             <div className="rounded-2xl overflow-hidden bg-cream h-80 md:h-[500px] relative border border-none">
               <Image
-                src="/images/new-prd-img1.png"
+                src="/images/new-prd-img0.png"
                 alt="Ponkali Turmeric Powder, front and back of packaging"
                 fill
                 className="object-contain p-6"
@@ -309,7 +309,7 @@ export default function HomePage() {
       </section>
 
       {/* ─── 8. REVIEWS ─── */}
-      <section className="py-20 px-5 bg-white">
+      {/* <section className="py-20 px-5 bg-white">
         <div className="max-w-6xl mx-auto">
           <div className="mb-12">
             <p className="text-gold text-[11px] font-semibold tracking-[0.3em] uppercase mb-3">Customer Stories</p>
@@ -338,10 +338,10 @@ export default function HomePage() {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* ─── 9. FAQ ─── */}
-      <section className="py-20 px-5 bg-white border-t border-black/5">
+      {/* <section className="py-20 px-5 bg-white border-t border-black/5">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-12">
             <p className="text-gold text-[11px] font-semibold tracking-[0.3em] uppercase mb-3">Good to Know</p>
@@ -363,7 +363,7 @@ export default function HomePage() {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* ─── 10. CTA + GUARANTEE ─── */}
       <section className="py-20 px-5 bg-[#F5E4B0]">

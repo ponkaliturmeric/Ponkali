@@ -32,21 +32,21 @@ export default function OurStoryPage() {
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-14 items-center">
 
           {/* Product image — shows the grandparents illustration */}
-          <div className="relative max-w-sm mx-auto md:max-w-none">
-            <div className="rounded-2xl overflow-hidden bg-white border border-black/6 shadow-sm aspect-square relative">
-              <Image
-                src="/images/new-prd-img.png"
-                alt="Ponkali Turmeric, Ponnamal and Kaaliappa Gounder"
-                fill
-                className="object-contain p-4"
-                sizes="(max-width: 768px) 90vw, 45vw"
-                priority
-              />
-            </div>
-            <p className="text-center text-[12px] text-gray-400 mt-3 font-medium">
-              Ponnamal &amp; Kaaliappa, Erode
-            </p>
-          </div>
+          <div className="relative max-w-xl mx-auto md:max-w-none w-full">
+  <div className="rounded-2xl overflow-hidden bg-white border border-black/6 shadow-md aspect-square relative w-full min-h-[350px] md:min-h-[500px]">
+    <Image
+      src="/images/new-prd-img0.png"
+      alt="Ponkali Turmeric, Ponnamal and Kaaliappa Gounder"
+      fill
+      className="object-contain p-6"
+      sizes="(max-width: 768px) 100vw, 50vw"
+      priority
+    />
+  </div>
+  <p className="text-center text-[13px] text-gray-500 mt-4 font-semibold tracking-wide">
+    Ponnamal &amp; Kaaliappa, Erode
+  </p>
+</div>
 
           <div>
             <p className="text-gold text-[11px] font-semibold tracking-[0.3em] uppercase mb-4">The People Behind the Brand</p>

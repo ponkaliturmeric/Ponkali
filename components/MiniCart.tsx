@@ -56,7 +56,7 @@ export default function MiniCart() {
                 <div key={item.product.slug} className="flex gap-3.5">
                   <div className="w-16 h-16 rounded-xl flex-shrink-0 overflow-hidden bg-white border border-black/8 relative">
                     <Image
-                      src="/images/new-prd-img.png"
+                      src="/images/new-prd-img0.png"
                       alt={item.product.name}
                       fill
                       className="object-contain p-1"
