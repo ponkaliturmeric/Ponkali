@@ -17,7 +17,7 @@ export default function OurStoryPage() {
       {/* ── HERO ── */}
       <div className="bg-dark-brown py-24 px-5 text-center">
         <p className="text-gold/70 text-[11px] font-semibold tracking-[0.35em] uppercase mb-5">
-          Est. 1980s · Erode
+          Est. 1960s · Erode
         </p>
         <h1 className="font-hero text-[48px] md:text-[72px] font-extrabold text-white tracking-tight leading-[1.0] mb-5">
           Our Story
@@ -57,7 +57,7 @@ export default function OurStoryPage() {
               Our grandmother <strong className="text-dark-brown font-semibold">Ponnamal</strong> tended these turmeric fields before we could walk. She knew every row, every plant and every season. She would say turmeric is not just a spice. It is medicine, it is prayer, it is the smell of home.
             </p>
             <p className="text-gray-600 leading-[1.9] text-[16px] mb-5">
-              Our grandfather <strong className="text-dark-brown font-semibold">Kaaliappa</strong> built the stone mill with his own hands. He believed that turmeric ground by machine loses its soul: the oils, the fragrance, the depth. He was right. Forty years later, the same stone mill still runs.
+              Our grandfather <strong className="text-dark-brown font-semibold">Kaaliappa</strong> built the stone mill with his own hands. He believed that turmeric ground by machine loses its soul: the oils, the fragrance, the depth. He was right. 60 years later, the same stone mill still runs.
             </p>
             <p className="text-gray-600 leading-[1.9] text-[16px]">
               We carry their names so we never forget what this is about.
@@ -72,13 +72,13 @@ export default function OurStoryPage() {
           <div className="text-center mb-12">
             <p className="text-gold text-[11px] font-semibold tracking-[0.3em] uppercase mb-4">The Land</p>
             <h2 className="font-hero text-[32px] md:text-[40px] font-extrabold text-dark-brown tracking-tight">
-              Erode, the Yellow City
+              Erode, the Turmeric City
             </h2>
           </div>
           <div className="grid md:grid-cols-2 gap-8">
             <div className="bg-cream rounded-2xl p-8 border border-black/6">
               <p className="text-gray-600 leading-[1.9] text-[16px]">
-                Erode is not called the Yellow City for nothing. This district in Tamil Nadu produces some of the world&apos;s finest turmeric, with curcumin levels of 2.5% to 3.5%, double the national average. The Erode variety is GI-tagged, meaning it can only come from here. There is no substitute.
+                Erode is not called the Turmeric City for nothing. This district in Tamil Nadu produces some of the world&apos;s finest turmeric, with curcumin levels of 2.5% to 3.5%, double the national average. The Erode variety is GI-tagged, meaning it can only come from here. There is no substitute.
               </p>
             </div>
             <div className="bg-cream rounded-2xl p-8 border border-black/6">

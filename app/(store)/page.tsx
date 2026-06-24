@@ -88,7 +88,7 @@ export default function HomePage() {
             </div>
 
             <div className="flex flex-wrap gap-2">
-              {['GI Tagged', 'FSSAI Certified', 'Lab Tested', 'Farm Direct', 'Free Shipping'].map(t => (
+              {['GI Tagged', 'FSSAI Certified','Farm Direct', 'Free Shipping'].map(t => (
                 <span key={t} className="text-[11px] text-cream/50 border border-cream/20 px-3 py-1 rounded-full">
                   {t}
                 </span>
@@ -116,7 +116,6 @@ export default function HomePage() {
             <div className="hidden md:block absolute -left-8 top-1/3 bg-white rounded-2xl px-4 py-3.5 shadow-2xl shadow-black/20">
               <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider mb-0.5">Curcumin</p>
               <p className="text-[22px] font-extrabold text-dark-brown leading-none">2.5-3.5%</p>
-              <p className="text-[10px] text-gray-400 mt-0.5">Lab Tested</p>
             </div>
             <div className="hidden md:block absolute -right-5 bottom-1/4 bg-dark-brown border border-gold/20 rounded-2xl px-4 py-3.5 shadow-2xl">
               <p className="text-[10px] text-gold/50 font-semibold uppercase tracking-wider mb-0.5">Starting at</p>
@@ -237,7 +236,7 @@ export default function HomePage() {
                 Their names are on every packet
               </h2>
               <p className="text-gray-600 leading-[1.8] mb-5 text-[16px]">
-                Ponkali is named after our grandparents, <strong className="text-dark-brown font-semibold">Ponnamal</strong> and <strong className="text-dark-brown font-semibold">Kaaliappa</strong>, who farmed this same Erode land for over 40 years. They knew every row, every plant and every season.
+                Ponkali is named after our grandparents, <strong className="text-dark-brown font-semibold">Ponnamal</strong> and <strong className="text-dark-brown font-semibold">Kaaliappa</strong>, who farmed this same Erode land for over 60 years. They knew every row, every plant and every season.
               </p>
               <p className="text-gray-600 leading-[1.8] mb-8 text-[16px]">
                 Same land. Same seeds. Same promise. What reaches your kitchen is not just turmeric. It is our family&apos;s legacy, packed with nothing added.

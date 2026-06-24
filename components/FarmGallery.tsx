@@ -27,7 +27,7 @@ export default function FarmGallery() {
         <div className="text-center mb-12">
           <p className="text-gold text-[11px] font-semibold tracking-[0.3em] uppercase mb-3">From Our Fields</p>
           <h2 className="font-hero text-[32px] md:text-[42px] font-extrabold text-dark-brown tracking-tight mb-4 leading-[1.05]">
-            Forty years of farming,<br className="hidden sm:block" /> in every packet
+            60 years of farming,<br className="hidden sm:block" /> in every packet
           </h2>
           <p className="text-gray-500 text-[16px] max-w-lg mx-auto leading-[1.75]">
             Our family has worked this same Erode land across three generations.

@@ -138,7 +138,7 @@ export default function ProductShowcase() {
 
             {/* Trust pills */}
             <div className="flex flex-wrap gap-1.5 mb-6">
-              {['GI Tagged', 'Naturally Grown', 'FSSAI Certified', 'Lab Tested', 'Farm Direct'].map(t => (
+              {['GI Tagged', 'Naturally Grown', 'FSSAI Certified','Farm Direct'].map(t => (
                 <span key={t} className="text-[11px] font-semibold text-dark-brown/60 border border-dark-brown/15 px-3 py-1 rounded-full">
                   {t}
                 </span>
