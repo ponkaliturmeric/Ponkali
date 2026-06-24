@@ -4,11 +4,11 @@ import Image from 'next/image';
 import ProductShowcase from '@/components/ProductShowcase';
 import FarmGallery from '@/components/FarmGallery';
 import JsonLd from '@/components/JsonLd';
-import { buildMetadata, productListJsonLd, faqJsonLd } from '@/lib/seo';
+import { buildMetadata, productListJsonLd} from '@/lib/seo';
 import { PRODUCTS, FROM_PRICE } from '@/lib/products';
 import {
   MapPinIcon, LeafIcon, TruckIcon, DropletIcon,
-  ShieldCheckIcon, StarIcon, ArrowRightIcon,
+  ShieldCheckIcon,ArrowRightIcon,
 } from '@/components/Icons';
 import Mandala from '@/components/Mandala';
 import HeroVideo from '@/components/HeroVideo';
@@ -31,7 +31,7 @@ const TRUST_BADGES = [
 export default function HomePage() {
   return (
     <>
-      <JsonLd data={[productListJsonLd(PRODUCTS), faqJsonLd(FAQ_ITEMS)]} />
+      <JsonLd data={[productListJsonLd(PRODUCTS)]} />
 
       {/* ─── 1. HERO ─── */}
       <section className="bg-dark-brown relative overflow-hidden">
