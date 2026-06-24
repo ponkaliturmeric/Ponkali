@@ -308,63 +308,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ─── 8. REVIEWS ─── */}
-      {/* <section className="py-20 px-5 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <div className="mb-12">
-            <p className="text-gold text-[11px] font-semibold tracking-[0.3em] uppercase mb-3">Customer Stories</p>
-            <div className="flex flex-col sm:flex-row sm:items-end gap-3">
-              <h2 className="font-hero text-[34px] md:text-[42px] font-extrabold text-dark-brown tracking-tight leading-none">
-                Trusted by families across India
-              </h2>
-              <div className="flex items-center gap-2 pb-1">
-                <Stars count={5} />
-                <span className="text-gray-400 text-[14px] font-medium">4.9 avg · 200+ orders</span>
-              </div>
-            </div>
-          </div>
-          <div className="grid md:grid-cols-3 gap-5">
-            {REVIEWS.map(review => (
-              <div key={review.name} className="p-7 rounded-2xl bg-cream border border-black/6 flex flex-col">
-                <Stars count={5} />
-                <p className="text-dark-brown/75 leading-[1.8] text-[15px] mt-5 mb-6 flex-1">
-                  &ldquo;{review.text}&rdquo;
-                </p>
-                <div className="border-t border-black/6 pt-5">
-                  <p className="font-bold text-dark-brown text-[15px]">{review.name}</p>
-                  <p className="text-gray-400 text-[13px] mt-0.5">{review.location}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section> */}
-
-      {/* ─── 9. FAQ ─── */}
-      {/* <section className="py-20 px-5 bg-white border-t border-black/5">
-        <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-12">
-            <p className="text-gold text-[11px] font-semibold tracking-[0.3em] uppercase mb-3">Good to Know</p>
-            <h2 className="font-hero text-[32px] md:text-[40px] font-extrabold text-dark-brown tracking-tight">
-              Frequently Asked Questions
-            </h2>
-          </div>
-          <div className="border-t border-black/8">
-            {FAQ_ITEMS.map(({ question, answer }) => (
-              <details key={question} className="group border-b border-black/8 py-5">
-                <summary className="flex items-center justify-between cursor-pointer list-none gap-6">
-                  <h3 className="font-semibold text-dark-brown text-[16px]">{question}</h3>
-                  <span className="text-gold text-[24px] leading-none flex-shrink-0 transition-transform duration-200 group-open:rotate-45">
-                    +
-                  </span>
-                </summary>
-                <p className="text-gray-600 leading-[1.8] text-[15px] mt-3">{answer}</p>
-              </details>
-            ))}
-          </div>
-        </div>
-      </section> */}
-
+      
       {/* ─── 10. CTA + GUARANTEE ─── */}
       <section className="py-20 px-5 bg-[#F5E4B0]">
         <div className="max-w-xl mx-auto text-center">
