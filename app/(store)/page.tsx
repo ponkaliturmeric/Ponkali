@@ -155,7 +155,7 @@ export default function HomePage() {
               aspect-square max-w-[260px] mx-auto
               md:max-w-none md:rounded-3xl">
               <Image
-                src="/images/product-1.jpeg"
+                src="/images/new-prd-img.png"
                 alt="Ponkali Erode Turmeric Powder"
                 fill
                 className="object-contain p-4 md:p-8"
@@ -276,7 +276,7 @@ export default function HomePage() {
           <div className="grid md:grid-cols-2 gap-14 items-center">
             <div className="rounded-2xl overflow-hidden bg-cream h-80 md:h-[500px] relative border border-none">
               <Image
-                src="/images/product-2.jpeg"
+                src="/images/new-prd-img1.png"
                 alt="Ponkali Turmeric Powder, front and back of packaging"
                 fill
                 className="object-contain p-6"

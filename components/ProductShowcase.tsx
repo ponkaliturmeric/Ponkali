@@ -89,7 +89,7 @@ export default function ProductShowcase() {
               {/* Main image — fills remaining width */}
               <div className="flex-1 rounded-2xl overflow-hidden aspect-square relative bg-white border border-black/8 shadow-sm">
                 <Image
-                  src={activeImg === 1 ? '/images/product-1.jpeg' : '/images/product-2.jpeg'}
+                  src={activeImg === 1 ? '/images/new-prd-img.png' : '/images/new-prd-img1.png'}
                   alt={`Ponkali Erode Turmeric Powder ${selected.weight}`}
                   fill
                   className="object-contain p-3 md:p-4 transition-opacity duration-300"

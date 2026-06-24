@@ -35,7 +35,7 @@ export default function OurStoryPage() {
           <div className="relative max-w-sm mx-auto md:max-w-none">
             <div className="rounded-2xl overflow-hidden bg-white border border-black/6 shadow-sm aspect-square relative">
               <Image
-                src="/images/product-1.jpeg"
+                src="/images/new-prd-img.png"
                 alt="Ponkali Turmeric, Ponnamal and Kaaliappa Gounder"
                 fill
                 className="object-contain p-4"
@@ -203,7 +203,7 @@ export default function OurStoryPage() {
           {/* Back of packaging image */}
           <div className="rounded-2xl overflow-hidden bg-white border border-black/6 shadow-sm aspect-square relative max-w-sm mx-auto md:max-w-none">
             <Image
-              src="/images/product-2.jpeg"
+              src="/images/new-prd-img1.png"
               alt="Ponkali Turmeric Powder, front and back packaging"
               fill
               className="object-contain p-6"

@@ -97,7 +97,7 @@ export default function ProductDetail({ slug }: { slug: string }) {
                 </div>
               )}
               <Image
-                src="/images/product-1.jpeg"
+                src="/images/new-prd-img.png"
                 alt={`Ponkali Erode Turmeric Powder ${selected.weight}`}
                 fill
                 className="object-contain p-6"
@@ -109,7 +109,7 @@ export default function ProductDetail({ slug }: { slug: string }) {
             {/* Secondary image — back of pack */}
             <div className="relative mt-3 rounded-2xl overflow-hidden bg-[#F5E8A0] h-36">
               <Image
-                src="/images/product-2.jpeg"
+                src="/images/new-prd-img1.png"
                 alt="Ponkali Turmeric Powder, front and back packaging"
                 fill
                 className="object-contain px-4 py-2"

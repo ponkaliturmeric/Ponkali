@@ -32,7 +32,7 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
     path: `/product/${product.slug}`,
     images: [
       {
-        url: '/images/product-1.jpeg',
+        url: '/images/new-prd-img.png',
         alt: `Ponkali ${product.name} ${product.weight}`,
       },
     ],

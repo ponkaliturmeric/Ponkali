@@ -30,7 +30,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       <Link href={`/product/${product.slug}`} className="block">
         <div className="relative h-52 bg-[#F5E8A0] overflow-hidden">
           <Image
-            src="/images/product-1.jpeg"
+            src="/images/new-prd-img.png"
             alt={`${product.name} ${product.weight}`}
             fill
             className="object-contain p-4 group-hover:scale-105 transition-transform duration-500"

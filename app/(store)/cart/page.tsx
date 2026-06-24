@@ -51,7 +51,7 @@ export default function CartPage() {
               <div key={item.product.slug} className="bg-white rounded-2xl p-5 border border-black/6 flex gap-4">
                 <div className="w-[72px] h-[72px] flex-shrink-0 bg-[#F5E8A0] rounded-xl overflow-hidden relative">
                   <Image
-                    src="/images/product-1.jpeg"
+                    src="/images/new-prd-img.png"
                     alt={item.product.name}
                     fill
                     className="object-contain p-1.5"
