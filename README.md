@@ -38,13 +38,26 @@ RAZORPAY_WEBHOOK_SECRET=          # optional, for the webhook
 ```
 
 Flow:
-1. Checkout posts the cart to `POST /api/razorpay/order` — the server **recomputes
-   the amount** from the catalogue and creates a Razorpay order.
+1. Checkout posts the cart **and delivery details** to `POST /api/razorpay/order` — the
+   server recomputes the amount from the catalogue, creates a Razorpay order, and saves
+   the priced cart + address in `pending_payments` *before* the customer pays.
 2. The hosted Razorpay Checkout modal collects payment (UPI / cards / netbanking / wallets).
-3. `POST /api/razorpay/verify` validates the payment signature (HMAC-SHA256) before
-   the order is confirmed.
-4. (Optional but recommended) Configure a webhook in the Razorpay dashboard →
-   `/api/razorpay/webhook` with `RAZORPAY_WEBHOOK_SECRET` for reliable confirmation.
+3. The order is then created from the saved record by **whichever arrives first**:
+   - `POST /api/razorpay/verify` from the browser (signature-checked), or
+   - `POST /api/razorpay/webhook` from Razorpay (`payment.captured`).
+   Both are idempotent — a payment can only ever produce one order.
+4. **The webhook is required**, not optional: on mobile UPI the browser tab is often
+   killed while the customer is in their UPI app, so `/verify` never runs. Configure it in
+   Razorpay Dashboard → Settings → Webhooks → `https://<domain>/api/razorpay/webhook`,
+   event `payment.captured`, and set the same secret as `RAZORPAY_WEBHOOK_SECRET`.
+5. If a checkout page reloads mid-payment, it polls `GET /api/razorpay/status` and sends
+   the customer to their confirmation once the webhook has recorded the order.
+
+To find captured payments that have no order (e.g. from before the webhook was set up):
+
+```bash
+node scripts/reconcile-razorpay.mjs --days 60
+```
 
 If keys are not set, online payment returns a friendly error and customers can
 still use **Cash on Delivery**. Test cards: see Razorpay's

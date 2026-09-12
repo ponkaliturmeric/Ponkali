@@ -48,48 +48,57 @@ export async function createOrder(input: {
   notes?: string;
   /** Account id of the signed-in customer, if any — links the order to their history. */
   user_id?: number | null;
+  /** Razorpay ids for online orders — unique in the DB so a payment can only ever create one order. */
+  razorpay_order_id?: string | null;
+  razorpay_payment_id?: string | null;
 }): Promise<string> {
   const db = await getDb();
   const { customer: c, cart, payment_method, status } = input;
   const order_id = input.order_id ?? generateOrderId();
 
-  await db.execute({
-    sql: `INSERT INTO orders (
-            order_id, customer_name, phone, email,
-            address_line1, address_line2, city, state, pincode, landmark,
-            payment_method, upi_id, subtotal, shipping, cod_charge, total, status, notes, user_id
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    args: [
-      order_id,
-      c.customer_name,
-      c.phone,
-      c.email ?? null,
-      c.address_line1,
-      c.address_line2 ?? null,
-      c.city,
-      c.state,
-      c.pincode,
-      c.landmark ?? null,
-      payment_method,
-      c.upi_id ?? null,
-      cart.subtotal,
-      cart.shipping,
-      cart.codCharge,
-      cart.total,
-      status,
-      input.notes ?? null,
-      input.user_id ?? null,
-    ],
-  });
-
-  const stmts = cart.lines.map((l) => ({
-    sql: 'INSERT INTO order_items (order_id, product_name, weight, quantity, price) VALUES (?, ?, ?, ?, ?)',
-    args: [order_id, l.name, l.weight, l.quantity, l.price] as (string | number)[],
-  }));
-  stmts.push({
-    sql: 'INSERT INTO order_status_history (order_id, status, notes) VALUES (?, ?, ?)',
-    args: [order_id, status, 'Order placed'],
-  });
+  // Order row + line items + first history entry go in ONE transaction, so a
+  // failure part-way can never leave an order with no items behind.
+  const stmts: { sql: string; args: (string | number | null)[] }[] = [
+    {
+      sql: `INSERT INTO orders (
+              order_id, customer_name, phone, email,
+              address_line1, address_line2, city, state, pincode, landmark,
+              payment_method, upi_id, subtotal, shipping, cod_charge, total, status, notes, user_id,
+              razorpay_order_id, razorpay_payment_id
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      args: [
+        order_id,
+        c.customer_name,
+        c.phone,
+        c.email ?? null,
+        c.address_line1,
+        c.address_line2 ?? null,
+        c.city,
+        c.state,
+        c.pincode,
+        c.landmark ?? null,
+        payment_method,
+        c.upi_id ?? null,
+        cart.subtotal,
+        cart.shipping,
+        cart.codCharge,
+        cart.total,
+        status,
+        input.notes ?? null,
+        input.user_id ?? null,
+        input.razorpay_order_id ?? null,
+        input.razorpay_payment_id ?? null,
+      ],
+    },
+    ...cart.lines.map((l) => ({
+      sql: 'INSERT INTO order_items (order_id, product_name, weight, quantity, price) VALUES (?, ?, ?, ?, ?)',
+      args: [order_id, l.name, l.weight, l.quantity, l.price] as (string | number | null)[],
+    })),
+    {
+      sql: 'INSERT INTO order_status_history (order_id, status, notes) VALUES (?, ?, ?)',
+      args: [order_id, status, 'Order placed'],
+    },
+  ];
   await db.batch(stmts, 'write');
 
   // Fire the customer/business notifications. Awaited so they actually run on

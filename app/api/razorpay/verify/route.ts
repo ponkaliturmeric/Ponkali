@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyPaymentSignature } from '@/lib/razorpay';
-import { getCustomerSession } from '@/lib/customer-auth';
-import { priceCart } from '@/lib/pricing';
-import { createOrder, missingCustomerField, type CustomerDetails } from '@/lib/orders';
+import { finalizeRazorpayPayment } from '@/lib/payments';
 
+/**
+ * Browser-side completion of an online payment. Confirms the Razorpay
+ * signature, then creates the order from the cart saved at checkout start.
+ * Idempotent with the webhook — whichever arrives first creates the order, the
+ * other gets the same order id back.
+ */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -14,38 +18,29 @@ export async function POST(request: NextRequest) {
     }
 
     // Cryptographically confirm the payment really came from Razorpay for this order.
-    const valid = verifyPaymentSignature(
-      razorpay_order_id,
-      razorpay_payment_id,
-      razorpay_signature,
-    );
+    const valid = verifyPaymentSignature(razorpay_order_id, razorpay_payment_id, razorpay_signature);
     if (!valid) {
       return NextResponse.json({ error: 'Payment verification failed.' }, { status: 400 });
     }
 
-    const missing = missingCustomerField(customer ?? {});
-    if (missing) {
-      return NextResponse.json({ error: `Missing required field: ${missing}` }, { status: 400 });
-    }
-
-    // Recompute the order total server-side for the record of truth.
-    const cart = await priceCart(customer?.items, { cod: false });
-    if (!cart) {
-      return NextResponse.json({ error: 'Cart could not be priced.' }, { status: 400 });
-    }
-
-    const session = getCustomerSession();
-
-    const order_id = await createOrder({
-      customer: customer as CustomerDetails,
-      cart,
-      payment_method: 'online',
-      status: 'Paid',
-      notes: `Razorpay payment ${razorpay_payment_id} (order ${razorpay_order_id})`,
-      user_id: session?.uid ?? null,
+    const result = await finalizeRazorpayPayment({
+      razorpay_order_id,
+      razorpay_payment_id,
+      source: 'verify',
+      fallback: customer ? { customer } : undefined,
     });
 
-    return NextResponse.json({ success: true, order_id });
+    if (result.status === 'unknown') {
+      // Payment is real but we have nothing to build the order from. Log loudly;
+      // the reconciliation script picks these up from Razorpay.
+      console.error('[razorpay verify] captured payment with no pending record', { razorpay_order_id, razorpay_payment_id });
+      return NextResponse.json(
+        { error: 'Payment received but the order could not be recorded. Please WhatsApp us with your payment id ' + razorpay_payment_id + '.' },
+        { status: 500 },
+      );
+    }
+
+    return NextResponse.json({ success: true, order_id: result.order_id });
   } catch (error) {
     console.error('Razorpay verify error:', error);
     return NextResponse.json({ error: 'Could not verify payment. Please contact us.' }, { status: 500 });

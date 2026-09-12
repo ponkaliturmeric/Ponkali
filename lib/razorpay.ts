@@ -68,6 +68,18 @@ export async function createRazorpayOrder(params: {
   return res.json() as Promise<RazorpayOrder>;
 }
 
+/** Fetches a Razorpay order (for amount reconciliation). Null if not found / not configured. */
+export async function fetchRazorpayOrder(orderId: string): Promise<RazorpayOrder | null> {
+  const { keyId, keySecret } = getRazorpayKeys();
+  if (!keyId || !keySecret || !orderId) return null;
+  const auth = Buffer.from(`${keyId}:${keySecret}`).toString('base64');
+  const res = await fetch(`${RAZORPAY_API}/orders/${encodeURIComponent(orderId)}`, {
+    headers: { Authorization: `Basic ${auth}` },
+  });
+  if (!res.ok) return null;
+  return res.json() as Promise<RazorpayOrder>;
+}
+
 /** Verifies the Checkout handler signature: HMAC_SHA256(order_id|payment_id, secret). */
 export function verifyPaymentSignature(
   orderId: string,

@@ -122,8 +122,16 @@ async function initialize(db: Db) {
     CREATE INDEX IF NOT EXISTS idx_orders_email ON orders (lower(email));
     -- Admin orders list sorts newest-first; the dashboard aggregates filter by date.
     CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders (created_at DESC);
-    -- order_items is joined/aggregated by order_id on every admin orders page.
-    CREATE INDEX IF NOT EXISTS idx_order_items_order_id ON order_items (order_id);
+
+    -- Razorpay linkage. razorpay_order_id is set when the checkout starts and
+    -- razorpay_payment_id once the payment is captured. Both UNIQUE so the
+    -- browser callback and the webhook can never create the same order twice.
+    ALTER TABLE orders ADD COLUMN IF NOT EXISTS razorpay_order_id TEXT;
+    ALTER TABLE orders ADD COLUMN IF NOT EXISTS razorpay_payment_id TEXT;
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_orders_razorpay_order_id
+      ON orders (razorpay_order_id) WHERE razorpay_order_id IS NOT NULL;
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_orders_razorpay_payment_id
+      ON orders (razorpay_payment_id) WHERE razorpay_payment_id IS NOT NULL;
 
     CREATE TABLE IF NOT EXISTS order_items (
       id SERIAL PRIMARY KEY,
@@ -132,6 +140,26 @@ async function initialize(db: Db) {
       weight TEXT NOT NULL,
       quantity INTEGER NOT NULL,
       price REAL NOT NULL
+    );
+    -- order_items is joined/aggregated by order_id on every admin orders page.
+    -- (Must come AFTER the table: the whole bootstrap runs as one statement
+    -- batch and an index on a not-yet-created table aborts all of it.)
+    CREATE INDEX IF NOT EXISTS idx_order_items_order_id ON order_items (order_id);
+
+    -- Online checkout in flight. Written when the Razorpay order is created —
+    -- BEFORE the customer pays — with the server-priced cart and the delivery
+    -- details, so the webhook can create the real order on its own even if the
+    -- customer's browser never comes back from the UPI app. Also what /verify
+    -- reads, so the amount paid always matches the cart that was priced.
+    CREATE TABLE IF NOT EXISTS pending_payments (
+      id SERIAL PRIMARY KEY,
+      razorpay_order_id TEXT UNIQUE NOT NULL,
+      receipt TEXT NOT NULL,
+      amount_paise INTEGER NOT NULL,
+      cart JSONB NOT NULL,
+      customer JSONB NOT NULL,
+      user_id INTEGER,
+      created_at TIMESTAMPTZ DEFAULT now()
     );
 
     CREATE TABLE IF NOT EXISTS products (

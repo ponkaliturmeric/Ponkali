@@ -17,6 +17,8 @@ const INDIAN_STATES = [
   'Delhi', 'Jammu and Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry',
 ];
 
+const PENDING_KEY = 'ponkali_pending_rzp_order';
+
 const inputClass = 'w-full border border-black/12 rounded-xl px-4 py-3 text-[14px] focus:outline-none focus:border-gold transition-colors bg-white placeholder:text-gray-300';
 const labelClass = 'block text-[12px] font-semibold text-dark-brown uppercase tracking-wider mb-1.5';
 
@@ -57,6 +59,45 @@ export default function CheckoutPage() {
       })
       .catch(() => {});
     return () => { active = false; };
+  }, []);
+
+  // Razorpay order id of a payment in progress. On mobile UPI the browser tab
+  // is often killed while the customer is in their UPI app; when they come back
+  // the page reloads and the Razorpay `handler` never fires. The webhook has
+  // still recorded the order server-side, so on load we check for it and send
+  // the customer to their confirmation instead of showing a stale cart.
+  useEffect(() => {
+    let rzpOrderId: string | null = null;
+    try { rzpOrderId = localStorage.getItem(PENDING_KEY); } catch { /* ignore */ }
+    if (!rzpOrderId) return;
+
+    let cancelled = false;
+    let attempts = 0;
+    const check = async () => {
+      if (cancelled) return;
+      attempts += 1;
+      try {
+        const res = await fetch(`/api/razorpay/status?razorpay_order_id=${encodeURIComponent(rzpOrderId!)}`);
+        const data = await res.json();
+        if (data.order_id) {
+          // Same local snapshot the confirmation page falls back to for guests.
+          try {
+            localStorage.removeItem(PENDING_KEY);
+            if (data.order) localStorage.setItem(`ponkali_order_${data.order_id}`, JSON.stringify(data.order));
+          } catch { /* ignore */ }
+          clearCart();
+          router.push(`/order-confirmation/${data.order_id}`);
+          return;
+        }
+      } catch { /* network — try again below */ }
+      // The webhook can lag the UPI app by a few seconds; poll briefly, then
+      // forget the pending id so an abandoned payment doesn't haunt the page.
+      if (attempts < 6) setTimeout(check, 2500);
+      else { try { localStorage.removeItem(PENDING_KEY); } catch { /* ignore */ } }
+    };
+    check();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const shipping = 0; // Free shipping on every order.
@@ -124,10 +165,12 @@ export default function CheckoutPage() {
   const payWithRazorpay = async () => {
     setLoading(true);
     try {
+      // Delivery details go up BEFORE payment so the server can record the
+      // order from the webhook alone if this page never regains control.
       const res = await fetch('/api/razorpay/order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items: cartPayload() }),
+        body: JSON.stringify({ ...form, items: cartPayload() }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -135,6 +178,7 @@ export default function CheckoutPage() {
         setLoading(false);
         return;
       }
+      try { localStorage.setItem(PENDING_KEY, data.orderId); } catch { /* ignore */ }
 
       const RazorpayCtor = (window as unknown as {
         Razorpay?: new (o: Record<string, unknown>) => {
@@ -188,6 +232,7 @@ export default function CheckoutPage() {
               setLoading(false);
               return;
             }
+            try { localStorage.removeItem(PENDING_KEY); } catch { /* ignore */ }
             persistOrder(verifyData.order_id, 'online', true);
           } catch {
             setError('Could not verify payment. If money was deducted, please contact us.');
@@ -195,11 +240,14 @@ export default function CheckoutPage() {
           }
         },
         modal: {
+          // Keep PENDING_KEY on dismiss: the customer may have paid in the UPI
+          // app and closed the modal; the resume check above will pick it up.
           ondismiss: () => setLoading(false),
         },
       });
 
       rzp.on('payment.failed', (resp) => {
+        try { localStorage.removeItem(PENDING_KEY); } catch { /* ignore */ }
         setError(resp.error?.description || 'Payment failed. Please try again.');
         setLoading(false);
       });

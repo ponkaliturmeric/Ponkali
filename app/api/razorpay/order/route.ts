@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { priceCart, toPaise } from '@/lib/pricing';
-import { createRazorpayOrder, getRazorpayKeys, isRazorpayConfigured } from '@/lib/razorpay';
+import { getRazorpayKeys, isRazorpayConfigured } from '@/lib/razorpay';
+import { getCustomerSession } from '@/lib/customer-auth';
+import { startRazorpayCheckout } from '@/lib/payments';
 
-function generateReceipt(): string {
-  const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-  const rand = Math.floor(1000 + Math.random() * 9000);
-  return `PKL-${date}-${rand}`;
-}
-
+/**
+ * Step 1 of online checkout. Prices the cart on the server, creates the
+ * Razorpay order, and SAVES the cart + delivery details (pending_payments)
+ * before the customer pays — so the webhook can create the order on its own
+ * if the browser never returns from the UPI app. See lib/payments.ts.
+ */
 export async function POST(request: NextRequest) {
   try {
     if (!isRazorpayConfigured()) {
@@ -18,29 +19,27 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
+    const session = getCustomerSession();
 
-    // Amounts are computed server-side from the catalogue — client totals are ignored.
-    const cart = await priceCart(body.items, { cod: false });
-    if (!cart) {
-      return NextResponse.json({ error: 'Your cart is empty or contains an unavailable item.' }, { status: 400 });
+    const started = await startRazorpayCheckout({
+      items: body.items,
+      customer: body,
+      user_id: session?.uid ?? null,
+    });
+    if (!started.ok) {
+      return NextResponse.json({ error: started.error }, { status: 400 });
     }
 
-    const receipt = generateReceipt();
-    const order = await createRazorpayOrder({
-      amountPaise: toPaise(cart.total),
-      receipt,
-      notes: { receipt },
-    });
-
     const { keyId } = getRazorpayKeys();
+    const r = started.result;
     return NextResponse.json({
       keyId,
-      orderId: order.id,
-      amount: order.amount,
-      currency: order.currency,
-      receipt,
+      orderId: r.razorpayOrderId,
+      amount: r.amountPaise,
+      currency: r.currency,
+      receipt: r.receipt,
       // Echo the authoritative breakdown so the UI can reconcile if needed.
-      breakdown: { subtotal: cart.subtotal, shipping: cart.shipping, total: cart.total },
+      breakdown: { subtotal: r.cart.subtotal, shipping: r.cart.shipping, total: r.cart.total },
     });
   } catch (error) {
     console.error('Razorpay order error:', error);
