@@ -2,6 +2,7 @@ import { getDb } from './db';
 import type { PricedCart } from './pricing';
 import { sendOrderEmails } from './email';
 import { sendOrderWhatsApp } from './whatsapp';
+import { normalizePhone } from './customer-auth';
 
 /**
  * Order persistence — shared by the Cash-on-Delivery route (/api/orders) and the
@@ -30,6 +31,21 @@ export function missingCustomerField(c: Partial<CustomerDetails>): string | null
   for (const f of REQUIRED_FIELDS) {
     if (!String(c[f] ?? '').trim()) return f;
   }
+  return null;
+}
+
+/**
+ * Format checks on the fields couriers and WhatsApp depend on. Phone must be a
+ * 10-digit Indian mobile (6–9 first digit, +91 / 0 prefix tolerated and
+ * stripped); PIN must be 6 digits not starting with 0. Returns a customer-facing
+ * message, or null when valid. Mutates `c` to the normalised phone.
+ */
+export function invalidCustomerField(c: Partial<CustomerDetails>): string | null {
+  const phone = normalizePhone(String(c.phone ?? ''));
+  if (!/^[6-9]\d{9}$/.test(phone)) return 'Please enter a valid 10-digit mobile number.';
+  c.phone = phone;
+  const pin = String(c.pincode ?? '').trim();
+  if (!/^[1-9]\d{5}$/.test(pin)) return 'Please enter a valid 6-digit PIN code.';
   return null;
 }
 

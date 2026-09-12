@@ -105,9 +105,18 @@ export default function CheckoutPage() {
   const total = subtotal + shipping + codCharge;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
-    if (e.target.name === 'state') setShipState(e.target.value);
+    const { name } = e.target;
+    let { value } = e.target;
+    // Phone and PIN accept digits only and stop at their exact length, so a typo
+    // or a pasted "+91 98765 43210" can't get through.
+    if (name === 'phone') value = value.replace(/\D/g, '').slice(0, 10);
+    if (name === 'pincode') value = value.replace(/\D/g, '').slice(0, 6);
+    setForm(prev => ({ ...prev, [name]: value }));
+    if (name === 'state') setShipState(value);
   };
+
+  const phoneValid = /^[6-9]\d{9}$/.test(form.phone);
+  const pincodeValid = /^[1-9]\d{5}$/.test(form.pincode);
 
   const cartPayload = () => items.map(i => ({ slug: i.product.slug, quantity: i.quantity }));
 
@@ -266,6 +275,14 @@ export default function CheckoutPage() {
       setError('Your cart is empty.');
       return;
     }
+    if (!phoneValid) {
+      setError('Please enter a valid 10-digit mobile number.');
+      return;
+    }
+    if (!pincodeValid) {
+      setError('Please enter a valid 6-digit PIN code.');
+      return;
+    }
     if (paymentMethod === 'online') {
       await payWithRazorpay();
     } else {
@@ -307,8 +324,14 @@ export default function CheckoutPage() {
                   </div>
                   <div>
                     <label className={labelClass}>Phone (WhatsApp) *</label>
-                    <input name="phone" required type="tel" value={form.phone} onChange={handleChange}
-                      placeholder="9876543210" className={inputClass} />
+                    <input name="phone" required type="tel" inputMode="numeric" autoComplete="tel-national"
+                      pattern="[6-9][0-9]{9}" maxLength={10} title="10-digit Indian mobile number"
+                      value={form.phone} onChange={handleChange}
+                      placeholder="9876543210"
+                      className={`${inputClass} ${form.phone && !phoneValid ? 'border-red-300' : ''}`} />
+                    {form.phone && !phoneValid && (
+                      <p className="text-[12px] text-red-500 mt-1">Enter a 10-digit mobile number starting with 6–9.</p>
+                    )}
                   </div>
                   <div>
                     <label className={labelClass}>Email</label>
@@ -339,8 +362,14 @@ export default function CheckoutPage() {
                   </div>
                   <div>
                     <label className={labelClass}>PIN Code *</label>
-                    <input name="pincode" required value={form.pincode} onChange={handleChange}
-                      placeholder="600001" className={inputClass} />
+                    <input name="pincode" required type="text" inputMode="numeric" autoComplete="postal-code"
+                      pattern="[1-9][0-9]{5}" maxLength={6} title="6-digit PIN code"
+                      value={form.pincode} onChange={handleChange}
+                      placeholder="600001"
+                      className={`${inputClass} ${form.pincode && !pincodeValid ? 'border-red-300' : ''}`} />
+                    {form.pincode && !pincodeValid && (
+                      <p className="text-[12px] text-red-500 mt-1">Enter a valid 6-digit PIN code.</p>
+                    )}
                   </div>
                   <div className="sm:col-span-2">
                     <label className={labelClass}>State *</label>

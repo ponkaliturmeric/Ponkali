@@ -3,7 +3,7 @@ import { getAdminSession } from '@/lib/auth';
 import { getCustomerSession } from '@/lib/customer-auth';
 import { getDb } from '@/lib/db';
 import { priceCart } from '@/lib/pricing';
-import { createOrder, missingCustomerField, type CustomerDetails } from '@/lib/orders';
+import { createOrder, invalidCustomerField, missingCustomerField, type CustomerDetails } from '@/lib/orders';
 
 const PAGE_SIZE = 20;
 
@@ -118,6 +118,10 @@ export async function POST(request: NextRequest) {
     const missing = missingCustomerField(customer);
     if (missing) {
       return NextResponse.json({ error: `Missing required field: ${missing}` }, { status: 400 });
+    }
+    const invalid = invalidCustomerField(customer);
+    if (invalid) {
+      return NextResponse.json({ error: invalid }, { status: 400 });
     }
 
     const payment_method = body.payment_method === 'online' ? 'online' : 'cod';

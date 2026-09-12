@@ -1,5 +1,5 @@
 import { getDb } from './db';
-import { createOrder, generateOrderId, missingCustomerField, type CustomerDetails } from './orders';
+import { createOrder, generateOrderId, invalidCustomerField, missingCustomerField, type CustomerDetails } from './orders';
 import { priceCart, toPaise, type PricedCart } from './pricing';
 import { createRazorpayOrder, fetchRazorpayOrder } from './razorpay';
 
@@ -40,6 +40,8 @@ export async function startRazorpayCheckout(input: {
 }): Promise<{ ok: true; result: StartCheckoutResult } | { ok: false; error: string }> {
   const missing = missingCustomerField(input.customer);
   if (missing) return { ok: false, error: `Missing required field: ${missing}` };
+  const invalid = invalidCustomerField(input.customer);
+  if (invalid) return { ok: false, error: invalid };
 
   const cart = await priceCart(input.items, { cod: false, state: input.customer.state });
   if (!cart) return { ok: false, error: 'Your cart is empty or contains an unavailable item.' };
