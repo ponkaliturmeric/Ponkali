@@ -2,19 +2,18 @@ import type { Metadata } from 'next';
 import ProductDetail from '@/components/ProductDetail';
 import JsonLd from '@/components/JsonLd';
 import { PRODUCTS } from '@/lib/products';
+import { getCatalogItem } from '@/lib/catalog';
 import { buildMetadata, productJsonLd, breadcrumbJsonLd } from '@/lib/seo';
 
-// Pre-render every SKU at build time — products are a fixed catalogue.
+// The set of SKUs is fixed in code, so every slug is pre-rendered; the price and
+// stock inside come from the DB (admin-editable) and refresh at most once a minute.
 export function generateStaticParams() {
   return PRODUCTS.map((p) => ({ slug: p.slug }));
 }
+export const revalidate = 60;
 
-function findProduct(slug: string) {
-  return PRODUCTS.find((p) => p.slug === slug);
-}
-
-export function generateMetadata({ params }: { params: { slug: string } }): Metadata {
-  const product = findProduct(params.slug);
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const product = await getCatalogItem(params.slug);
 
   if (!product) {
     return buildMetadata({
@@ -24,7 +23,7 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
   }
 
   const title = `${product.name} ${product.weight}: Buy Pure GI-Tagged Turmeric`;
-  const description = `Buy ${product.name} (${product.weight}) for ₹${product.price}. Naturally grown GI-tagged Erode turmeric, 2.5% to 3.5% natural curcumin, FSSAI certified. ${product.in_stock ? 'In stock' : 'Currently unavailable'} · Free shipping on every order.`;
+  const description = `Buy ${product.name} (${product.weight}) for ₹${product.price}. Naturally grown GI-tagged Erode turmeric, 2.5% to 3.5% natural curcumin, FSSAI certified. ${product.in_stock ? 'In stock' : 'Currently unavailable'} · Delivered all over India.`;
 
   return buildMetadata({
     title,
@@ -39,8 +38,8 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
   });
 }
 
-export default function ProductPage({ params }: { params: { slug: string } }) {
-  const product = findProduct(params.slug);
+export default async function ProductPage({ params }: { params: { slug: string } }) {
+  const product = await getCatalogItem(params.slug);
 
   return (
     <>

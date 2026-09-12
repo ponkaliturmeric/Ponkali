@@ -5,7 +5,7 @@ import ProductShowcase from '@/components/ProductShowcase';
 import FarmGallery from '@/components/FarmGallery';
 import JsonLd from '@/components/JsonLd';
 import { buildMetadata, productListJsonLd} from '@/lib/seo';
-import { PRODUCTS, FROM_PRICE } from '@/lib/products';
+import { getCatalog, getFromPrice } from '@/lib/catalog';
 import { MIN_SHIPPING } from '@/lib/shipping';
 import {
   MapPinIcon, LeafIcon, TruckIcon, DropletIcon,
@@ -29,10 +29,14 @@ const TRUST_BADGES = [
   { Icon: ShieldCheckIcon, title: 'FSSAI Certified',  desc: 'Lic. 22426064000154' },
 ];
 
-export default function HomePage() {
+// Prices come from the DB (admin-editable). Re-render at most once a minute.
+export const revalidate = 60;
+
+export default async function HomePage() {
+  const [catalog, fromPrice] = await Promise.all([getCatalog(), getFromPrice()]);
   return (
     <>
-      <JsonLd data={[productListJsonLd(PRODUCTS)]} />
+      <JsonLd data={[productListJsonLd(catalog)]} />
 
       {/* ─── 1. HERO ─── */}
       <section className="bg-dark-brown relative overflow-hidden">
@@ -78,7 +82,7 @@ export default function HomePage() {
                 href="/shop"
                 className="bg-cream text-dark-brown px-9 py-4 rounded-full font-bold text-[15px] hover:bg-white transition-all duration-150 text-center tracking-wide shadow-md"
               >
-                Shop Now, from ₹{FROM_PRICE}
+                Shop Now, from ₹{fromPrice}
               </Link>
               <Link
                 href="/our-story"
@@ -120,7 +124,7 @@ export default function HomePage() {
             </div>
             <div className="hidden md:block absolute -right-5 bottom-1/4 bg-dark-brown border border-gold/20 rounded-2xl px-4 py-3.5 shadow-2xl">
               <p className="text-[10px] text-gold/50 font-semibold uppercase tracking-wider mb-0.5">Starting at</p>
-              <p className="text-[22px] font-extrabold text-gold leading-none">₹{FROM_PRICE}</p>
+              <p className="text-[22px] font-extrabold text-gold leading-none">₹{fromPrice}</p>
               <p className="text-[10px] text-cream/30 mt-0.5">Delivery from ₹{MIN_SHIPPING}</p>
             </div>
           </div>

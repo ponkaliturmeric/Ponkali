@@ -51,6 +51,16 @@ export async function getCatalog(): Promise<Product[]> {
   }
 }
 
+/**
+ * Lowest current price across in-stock packs — for every "from ₹X" line. Reads
+ * the live catalogue so the admin's price edits show up in the hero too.
+ */
+export async function getFromPrice(): Promise<number> {
+  const catalog = await getCatalog();
+  const pool = catalog.filter((p) => p.in_stock).length ? catalog.filter((p) => p.in_stock) : catalog;
+  return Math.min(...pool.map((p) => p.price));
+}
+
 export async function getCatalogItem(slug: string): Promise<Product | null> {
   const catalog = await getCatalog();
   return catalog.find((p) => p.slug === slug) ?? null;
