@@ -15,9 +15,9 @@ import Mandala from '@/components/Mandala';
 import HeroVideo from '@/components/HeroVideo';
 
 export const metadata: Metadata = buildMetadata({
-  title: 'Pure Erode Turmeric, Farm Direct',
+  title: 'Pure Erode Turmeric Powder, Farm Direct from Tamil Nadu',
   description:
-    'Buy GI-tagged Erode turmeric powder, naturally grown and freshly ground. 2.5% to 3.5% natural curcumin, zero additives and FSSAI certified. Shipped direct from our family farm in Erode, all over India.',
+    'Buy GI-tagged Erode turmeric powder online in India, direct from a third-generation farm. 2.5% to 3.5% natural curcumin, no colour or fillers, FSSAI certified, ground and packed fresh. Delivered all over India.',
   path: '/',
 });
 

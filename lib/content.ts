@@ -64,6 +64,16 @@ export const FAQ: FaqItem[] = [
       'You can pay online with UPI (Google Pay, PhonePe, Paytm, BHIM), debit and credit cards, net banking or wallets through Razorpay, or choose Cash on Delivery (₹30 handling charge). Online payments are confirmed instantly and you receive your order ID by WhatsApp and email.',
   },
   {
+    question: 'Which is the best turmeric powder in India?',
+    answer:
+      'There is no single "best" — it depends on what you cook and what you value. For everyday Indian cooking, the varieties most cooks rate highest are the GI-tagged regional ones: Erode and Salem (Tamil Nadu) for a balanced colour, aroma and 2.5%–4% curcumin, Alleppey (Kerala) for higher curcumin and a deeper colour, and Lakadong (Meghalaya) for the highest curcumin but a more bitter taste and limited supply. Whichever you choose, the things that actually separate a good turmeric from a poor one are: a stated origin and curcumin figure, an ingredient list that says only "turmeric", a recent packing date, and a seller who grinds fresh rather than blends old stock. Ponkali is single-origin Erode turmeric, ground and packed on our own farm, with 2.5%–3.5% curcumin printed on the pack.',
+  },
+  {
+    question: 'Which turmeric has the highest curcumin content?',
+    answer:
+      'Among Indian varieties, Lakadong turmeric from Meghalaya tests highest at roughly 6%–7.5% curcumin, followed by Alleppey finger turmeric from Kerala at about 4%–6%. Erode and Salem turmeric from Tamil Nadu sit around 2.5%–4%, which is above general-market powder (2%–3%) and is the range most South Indian cooking is built around. Higher is not automatically better for cooking — very high-curcumin turmeric is more bitter and is mostly grown for extraction into supplements.',
+  },
+  {
     question: 'What is "manjal" and "virali manjal"?',
     answer:
       '"Manjal" (மஞ்சள்) is the Tamil word for turmeric, and "manjal podi" is turmeric powder. "Virali manjal" refers to the whole dried finger rhizomes before grinding — the form traded in the Erode market. Ponkali grinds Erode virali manjal into powder on our own mill, which is why the colour and aroma are closer to freshly ground turmeric than to factory-blended powder.',
@@ -93,7 +103,7 @@ export interface Guide {
   faq?: FaqItem[];
 }
 
-export const GUIDES: Guide[] = [
+const CORE_GUIDES: Guide[] = [
   {
     slug: 'erode-turmeric-gi-tag',
     title: 'Erode Turmeric: Why It Is GI-Tagged and What Makes It Different',
@@ -279,6 +289,160 @@ export const GUIDES: Guide[] = [
     ],
   },
 ];
+
+const BUYERS_GUIDES: Guide[] = [
+  {
+    slug: 'best-turmeric-powder-in-india-how-to-choose',
+    title: 'Best Turmeric Powder in India: How to Choose (Buyer\'s Guide)',
+    description:
+      'An honest buyer\'s guide to choosing turmeric powder in India — which varieties are best for cooking, what curcumin figure to expect, how to read a label, and the red flags that mean adulteration or old stock.',
+    intro:
+      'Search "best turmeric powder in India" and you get lists of brands ranked by people who have not opened the packs. This is a different kind of guide: written by a family that has grown turmeric in Erode for three generations, it tells you what actually separates good turmeric from poor turmeric, so you can judge any pack — including ours — for yourself.',
+    published: '2026-09-12',
+    updated: '2026-09-12',
+    sections: [
+      {
+        heading: 'What "best" means for turmeric',
+        paragraphs: [
+          'Turmeric powder is judged on four things: colour (a deep golden yellow, not neon), aroma (earthy and slightly bitter, obvious when the pack opens), curcumin content (the compound behind the colour, usually 2%–5% by weight), and freshness (how long ago it was ground). A pack can score well on one and badly on another — a very high-curcumin turmeric can taste harsh in dal, and a beautifully aromatic one can be adulterated with dye. The best turmeric for you is the one that scores well on all four for the way you cook.',
+        ],
+      },
+      {
+        heading: 'The Indian varieties worth knowing',
+        paragraphs: [
+          'India grows around 80% of the world\'s turmeric, and a few regions are recognised for quality — several with a Geographical Indication (GI) tag, which legally ties the name to the place.',
+        ],
+        bullets: [
+          'Erode turmeric (Tamil Nadu, GI 2019): deep colour, strong aroma, about 2.5%–4% curcumin. Erode is India\'s largest turmeric market. Balanced for everyday cooking.',
+          'Salem turmeric (Tamil Nadu): a close neighbour of Erode with similar character, about 3%–4% curcumin.',
+          'Alleppey finger turmeric (Kerala): about 4%–6% curcumin, a darker orange-yellow, historically the export grade.',
+          'Lakadong turmeric (Meghalaya): the highest curcumin in India at roughly 6%–7.5%, more bitter, small harvests and premium prices; often bought for extraction rather than cooking.',
+          'Sangli / Rajapuri (Maharashtra) and Nizamabad (Telangana): large trading centres for bulb turmeric, generally 2%–3.5% curcumin, common in blended commercial powders.',
+        ],
+      },
+      {
+        heading: 'How to read a turmeric label',
+        paragraphs: ['Most of what you need to know is on the pack — or conspicuously missing from it.'],
+        bullets: [
+          'Ingredients: should say "turmeric" and nothing else. No "permitted colour", no "anti-caking agent".',
+          'Origin: a district or farm ("Erode, Tamil Nadu"), not just "Product of India". Blended powder cannot name a place.',
+          'Curcumin: a tested range ("2.5%–3.5%"), not a slogan ("high curcumin"). Be wary of "95% curcumin" — that is an extract for capsules, not a cooking powder.',
+          'FSSAI licence number: mandatory on any packaged food sold in India. Its absence is disqualifying.',
+          'Packing date: turmeric loses aroma and curcumin over 12–18 months. A pack with only a distant "best before" and no packing date is hiding its age.',
+          'Packaging: opaque or foil, properly sealed. Light and air degrade curcumin; a clear plastic pouch on a sunny shelf is a bad sign.',
+        ],
+      },
+      {
+        heading: 'Red flags for adulteration',
+        paragraphs: [
+          'Turmeric is one of the most adulterated spices in India. Dyes (metanil yellow, lead chromate) are added for colour, and chalk, rice flour or tapioca starch for weight. The warning signs: a lemon-bright or orange colour, a price far below the market (good turmeric costs money to grow, cure and grind), a silky talc-like feel instead of a slightly gritty one, and water that turns strongly yellow when a spoon of powder is stirred in. Our guide on checking turmeric purity at home walks through five tests.',
+        ],
+      },
+      {
+        heading: 'Farm-direct vs. brand vs. loose market turmeric',
+        paragraphs: [
+          'Loose turmeric from a spice shop is the cheapest and the riskiest — no label, no origin, no accountability. Packaged national brands are safer and consistent, but they blend rhizomes from many regions and seasons and hold stock for months, so the aroma is muted and the origin is unknowable. Farm-direct turmeric — bought from the grower who cured, ground and packed it — is the only option where the person selling it knows exactly what is in the pack. It costs more than loose turmeric and about the same as a premium brand.',
+        ],
+      },
+      {
+        heading: 'A simple checklist',
+        paragraphs: ['If a pack passes all six, it is good turmeric regardless of the brand name:'],
+        bullets: [
+          'Single named origin',
+          'Stated curcumin range',
+          'Ingredients: turmeric only',
+          'FSSAI licence printed',
+          'Packing date within the last few months',
+          'Passes the water test at home',
+        ],
+      },
+      {
+        heading: 'Where Ponkali fits',
+        paragraphs: [
+          'Ponkali is Erode turmeric from one farm, ours, in the GI-tagged region. We grow, cure, grind and pack it ourselves, print the tested curcumin range (2.5%–3.5%) and FSSAI licence on every pouch, and ship within days of grinding. It passes the checklist above — and we would rather you check than take our word for it. Available in 100 g to 1 kg, delivered across India.',
+        ],
+      },
+    ],
+    faq: [
+      {
+        question: 'Is expensive turmeric better?',
+        answer: 'Not automatically, but very cheap turmeric is almost always a bad sign: growing, curing, drying and grinding turmeric properly has a real cost, and prices far below the market are usually met by adding fillers or dye.',
+      },
+      {
+        question: 'Is Erode turmeric the best turmeric in India?',
+        answer: 'It is one of the best-regarded for cooking, which is why it carries a GI tag — balanced colour, aroma and curcumin. Lakadong and Alleppey have higher curcumin; Erode is generally preferred for everyday South Indian food.',
+      },
+    ],
+  },
+  {
+    slug: 'erode-vs-salem-vs-alleppey-vs-lakadong-turmeric',
+    title: 'Erode vs Salem vs Alleppey vs Lakadong Turmeric: Which Is Best?',
+    description:
+      'A side-by-side comparison of India\'s best-known turmeric varieties — Erode, Salem, Alleppey and Lakadong — by curcumin content, colour, taste, price and what each is best used for.',
+    intro:
+      'Four names come up whenever people argue about the best turmeric in India. They are genuinely different — in curcumin, in taste, in price and in what they are grown for. Here is how they compare, without a sales pitch.',
+    published: '2026-09-12',
+    updated: '2026-09-12',
+    sections: [
+      {
+        heading: 'At a glance',
+        paragraphs: ['Typical figures; curcumin varies with season, curing and storage.'],
+        bullets: [
+          'Erode (Tamil Nadu) — curcumin ~2.5%–4% · deep golden yellow · earthy, balanced · GI-tagged 2019 · best for everyday cooking.',
+          'Salem (Tamil Nadu) — curcumin ~3%–4% · golden yellow · similar to Erode, slightly bolder · best for everyday cooking.',
+          'Alleppey (Kerala) — curcumin ~4%–6% · orange-yellow · stronger, slightly bitter · historically the export grade · good for colour-heavy dishes and extraction.',
+          'Lakadong (Meghalaya) — curcumin ~6%–7.5% · bright orange · noticeably bitter · very limited supply, premium price · mostly bought for health use and extraction.',
+        ],
+      },
+      {
+        heading: 'Curcumin: the number everyone quotes',
+        paragraphs: [
+          'Lakadong wins on raw curcumin, Alleppey second, then Salem and Erode close together. But curcumin is the pigment, not the flavour, and at 6%+ it makes food bitter enough that many cooks dilute it. For a kadai of vegetables or a pot of sambar, 2.5%–4% gives full colour without harshness — which is why the Tamil Nadu varieties dominate South Indian kitchens.',
+        ],
+      },
+      {
+        heading: 'Aroma and taste',
+        paragraphs: [
+          'Erode and Salem turmeric are prized for aroma — the warm, earthy smell that hits when the pack opens and blooms in hot oil. Alleppey is more pungent; Lakadong is sharper and more medicinal. If you cook Indian food daily, aroma matters more than a percentage point of curcumin.',
+        ],
+      },
+      {
+        heading: 'Price and availability',
+        paragraphs: [
+          'Erode and Salem are widely grown, so genuine single-origin powder is available at fair prices. Alleppey is a smaller crop and costs more. Lakadong is grown in a few districts of Meghalaya in small quantities; genuine Lakadong is expensive, and the name is heavily misused on ordinary turmeric.',
+        ],
+      },
+      {
+        heading: 'Which should you buy?',
+        paragraphs: [
+          'For cooking: Erode or Salem. Balanced, aromatic, affordable, and — when bought from a named farm — traceable.',
+          'For colour-intensive dishes or homemade extracts: Alleppey.',
+          'For the highest curcumin regardless of taste and price: Lakadong, if you can verify it is genuine.',
+          'Whatever the variety, the same rules apply: named origin, stated curcumin, turmeric-only ingredients, recent packing date, and a water test at home.',
+        ],
+      },
+      {
+        heading: 'About Ponkali',
+        paragraphs: [
+          'Ponkali is Erode turmeric, grown and ground on our own farm in the GI-tagged region and packed within days of grinding. It tests at 2.5%–3.5% curcumin. If you want an Erode turmeric you can trace to one field, that is what we sell. Delivered anywhere in India.',
+        ],
+      },
+    ],
+    faq: [
+      {
+        question: 'Is Lakadong turmeric better than Erode turmeric?',
+        answer: 'Lakadong has roughly double the curcumin, but it is more bitter, far more expensive, and frequently counterfeited. For everyday cooking most people prefer Erode; for maximum curcumin, genuine Lakadong.',
+      },
+      {
+        question: 'Is Salem turmeric the same as Erode turmeric?',
+        answer: 'They are neighbouring Tamil Nadu districts with very similar turmeric. The GI tag applies to the Erode region specifically; both are excellent cooking varieties.',
+      },
+    ],
+  },
+];
+
+/** All guides, in display order. */
+export const GUIDES: Guide[] = [...CORE_GUIDES, ...BUYERS_GUIDES];
 
 export function getGuide(slug: string): Guide | undefined {
   return GUIDES.find((g) => g.slug === slug);
