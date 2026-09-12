@@ -13,6 +13,8 @@ import {
 } from '@/components/Icons';
 import Mandala from '@/components/Mandala';
 import HeroVideo from '@/components/HeroVideo';
+import Faq from '@/components/Faq';
+import { FAQ, GUIDES } from '@/lib/content';
 
 export const metadata: Metadata = buildMetadata({
   title: 'Pure Erode Turmeric, Farm Direct',
@@ -261,6 +263,27 @@ export default async function HomePage() {
       </section>
 
       
+      {/* ─── 9. GUIDES ─── */}
+      <section className="bg-white py-20 px-5">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-10">
+            <p className="text-gold text-[11px] font-semibold tracking-[0.35em] uppercase mb-4">Learn</p>
+            <h2 className="font-hero text-[30px] md:text-[38px] font-extrabold text-dark-brown tracking-tight">Know your turmeric</h2>
+          </div>
+          <div className="grid md:grid-cols-3 gap-5">
+            {GUIDES.map((g) => (
+              <Link key={g.slug} href={`/guides/${g.slug}`} className="bg-cream rounded-2xl p-6 border border-black/6 hover:border-gold/40 transition-colors group">
+                <h3 className="font-bold text-dark-brown text-[16px] leading-snug mb-2 group-hover:text-gold transition-colors">{g.title}</h3>
+                <p className="text-[13px] text-gray-500 leading-[1.7]">{g.description}</p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── 9b. FAQ ─── */}
+      <Faq items={FAQ} />
+
       {/* ─── 10. CTA + GUARANTEE ─── */}
       <section className="py-20 px-5 bg-[#F5E4B0]">
         <div className="max-w-xl mx-auto text-center">

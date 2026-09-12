@@ -3,6 +3,8 @@ import ProductDetail from '@/components/ProductDetail';
 import JsonLd from '@/components/JsonLd';
 import { PRODUCTS } from '@/lib/products';
 import { getCatalogItem } from '@/lib/catalog';
+import Faq from '@/components/Faq';
+import { FAQ } from '@/lib/content';
 import { buildMetadata, productJsonLd, breadcrumbJsonLd } from '@/lib/seo';
 
 // The set of SKUs is fixed in code, so every slug is pre-rendered; the price and
@@ -56,6 +58,13 @@ export default async function ProductPage({ params }: { params: { slug: string }
         />
       )}
       <ProductDetail slug={params.slug} />
+      {product && (
+        <Faq
+          items={FAQ.filter((f) => /curcumin|pure|store|deliver|payment|organic/i.test(f.question))}
+          eyebrow="Good to know"
+          title="Questions about this turmeric"
+        />
+      )}
     </>
   );
 }

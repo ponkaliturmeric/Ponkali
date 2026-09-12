@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import { Product } from './types';
+import { ZONE_RATES, STATE_ZONES, type Zone } from './shipping';
+import type { Guide } from './content';
 
 /**
  * Central SEO configuration. The production domain is read from
@@ -117,6 +119,10 @@ export function organizationJsonLd() {
           postalCode: BUSINESS.postalCode,
           addressCountry: BUSINESS.country,
         },
+        foundingLocation: { '@type': 'Place', name: 'Erode, Tamil Nadu, India' },
+        areaServed: 'IN',
+        knowsAbout: ['Erode turmeric', 'GI-tagged turmeric', 'Curcumin content', 'Turmeric farming', 'Turmeric adulteration tests'],
+        slogan: SITE_TAGLINE,
         contactPoint: {
           '@type': 'ContactPoint',
           telephone: BUSINESS.phone,
@@ -181,6 +187,8 @@ export function productJsonLd(product: Product) {
     mpn: product.slug,
     brand: { '@type': 'Brand', name: BUSINESS.brand },
     category: 'Spices > Turmeric Powder',
+    countryOfOrigin: 'IN',
+    weight: { '@type': 'QuantitativeValue', value: parseFloat(product.weight) * (product.weight.endsWith('kg') ? 1000 : 1), unitCode: 'GRM' },
     additionalProperty: [
       { '@type': 'PropertyValue', name: 'Net Weight', value: product.weight },
       { '@type': 'PropertyValue', name: 'Curcumin Content', value: '2.5% to 3.5%' },
@@ -197,19 +205,66 @@ export function productJsonLd(product: Product) {
         : 'https://schema.org/OutOfStock',
       itemCondition: 'https://schema.org/NewCondition',
       seller: { '@id': `${SITE_URL}/#organization` },
-      shippingDetails: {
-        '@type': 'OfferShippingDetails',
-        shippingRate: {
-          '@type': 'MonetaryAmount',
-          value: 0,
-          currency: 'INR',
-        },
-        shippingDestination: {
-          '@type': 'DefinedRegion',
-          addressCountry: 'IN',
-        },
-      },
+      shippingDetails: shippingDetailsJsonLd(),
+      hasMerchantReturnPolicy: RETURN_POLICY_JSONLD,
     },
+  };
+}
+
+/**
+ * One OfferShippingDetails per delivery zone, generated from lib/shipping.ts so
+ * Google's price/shipping display can never disagree with checkout. Rate shown
+ * is the first-500 g charge for that zone.
+ */
+function shippingDetailsJsonLd() {
+  const zones = Object.keys(ZONE_RATES) as Zone[];
+  return zones.map((z) => ({
+    '@type': 'OfferShippingDetails',
+    shippingRate: { '@type': 'MonetaryAmount', value: ZONE_RATES[z].base, currency: 'INR' },
+    shippingDestination: {
+      '@type': 'DefinedRegion',
+      addressCountry: 'IN',
+      addressRegion: Object.entries(STATE_ZONES).filter(([, zz]) => zz === z).map(([st]) => st),
+    },
+    deliveryTime: {
+      '@type': 'ShippingDeliveryTime',
+      handlingTime: { '@type': 'QuantitativeValue', minValue: 1, maxValue: 2, unitCode: 'DAY' },
+      transitTime: { '@type': 'QuantitativeValue', minValue: 3, maxValue: 5, unitCode: 'DAY' },
+    },
+  }));
+}
+
+/** Mirrors /refund-policy: damaged/incorrect items reported within 24 h, refund to source. */
+const RETURN_POLICY_JSONLD = {
+  '@type': 'MerchantReturnPolicy',
+  applicableCountry: 'IN',
+  returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
+  merchantReturnDays: 1,
+  returnMethod: 'https://schema.org/ReturnByMail',
+  returnFees: 'https://schema.org/FreeReturn',
+  refundType: 'https://schema.org/FullRefund',
+  merchantReturnLink: `${SITE_URL}/refund-policy`,
+};
+
+/** Article schema for a /guides page — author is the brand (a real farm, not a persona). */
+export function articleJsonLd(guide: Guide) {
+  const url = absoluteUrl(`/guides/${guide.slug}`);
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    '@id': `${url}#article`,
+    headline: guide.title,
+    description: guide.description,
+    url,
+    mainEntityOfPage: url,
+    datePublished: guide.published,
+    dateModified: guide.updated,
+    inLanguage: 'en-IN',
+    author: { '@id': `${SITE_URL}/#organization` },
+    publisher: { '@id': `${SITE_URL}/#organization` },
+    image: [absoluteUrl('/images/turmeric-har.jpeg'), absoluteUrl('/images/new-prd-img0.png')],
+    about: { '@type': 'Thing', name: 'Erode turmeric' },
+    articleSection: 'Guides',
   };
 }
 
