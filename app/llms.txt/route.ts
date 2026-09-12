@@ -43,6 +43,7 @@ export async function GET() {
     `- [Shipping policy](${SITE_URL}/shipping-policy): zone rates and delivery times`,
     `- [Refund policy](${SITE_URL}/refund-policy)`,
     `- [Contact](${SITE_URL}/contact)`,
+    `- [FAQ](${SITE_URL}/faq)`,
     '',
     '## Guides',
     '',

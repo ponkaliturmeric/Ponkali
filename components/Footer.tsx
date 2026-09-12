@@ -124,6 +124,7 @@ export default function Footer() {
                 ['Our Story', '/our-story'],
                 ['From Our Farm', '/farm'],
                 ['Turmeric Guides', '/guides'],
+                ['FAQ', '/faq'],
                 ['All Products', '/shop'],
                 ['Contact Us', '/contact'],
               ].map(([label, href]) => (
