@@ -3,12 +3,17 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useCart } from '@/components/CartContext';
-import { MinusIcon, PlusIcon, TrashIcon } from '@/components/Icons';
+import { MinusIcon, PlusIcon, TrashIcon, TruckIcon } from '@/components/Icons';
+import { useShippingEstimate, useShippingState } from '@/components/useShippingEstimate';
+import { INDIAN_STATES, FREE_SHIPPING_ABOVE } from '@/lib/shipping';
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, subtotal, clearCart } = useCart();
-  const shipping = 0; // Free shipping on every order.
+  const [shipState, setShipState] = useShippingState();
+  const quote = useShippingEstimate(items, subtotal, shipState);
+  const shipping = quote.charge;
   const total = subtotal + shipping;
+  const toFree = FREE_SHIPPING_ABOVE != null ? Math.max(0, FREE_SHIPPING_ABOVE - subtotal) : null;
 
   if (items.length === 0) {
     return (
@@ -37,10 +42,29 @@ export default function CartPage() {
           Cart <span className="text-gray-300 font-normal text-[24px]">({items.reduce((s, i) => s + i.quantity, 0)})</span>
         </h1>
 
-        {/* Free shipping on every order */}
+        {/* Delivery estimate — pick a state to see the exact charge before checkout */}
         {subtotal > 0 && (
-          <div className="bg-green-50 border border-green-100 rounded-2xl p-4 mb-6">
-            <p className="text-[14px] font-semibold text-green-700">Free shipping on every order</p>
+          <div className="bg-white border border-black/6 rounded-2xl p-4 mb-6 flex flex-col sm:flex-row sm:items-center gap-3">
+            <div className="flex items-center gap-2.5 flex-1">
+              <TruckIcon className="w-4 h-4 text-gold flex-shrink-0" />
+              <p className="text-[14px] text-dark-brown">
+                {quote.free
+                  ? <span className="font-semibold text-green-700">Free delivery on this order</span>
+                  : <>Delivery to <span className="font-semibold">{quote.zoneLabel}</span>: <span className="font-semibold">₹{shipping}</span>
+                      <span className="text-gray-400"> · {quote.slabs * 500 >= 1000 ? `${(quote.slabs * 0.5).toFixed(1)} kg` : '500 g'} slab</span></>}
+                {toFree != null && toFree > 0 && (
+                  <span className="text-gray-400"> · add ₹{toFree} more for free delivery</span>
+                )}
+              </p>
+            </div>
+            <select
+              value={shipState}
+              onChange={(e) => setShipState(e.target.value)}
+              aria-label="Delivery state"
+              className="border border-black/12 rounded-xl px-3 py-2 text-[13px] bg-white focus:outline-none focus:border-gold"
+            >
+              {INDIAN_STATES.map((st) => <option key={st} value={st}>{st}</option>)}
+            </select>
           </div>
         )}
 
@@ -109,8 +133,10 @@ export default function CartPage() {
                   <span className="font-semibold">₹{subtotal}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-500">Shipping</span>
-                  <span className="text-green-600 font-semibold">Free</span>
+                  <span className="text-gray-500">Delivery <span className="text-gray-300">({shipState})</span></span>
+                  {shipping === 0
+                    ? <span className="text-green-600 font-semibold">Free</span>
+                    : <span className="font-semibold">₹{shipping}</span>}
                 </div>
               </div>
               <div className="border-t border-black/6 mt-4 pt-4 flex justify-between font-extrabold text-dark-brown text-[18px]">

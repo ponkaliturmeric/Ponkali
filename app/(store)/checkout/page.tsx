@@ -6,16 +6,9 @@ import Link from 'next/link';
 import Script from 'next/script';
 import { useCart } from '@/components/CartContext';
 import { ShieldCheckIcon, TruckIcon } from '@/components/Icons';
+import { useShippingEstimate, useShippingState } from '@/components/useShippingEstimate';
+import { INDIAN_STATES } from '@/lib/shipping';
 
-const INDIAN_STATES = [
-  'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
-  'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka',
-  'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram',
-  'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu',
-  'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal',
-  'Andaman and Nicobar Islands', 'Chandigarh', 'Dadra and Nagar Haveli and Daman and Diu',
-  'Delhi', 'Jammu and Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry',
-];
 
 const PENDING_KEY = 'ponkali_pending_rzp_order';
 
@@ -28,6 +21,9 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'online' | 'cod'>('online');
+  // Destination picked in the cart (or default). Seeds the State field; once the
+  // shopper changes State here, the cart/mini-cart follow so estimates match.
+  const [shipState, setShipState] = useShippingState();
 
   const [form, setForm] = useState({
     customer_name: '',
@@ -36,11 +32,12 @@ export default function CheckoutPage() {
     address_line1: '',
     address_line2: '',
     city: '',
-    state: 'Tamil Nadu',
+    state: shipState,
     pincode: '',
     landmark: '',
     upi_id: '',
   });
+  useEffect(() => { setForm(prev => (prev.state === shipState ? prev : { ...prev, state: shipState })); }, [shipState]);
 
   // Prefill contact details for a signed-in customer so their order links to
   // their account (and shows as one customer in the admin), saving them typing.
@@ -100,12 +97,16 @@ export default function CheckoutPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const shipping = 0; // Free shipping on every order.
+  // On-screen estimate from the same table the server uses; the server total is
+  // authoritative and recomputed from the submitted State.
+  const quote = useShippingEstimate(items, subtotal, form.state);
+  const shipping = quote.charge;
   const codCharge = paymentMethod === 'cod' ? 30 : 0;
   const total = subtotal + shipping + codCharge;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    if (e.target.name === 'state') setShipState(e.target.value);
   };
 
   const cartPayload = () => items.map(i => ({ slug: i.product.slug, quantity: i.quantity }));
@@ -410,8 +411,10 @@ export default function CheckoutPage() {
                     <span className="font-semibold">₹{subtotal}</span>
                   </div>
                   <div className="flex justify-between text-[13px]">
-                    <span className="text-gray-500">Shipping</span>
-                    <span className="font-semibold text-green-600">Free</span>
+                    <span className="text-gray-500">Delivery <span className="text-gray-300">({quote.zoneLabel})</span></span>
+                    {shipping === 0
+                      ? <span className="font-semibold text-green-600">Free</span>
+                      : <span className="font-semibold">₹{shipping}</span>}
                   </div>
                   {paymentMethod === 'cod' && (
                     <div className="flex justify-between text-[13px]">
@@ -441,9 +444,9 @@ export default function CheckoutPage() {
                   <p className="text-[11px] text-gray-300">Secure checkout · 3 to 5 day delivery</p>
                 </div>
 
-                <div className="mt-4 flex items-center gap-2 text-[12px] text-green-600 bg-green-50 rounded-xl px-3 py-2.5">
-                  <TruckIcon className="w-3.5 h-3.5 flex-shrink-0" />
-                  Free shipping on every order
+                <div className="mt-4 flex items-center gap-2 text-[12px] text-dark-brown/70 bg-cream rounded-xl px-3 py-2.5">
+                  <TruckIcon className="w-3.5 h-3.5 flex-shrink-0 text-gold" />
+                  Shipped from Erode · delivery charged by destination &amp; weight
                 </div>
               </div>
             </div>

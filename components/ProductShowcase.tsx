@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { PRODUCTS } from '@/lib/products';
+import { MIN_SHIPPING } from '@/lib/shipping';
 import { Product } from '@/lib/types';
 import { useCart } from './CartContext';
 import { TruckIcon, CheckIcon } from './Icons';
@@ -246,7 +247,7 @@ export default function ProductShowcase() {
                   <TruckIcon className="w-3.5 h-3.5 text-dark-brown" />
                 </div>
                 <p className="text-[13px] text-gray-600">
-                  <span className="text-dark-green font-semibold">Free shipping on every order</span>
+                  <span className="text-dark-green font-semibold">Delivered all over India</span> <span className="text-gray-400">· from ₹{MIN_SHIPPING}</span>
                 </p>
               </div>
               <div className="flex items-center gap-3">

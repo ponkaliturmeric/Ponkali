@@ -38,7 +38,10 @@ export default function LegalPage({
             [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-4 [&_ul]:space-y-1.5
             [&_li]:text-[15px] [&_li]:text-gray-600 [&_li]:leading-[1.7]
             [&_a]:text-gold [&_a]:font-medium hover:[&_a]:underline
-            [&_strong]:text-dark-brown [&_strong]:font-semibold"
+            [&_strong]:text-dark-brown [&_strong]:font-semibold
+            [&_table]:w-full [&_table]:text-[14px] [&_table]:mb-4 [&_table]:border-collapse
+            [&_th]:text-left [&_th]:text-[12px] [&_th]:uppercase [&_th]:tracking-wider [&_th]:text-gray-400 [&_th]:font-semibold [&_th]:py-2 [&_th]:pr-4 [&_th]:border-b [&_th]:border-black/10
+            [&_td]:py-2.5 [&_td]:pr-4 [&_td]:align-top [&_td]:text-gray-600 [&_td]:border-b [&_td]:border-black/6"
         >
           {children}
           <p className="text-[13px] text-gray-400 mt-10 pt-6 border-t border-black/6">Last updated: {updated}</p>

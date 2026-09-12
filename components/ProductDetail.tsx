@@ -6,6 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useCart } from '@/components/CartContext';
 import { Product } from '@/lib/types';
+import { MIN_SHIPPING } from '@/lib/shipping';
 import { TruckIcon, ShieldCheckIcon, LeafIcon, MinusIcon, PlusIcon, CheckIcon } from '@/components/Icons';
 
 const WEIGHT_ORDER = ['100g', '250g', '500g', '1kg'];
@@ -229,7 +230,7 @@ export default function ProductDetail({ slug }: { slug: string }) {
             <div className="flex items-center gap-2.5 bg-green-50 border border-green-100 rounded-xl px-4 py-3 mb-8">
               <TruckIcon className="w-4 h-4 text-green-600 flex-shrink-0" />
               <p className="text-[13px] text-green-700 font-medium">
-                Free delivery on every order · Usually ships in 1 to 2 days
+                Delivered all over India from ₹{MIN_SHIPPING} · Usually ships in 1 to 2 days
               </p>
             </div>
 

@@ -1,11 +1,12 @@
 import { getCatalog } from './catalog';
+import { calculateShipping } from './shipping';
 
 /**
  * Server-authoritative cart pricing. The client may send slugs + quantities,
  * but prices, shipping and totals are ALWAYS recomputed here from the trusted
  * product catalogue (the database) — never taken from the request body.
  *
- * Shipping is always free — we never add a delivery charge.
+ * Shipping is zone × weight from the destination state (lib/shipping.ts).
  */
 export const COD_CHARGE = 30;
 
@@ -38,7 +39,7 @@ export interface PricedCart {
  */
 export async function priceCart(
   items: unknown,
-  opts: { cod?: boolean } = {},
+  opts: { cod?: boolean; state?: string | null } = {},
 ): Promise<PricedCart | null> {
   if (!Array.isArray(items) || items.length === 0) return null;
 
@@ -67,7 +68,11 @@ export async function priceCart(
     });
   }
 
-  const shipping = 0; // Free shipping on every order.
+  const shipping = calculateShipping({
+    state: opts.state,
+    lines: lines.map((l) => ({ slug: l.slug, quantity: l.quantity })),
+    subtotal,
+  }).charge;
   const codCharge = opts.cod ? COD_CHARGE : 0;
   const total = subtotal + shipping + codCharge;
 

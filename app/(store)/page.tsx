@@ -6,6 +6,7 @@ import FarmGallery from '@/components/FarmGallery';
 import JsonLd from '@/components/JsonLd';
 import { buildMetadata, productListJsonLd} from '@/lib/seo';
 import { PRODUCTS, FROM_PRICE } from '@/lib/products';
+import { MIN_SHIPPING } from '@/lib/shipping';
 import {
   MapPinIcon, LeafIcon, TruckIcon, DropletIcon,
   ShieldCheckIcon,ArrowRightIcon,
@@ -16,7 +17,7 @@ import HeroVideo from '@/components/HeroVideo';
 export const metadata: Metadata = buildMetadata({
   title: 'Pure Erode Turmeric, Farm Direct',
   description:
-    'Buy GI-tagged Erode turmeric powder, naturally grown and freshly ground. 2.5% to 3.5% natural curcumin, zero additives and FSSAI certified. Shipped direct from our family farm. Free shipping on every order.',
+    'Buy GI-tagged Erode turmeric powder, naturally grown and freshly ground. 2.5% to 3.5% natural curcumin, zero additives and FSSAI certified. Shipped direct from our family farm in Erode, all over India.',
   path: '/',
 });
 
@@ -88,7 +89,7 @@ export default function HomePage() {
             </div>
 
             <div className="flex flex-wrap gap-2">
-              {['GI Tagged', 'FSSAI Certified','Farm Direct', 'Free Shipping'].map(t => (
+              {['GI Tagged', 'FSSAI Certified','Farm Direct', 'Pan-India Delivery'].map(t => (
                 <span key={t} className="text-[11px] text-cream/50 border border-cream/20 px-3 py-1 rounded-full">
                   {t}
                 </span>
@@ -120,7 +121,7 @@ export default function HomePage() {
             <div className="hidden md:block absolute -right-5 bottom-1/4 bg-dark-brown border border-gold/20 rounded-2xl px-4 py-3.5 shadow-2xl">
               <p className="text-[10px] text-gold/50 font-semibold uppercase tracking-wider mb-0.5">Starting at</p>
               <p className="text-[22px] font-extrabold text-gold leading-none">₹{FROM_PRICE}</p>
-              <p className="text-[10px] text-cream/30 mt-0.5">Free shipping</p>
+              <p className="text-[10px] text-cream/30 mt-0.5">Delivery from ₹{MIN_SHIPPING}</p>
             </div>
           </div>
         </div>
@@ -266,7 +267,7 @@ export default function HomePage() {
             Taste the Difference Today
           </h2>
           <p className="text-dark-brown/60 mb-8 text-[16px]">
-            Free shipping on every order. Delivered in 3 to 5 working days anywhere in India.
+            Shipped from our farm in Erode. Delivered in 3 to 5 working days anywhere in India.
           </p>
           <Link
             href="/shop"

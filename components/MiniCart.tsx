@@ -4,10 +4,13 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useCart } from './CartContext';
 import { XIcon, MinusIcon, PlusIcon, CartIcon } from './Icons';
+import { useShippingEstimate, useShippingState } from './useShippingEstimate';
 
 export default function MiniCart() {
   const { items, removeItem, updateQuantity, subtotal, totalItems, isOpen, setIsOpen } = useCart();
-  const shipping = 0; // Free shipping on every order.
+  const [shipState] = useShippingState();
+  const quote = useShippingEstimate(items, subtotal, shipState);
+  const shipping = quote.charge;
   const total = subtotal + shipping;
 
   if (!isOpen) return null;
@@ -46,8 +49,13 @@ export default function MiniCart() {
         ) : (
           <>
             {subtotal > 0 && (
-              <div className="mx-5 mt-4 p-3.5 bg-green-50 rounded-xl border border-green-100">
-                <p className="text-[12px] text-green-700 font-semibold">Free shipping on every order</p>
+              <div className="mx-5 mt-4 p-3.5 bg-cream rounded-xl border border-black/6">
+                <p className="text-[12px] text-dark-brown">
+                  {quote.free
+                    ? <span className="text-green-700 font-semibold">Free delivery on this order</span>
+                    : <>Delivery to {shipState}: <span className="font-semibold">₹{shipping}</span>
+                        <span className="text-gray-400"> · change in cart</span></>}
+                </p>
               </div>
             )}
 
@@ -101,8 +109,10 @@ export default function MiniCart() {
                 <span className="font-semibold">₹{subtotal}</span>
               </div>
               <div className="flex justify-between text-[14px]">
-                <span className="text-gray-500">Shipping</span>
-                <span className="text-green-600 font-semibold">Free</span>
+                <span className="text-gray-500">Delivery</span>
+                {shipping === 0
+                  ? <span className="text-green-600 font-semibold">Free</span>
+                  : <span className="font-semibold">₹{shipping}</span>}
               </div>
               <div className="flex justify-between font-bold text-dark-brown text-[16px] border-t border-gray-100 pt-2.5">
                 <span>Total</span>

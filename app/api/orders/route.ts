@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
     const payment_method = body.payment_method === 'online' ? 'online' : 'cod';
 
     // Server-authoritative pricing — client-sent totals are ignored.
-    const cart = await priceCart(body.items, { cod: payment_method === 'cod' });
+    const cart = await priceCart(body.items, { cod: payment_method === 'cod', state: customer.state });
     if (!cart) {
       return NextResponse.json(
         { error: 'Your cart is empty or contains an unavailable item.' },

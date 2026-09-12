@@ -220,7 +220,7 @@ export default function OurStoryPage() {
           Taste What Three Generations Built
         </h2>
         <p className="text-cream/50 text-[16px] mb-8 max-w-md mx-auto">
-          Free shipping on every order. Delivered in 3 to 5 days anywhere in India.
+          Shipped from our farm in Erode. Delivered in 3 to 5 days anywhere in India.
         </p>
         <Link
           href="/shop"

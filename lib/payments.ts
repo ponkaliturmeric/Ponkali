@@ -41,7 +41,7 @@ export async function startRazorpayCheckout(input: {
   const missing = missingCustomerField(input.customer);
   if (missing) return { ok: false, error: `Missing required field: ${missing}` };
 
-  const cart = await priceCart(input.items, { cod: false });
+  const cart = await priceCart(input.items, { cod: false, state: input.customer.state });
   if (!cart) return { ok: false, error: 'Your cart is empty or contains an unavailable item.' };
 
   // The receipt becomes the PKL order id, so the Razorpay dashboard and the
@@ -140,7 +140,7 @@ export async function finalizeRazorpayPayment(input: {
     // build an order from; the reconciliation script surfaces these.
     const fb = input.fallback;
     if (!fb || missingCustomerField(fb.customer)) return { status: 'unknown' };
-    const priced = await priceCart(fb.customer.items, { cod: false });
+    const priced = await priceCart(fb.customer.items, { cod: false, state: fb.customer.state });
     if (!priced) return { status: 'unknown' };
     // Never trust the client's cart on its own: the amount must equal what
     // Razorpay actually charged for this order.
