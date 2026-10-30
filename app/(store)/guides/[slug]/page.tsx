@@ -10,6 +10,8 @@ import { getFromPrice } from '@/lib/catalog';
 export function generateStaticParams() {
   return GUIDES.map((g) => ({ slug: g.slug }));
 }
+/** Fixed list of guides — anything else is a true 404, not a soft one. */
+export const dynamicParams = false;
 export const revalidate = 60;
 
 export function generateMetadata({ params }: { params: { slug: string } }): Metadata {

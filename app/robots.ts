@@ -35,7 +35,9 @@ export default function robots(): MetadataRoute.Robots {
       { userAgent: '*', allow: '/', disallow: PRIVATE },
       { userAgent: AI_CRAWLERS, allow: '/', disallow: PRIVATE },
     ],
-    sitemap: `${SITE_URL}/sitemap.xml`,
+    // Both sitemaps: the page sitemap and the image sitemap (Next 14's typed
+    // sitemap cannot carry <image:image>, so images live in their own file).
+    sitemap: [`${SITE_URL}/sitemap.xml`, `${SITE_URL}/image-sitemap.xml`],
     host: SITE_URL,
   };
 }

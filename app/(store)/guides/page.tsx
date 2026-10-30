@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { buildMetadata } from '@/lib/seo';
+import JsonLd from '@/components/JsonLd';
+import { buildMetadata, breadcrumbJsonLd, absoluteUrl } from '@/lib/seo';
 import { GUIDES } from '@/lib/content';
 import { ArrowRightIcon } from '@/components/Icons';
 
@@ -14,6 +15,28 @@ export const metadata: Metadata = buildMetadata({
 export default function GuidesIndexPage() {
   return (
     <div className="min-h-screen bg-cream">
+      {/* An ItemList of the guides, so the hub page is understood as a
+          collection of articles rather than a page of links. */}
+      <JsonLd
+        data={[
+          breadcrumbJsonLd([
+            { name: 'Home', path: '/' },
+            { name: 'Guides', path: '/guides' },
+          ]),
+          {
+            '@context': 'https://schema.org',
+            '@type': 'ItemList',
+            name: 'Erode turmeric guides',
+            numberOfItems: GUIDES.length,
+            itemListElement: GUIDES.map((g, i) => ({
+              '@type': 'ListItem',
+              position: i + 1,
+              url: absoluteUrl(`/guides/${g.slug}`),
+              name: g.title,
+            })),
+          },
+        ]}
+      />
       <div className="bg-dark-brown py-16 px-5 text-center">
         <p className="text-gold/70 text-[11px] font-semibold tracking-[0.35em] uppercase mb-4">Learn</p>
         <h1 className="font-hero text-[36px] md:text-[48px] font-extrabold text-white tracking-tight mb-4">Turmeric, explained</h1>

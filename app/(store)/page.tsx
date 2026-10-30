@@ -4,7 +4,7 @@ import Image from 'next/image';
 import ProductShowcase from '@/components/ProductShowcase';
 import FarmGallery from '@/components/FarmGallery';
 import JsonLd from '@/components/JsonLd';
-import { buildMetadata, productListJsonLd} from '@/lib/seo';
+import { buildMetadata, productListJsonLd, videoObjectJsonLd, breadcrumbJsonLd, LANGUAGE_ALTERNATES } from '@/lib/seo';
 import { getCatalog, getFromPrice } from '@/lib/catalog';
 import { MIN_SHIPPING } from '@/lib/shipping';
 import {
@@ -19,6 +19,7 @@ export const metadata: Metadata = buildMetadata({
   description:
     'Buy GI-tagged Erode turmeric powder online in India, direct from a third-generation farm. 2.5% to 3.5% natural curcumin, no colour or fillers, FSSAI certified, ground and packed fresh. Delivered all over India.',
   path: '/',
+  languages: LANGUAGE_ALTERNATES,
 });
 
 const TRUST_BADGES = [
@@ -36,7 +37,7 @@ export default async function HomePage() {
   const [catalog, fromPrice] = await Promise.all([getCatalog(), getFromPrice()]);
   return (
     <>
-      <JsonLd data={[productListJsonLd(catalog)]} />
+      <JsonLd data={[productListJsonLd(catalog), videoObjectJsonLd(), breadcrumbJsonLd([{ name: 'Home', path: '/' }])]} />
 
       {/* ─── 1. HERO ─── */}
       <section className="bg-dark-brown relative overflow-hidden">
