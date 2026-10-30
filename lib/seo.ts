@@ -423,9 +423,13 @@ function reviewSnippet(slug?: string) {
  * "₹149 – ₹719", which is what a shopper comparing sellers looks for.
  */
 export function productGroupJsonLd(products: Product[]) {
-  const inStock = products.filter((p) => p.in_stock);
-  const pool = inStock.length ? inStock : products;
-  const prices = pool.map((p) => p.price);
+  // The range must span every variant listed in hasVariant below, not just the
+  // in-stock ones: a variant priced outside lowPrice..highPrice is flagged as
+  // inconsistent. Purchasability is expressed per variant instead — each
+  // Product's own Offer carries InStock or OutOfStock — while `availability`
+  // here reports whether anything in the group can be bought at all.
+  const prices = products.map((p) => p.price);
+  const anyInStock = products.some((p) => p.in_stock);
 
   return {
     '@context': 'https://schema.org',
@@ -447,8 +451,8 @@ export function productGroupJsonLd(products: Product[]) {
       priceCurrency: 'INR',
       lowPrice: Math.min(...prices),
       highPrice: Math.max(...prices),
-      offerCount: pool.length,
-      availability: inStock.length
+      offerCount: products.length,
+      availability: anyInStock
         ? 'https://schema.org/InStock'
         : 'https://schema.org/OutOfStock',
       seller: { '@id': `${SITE_URL}/#organization` },
