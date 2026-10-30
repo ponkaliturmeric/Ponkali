@@ -113,7 +113,8 @@ export interface OrderEmailData {
   customer_name: string;
   email?: string | null;
   phone: string;
-  payment_method: 'cod' | 'online';
+  /** 'cod' | 'online' from checkout; also 'upi' | 'cash' | 'bank' | 'other' for manual orders. */
+  payment_method: string;
   status: string;
   lines: { name: string; weight: string; quantity: number; price: number }[];
   subtotal: number;

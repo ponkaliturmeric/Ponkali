@@ -58,7 +58,8 @@ export function generateOrderId(): string {
 export async function createOrder(input: {
   customer: CustomerDetails;
   cart: PricedCart;
-  payment_method: 'cod' | 'online';
+  /** 'cod' | 'online' from the storefront; 'upi' | 'cash' | 'bank' | 'other' for manual orders. */
+  payment_method: string;
   status: string;
   order_id?: string;
   notes?: string;
@@ -67,10 +68,37 @@ export async function createOrder(input: {
   /** Razorpay ids for online orders — unique in the DB so a payment can only ever create one order. */
   razorpay_order_id?: string | null;
   razorpay_payment_id?: string | null;
+  /* ── CRM (manual / WhatsApp orders) ── */
+  /** Where it came from. Defaults to 'website' so storefront callers are unchanged. */
+  source?: string;
+  /** Defaults to 'Paid' for an online payment, 'Unpaid' otherwise. */
+  payment_status?: string;
+  /** Rupees actually received. Defaults to the full total for online, 0 otherwise. */
+  amount_paid?: number;
+  payment_ref?: string | null;
+  discount?: number;
+  /** First entry in the status timeline. */
+  history_note?: string;
+  /**
+   * Whether to send the customer the email + WhatsApp confirmation. Storefront
+   * orders always do; an order typed in by hand usually should NOT, because the
+   * shop owner is already mid-conversation with that customer on WhatsApp.
+   */
+  notify?: boolean;
 }): Promise<string> {
   const db = await getDb();
   const { customer: c, cart, payment_method, status } = input;
   const order_id = input.order_id ?? generateOrderId();
+
+  // An online payment is money already in the bank; everything else starts
+  // unpaid unless the caller says otherwise.
+  const paidInFull = payment_method === 'online';
+  const source = input.source ?? 'website';
+  const payment_status = input.payment_status ?? (paidInFull ? 'Paid' : 'Unpaid');
+  const amount_paid = input.amount_paid ?? (paidInFull ? cart.total : 0);
+  const payment_ref = input.payment_ref ?? input.razorpay_payment_id ?? null;
+  const discount = input.discount ?? 0;
+  const notify = input.notify ?? true;
 
   // Order row + line items + first history entry go in ONE transaction, so a
   // failure part-way can never leave an order with no items behind.
@@ -80,8 +108,9 @@ export async function createOrder(input: {
               order_id, customer_name, phone, email,
               address_line1, address_line2, city, state, pincode, landmark,
               payment_method, upi_id, subtotal, shipping, cod_charge, total, status, notes, user_id,
-              razorpay_order_id, razorpay_payment_id
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+              razorpay_order_id, razorpay_payment_id,
+              source, payment_status, amount_paid, payment_ref, discount
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       args: [
         order_id,
         c.customer_name,
@@ -104,6 +133,11 @@ export async function createOrder(input: {
         input.user_id ?? null,
         input.razorpay_order_id ?? null,
         input.razorpay_payment_id ?? null,
+        source,
+        payment_status,
+        amount_paid,
+        payment_ref,
+        discount,
       ],
     },
     ...cart.lines.map((l) => ({
@@ -112,7 +146,7 @@ export async function createOrder(input: {
     })),
     {
       sql: 'INSERT INTO order_status_history (order_id, status, notes) VALUES (?, ?, ?)',
-      args: [order_id, status, 'Order placed'],
+      args: [order_id, status, input.history_note ?? 'Order placed'],
     },
   ];
   await db.batch(stmts, 'write');
@@ -123,6 +157,9 @@ export async function createOrder(input: {
   //  • Email  — confirmation to the customer (if they gave one) + business alert.
   //  • WhatsApp — confirmation to the customer's phone (the required, reliable
   //    channel). No-op until the WhatsApp Cloud API env vars are set.
+  // Skipped entirely for a manually-entered order unless the admin asks for it.
+  if (!notify) return order_id;
+
   await Promise.allSettled([
     sendOrderEmails({
       order_id,

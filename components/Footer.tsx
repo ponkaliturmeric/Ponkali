@@ -126,6 +126,9 @@ export default function Footer() {
                 ['Turmeric Guides', '/guides'],
                 ['FAQ', '/faq'],
                 ['All Products', '/shop'],
+                ['Bulk & Wholesale', '/bulk-orders'],
+                ['Brand Facts', '/brand-facts'],
+                ['மஞ்சள் பொடி (தமிழ்)', '/manjal-podi'],
                 ['Contact Us', '/contact'],
               ].map(([label, href]) => (
                 <li key={href}>

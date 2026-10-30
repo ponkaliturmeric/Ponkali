@@ -9,6 +9,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: `${SITE_URL}/`, lastModified: now, changeFrequency: 'daily', priority: 1.0 },
     { url: `${SITE_URL}/shop`, lastModified: now, changeFrequency: 'daily', priority: 0.9 },
+    // High commercial intent: a wholesale buyer searching "bulk turmeric
+    // supplier erode" is a business about to place a repeat order.
+    { url: `${SITE_URL}/bulk-orders`, lastModified: now, changeFrequency: 'monthly', priority: 0.9 },
+    // Tamil landing page — the local-language queries nobody else serves.
+    { url: `${SITE_URL}/manjal-podi`, lastModified: now, changeFrequency: 'weekly', priority: 0.8 },
+    // The page written to be quoted: every verifiable claim in one place.
+    { url: `${SITE_URL}/brand-facts`, lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${SITE_URL}/our-story`, lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
     { url: `${SITE_URL}/farm`, lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
     { url: `${SITE_URL}/contact`, lastModified: now, changeFrequency: 'yearly', priority: 0.5 },
