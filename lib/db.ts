@@ -214,6 +214,75 @@ async function initialize(db: Db) {
     ALTER TABLE users ALTER COLUMN email DROP NOT NULL;
     CREATE UNIQUE INDEX IF NOT EXISTS idx_users_phone ON users (phone) WHERE phone IS NOT NULL;
     CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users (lower(email)) WHERE email IS NOT NULL;
+
+    -- ─────────────────────────────  CRM  ─────────────────────────────
+    -- Most orders actually arrive over WhatsApp and are typed into the admin by
+    -- hand. The source column records where an order came from, and the payment
+    -- columns track money that arrives outside Razorpay (a UPI screenshot, cash
+    -- on hand, a bank transfer) including part-payments.
+    --
+    -- These are added WITHOUT a DEFAULT on purpose: in Postgres 11+
+    -- ADD COLUMN ... DEFAULT x backfills every existing row, which would make
+    -- already-paid online orders indistinguishable from unpaid ones. So the
+    -- columns go in empty, the UPDATE below fills them from what each row
+    -- already tells us, and only then is the default set for future rows.
+    ALTER TABLE orders ADD COLUMN IF NOT EXISTS source TEXT;
+    ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_status TEXT;
+    ALTER TABLE orders ADD COLUMN IF NOT EXISTS amount_paid REAL;
+    ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_ref TEXT;
+    ALTER TABLE orders ADD COLUMN IF NOT EXISTS discount REAL;
+
+    -- Backfill from what each existing row already implies: an online payment is
+    -- money received, and a DELIVERED order was paid for on delivery (otherwise
+    -- every past COD sale would show up as an outstanding balance). Everything
+    -- else starts unpaid. Runs once — the WHERE clause stops it from ever
+    -- touching a row again, so a part-payment entered by hand is never reset.
+    UPDATE orders SET
+      source = COALESCE(source, 'website'),
+      payment_status = COALESCE(payment_status,
+        CASE WHEN payment_method = 'online' OR status IN ('Paid', 'Delivered') THEN 'Paid' ELSE 'Unpaid' END),
+      amount_paid = COALESCE(amount_paid,
+        CASE WHEN payment_method = 'online' OR status IN ('Paid', 'Delivered') THEN total ELSE 0 END),
+      discount = COALESCE(discount, 0)
+    WHERE source IS NULL OR payment_status IS NULL OR amount_paid IS NULL OR discount IS NULL;
+
+    ALTER TABLE orders ALTER COLUMN source SET DEFAULT 'website';
+    ALTER TABLE orders ALTER COLUMN payment_status SET DEFAULT 'Unpaid';
+    ALTER TABLE orders ALTER COLUMN amount_paid SET DEFAULT 0;
+    ALTER TABLE orders ALTER COLUMN discount SET DEFAULT 0;
+    -- The orders list can filter by source (e.g. "show me WhatsApp orders").
+    CREATE INDEX IF NOT EXISTS idx_orders_source ON orders (source);
+
+    -- Bulk / wholesale enquiries. A pipeline, not an order: someone asks for a
+    -- quote on 50 kg, and it is worked through stages until it is won or lost.
+    -- Entered and updated entirely by hand from WhatsApp conversations.
+    CREATE TABLE IF NOT EXISTS bulk_enquiries (
+      id SERIAL PRIMARY KEY,
+      created_at TIMESTAMPTZ DEFAULT now(),
+      updated_at TIMESTAMPTZ DEFAULT now(),
+      customer_name TEXT NOT NULL,
+      phone TEXT NOT NULL,
+      email TEXT,
+      company TEXT,
+      city TEXT,
+      state TEXT,
+      source TEXT DEFAULT 'whatsapp',
+      -- What they asked for, in their own terms: free text because a bulk ask
+      -- ("100 x 250g pouches, unlabelled") rarely maps onto a retail SKU.
+      product TEXT,
+      quantity TEXT,
+      -- Numeric weight when it is known, so the pipeline can be sized.
+      quantity_kg REAL,
+      target_price REAL,
+      quoted_price REAL,
+      requirement TEXT,
+      status TEXT DEFAULT 'New',
+      follow_up_on DATE,
+      notes TEXT
+    );
+    CREATE INDEX IF NOT EXISTS idx_bulk_enquiries_status ON bulk_enquiries (status);
+    CREATE INDEX IF NOT EXISTS idx_bulk_enquiries_created_at ON bulk_enquiries (created_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_bulk_enquiries_phone ON bulk_enquiries (phone);
   `);
 
   const { rows } = await db.execute('SELECT COUNT(*) as count FROM products');

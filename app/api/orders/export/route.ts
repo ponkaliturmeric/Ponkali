@@ -5,6 +5,7 @@ import { getDb } from '@/lib/db';
 interface OrderRow {
   order_id: string;
   created_at: string;
+  source: string;
   customer_name: string;
   phone: string;
   email: string | null;
@@ -15,10 +16,14 @@ interface OrderRow {
   pincode: string;
   landmark: string | null;
   payment_method: string;
+  payment_status: string;
   subtotal: number;
   shipping: number;
   cod_charge: number;
+  discount: number;
   total: number;
+  amount_paid: number;
+  balance: number;
   status: string;
   items: string;
 }
@@ -26,6 +31,7 @@ interface OrderRow {
 const COLUMNS: { header: string; key: keyof OrderRow; width: number }[] = [
   { header: 'Order ID', key: 'order_id', width: 20 },
   { header: 'Date', key: 'created_at', width: 20 },
+  { header: 'Source', key: 'source', width: 12 },
   { header: 'Customer', key: 'customer_name', width: 22 },
   { header: 'Phone', key: 'phone', width: 14 },
   { header: 'Email', key: 'email', width: 24 },
@@ -37,10 +43,14 @@ const COLUMNS: { header: string; key: keyof OrderRow; width: number }[] = [
   { header: 'Landmark', key: 'landmark', width: 18 },
   { header: 'Items', key: 'items', width: 40 },
   { header: 'Payment', key: 'payment_method', width: 12 },
+  { header: 'Payment Status', key: 'payment_status', width: 14 },
   { header: 'Subtotal', key: 'subtotal', width: 12 },
   { header: 'Shipping', key: 'shipping', width: 12 },
   { header: 'COD Charge', key: 'cod_charge', width: 12 },
+  { header: 'Discount', key: 'discount', width: 12 },
   { header: 'Total', key: 'total', width: 12 },
+  { header: 'Received', key: 'amount_paid', width: 12 },
+  { header: 'Balance Due', key: 'balance', width: 12 },
   { header: 'Status', key: 'status', width: 14 },
 ];
 
@@ -67,9 +77,13 @@ async function fetchOrders(): Promise<OrderRow[]> {
     itemsByOrder.set(String(it.order_id), list);
   }
 
-  return ordersRes.rows.map((o) => ({
+  return ordersRes.rows.map((o) => {
+    const total = Number(o.total);
+    const paid = Number(o.amount_paid ?? 0);
+    return {
     order_id: String(o.order_id),
     created_at: formatDate(o.created_at),
+    source: o.source != null ? String(o.source) : 'website',
     customer_name: String(o.customer_name),
     phone: String(o.phone),
     email: o.email != null ? String(o.email) : null,
@@ -80,13 +94,18 @@ async function fetchOrders(): Promise<OrderRow[]> {
     pincode: String(o.pincode),
     landmark: o.landmark != null ? String(o.landmark) : null,
     payment_method: String(o.payment_method),
+    payment_status: o.payment_status != null ? String(o.payment_status) : '',
     subtotal: Number(o.subtotal),
     shipping: Number(o.shipping),
     cod_charge: Number(o.cod_charge),
-    total: Number(o.total),
+    discount: Number(o.discount ?? 0),
+    total,
+    amount_paid: paid,
+    balance: Math.max(0, Math.round((total - paid) * 100) / 100),
     status: String(o.status),
     items: (itemsByOrder.get(String(o.order_id)) ?? []).join(', '),
-  }));
+    };
+  });
 }
 
 function csvCell(value: unknown): string {

@@ -7,6 +7,7 @@ import {
   Box, Typography, Button, Stack, TextField, Divider, CircularProgress,
 } from '@mui/material';
 import PrintOutlinedIcon from '@mui/icons-material/PrintOutlined';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
 import RadioButtonUncheckedRoundedIcon from '@mui/icons-material/RadioButtonUncheckedRounded';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
@@ -16,6 +17,7 @@ import PageHeader from '@/components/admin/PageHeader';
 import MainCard from '@/components/admin/MainCard';
 import StatusChip from '@/components/admin/StatusChip';
 import { Order } from '@/lib/types';
+import { ORDER_SOURCES, PAYMENT_METHODS, labelFor } from '@/lib/crm';
 
 interface OrderWithHistory extends Order {
   history?: { status: string; changed_at: string; notes?: string }[];
@@ -65,6 +67,7 @@ export default function AdminOrderDetailPage({ params }: { params: { id: string 
   // Normalise the phone for a wa.me link — 10-digit Indian numbers get the 91 code.
   const digits = String(order.phone || '').replace(/\D/g, '');
   const waPhone = digits.length === 10 ? `91${digits}` : digits;
+  const balance = Math.max(0, Math.round((Number(order.total) || 0) - (Number(order.amount_paid) || 0)));
 
   return (
     <AdminLayout>
@@ -72,7 +75,12 @@ export default function AdminOrderDetailPage({ params }: { params: { id: string 
         title={order.order_id}
         subtitle={new Date(order.created_at).toLocaleString('en-IN')}
         breadcrumbs={[{ label: 'Orders', href: '/admin/orders' }, { label: order.order_id }]}
-        action={<Button variant="outlined" color="inherit" startIcon={<PrintOutlinedIcon />} onClick={() => window.print()} sx={{ color: 'text.secondary' }}>Print Slip</Button>}
+        action={
+          <Stack direction="row" spacing={1.5}>
+            <Button variant="outlined" color="inherit" startIcon={<PrintOutlinedIcon />} onClick={() => window.print()} sx={{ color: 'text.secondary' }}>Print Slip</Button>
+            <Button component={Link} href={`/admin/orders/${order.order_id}/edit`} variant="contained" startIcon={<EditOutlinedIcon />}>Edit order</Button>
+          </Stack>
+        }
       />
 
       <Box sx={{ display: 'grid', gridTemplateColumns: { md: '2fr 1fr' }, gap: 2.5 }}>
@@ -86,7 +94,8 @@ export default function AdminOrderDetailPage({ params }: { params: { id: string 
                 ['Email', order.email || '—'],
                 ['City', `${order.city}, ${order.state}`],
                 ['PIN', order.pincode],
-                ['Payment', order.payment_method === 'cod' ? 'Cash on Delivery' : 'Online (Razorpay)'],
+                ['Payment', labelFor(PAYMENT_METHODS, order.payment_method)],
+                ['Came from', labelFor(ORDER_SOURCES, order.source || 'website')],
               ].map(([label, value]) => (
                 <Box key={label}>
                   <Typography variant="caption" color="text.secondary" fontWeight={600}>{label}</Typography>
@@ -138,8 +147,33 @@ export default function AdminOrderDetailPage({ params }: { params: { id: string 
               <Stack direction="row" justifyContent="space-between"><Typography variant="body1" color="text.secondary">Subtotal</Typography><Typography variant="body1">₹{order.subtotal}</Typography></Stack>
               <Stack direction="row" justifyContent="space-between"><Typography variant="body1" color="text.secondary">Shipping</Typography><Typography variant="body1">{order.shipping === 0 ? 'FREE' : `₹${order.shipping}`}</Typography></Stack>
               {order.cod_charge > 0 && <Stack direction="row" justifyContent="space-between"><Typography variant="body1" color="text.secondary">COD Charge</Typography><Typography variant="body1">₹{order.cod_charge}</Typography></Stack>}
+              {!!order.discount && order.discount > 0 && <Stack direction="row" justifyContent="space-between"><Typography variant="body1" color="text.secondary">Discount</Typography><Typography variant="body1">−₹{order.discount}</Typography></Stack>}
               <Divider />
               <Stack direction="row" justifyContent="space-between"><Typography variant="h5">Total</Typography><Typography variant="h5">₹{order.total}</Typography></Stack>
+
+              {/* What has actually been collected — the part that matters for a
+                  WhatsApp order, where money arrives separately from the order. */}
+              <Divider />
+              <Stack direction="row" justifyContent="space-between" alignItems="center">
+                <Typography variant="body1" color="text.secondary">Payment</Typography>
+                <StatusChip status={order.payment_status || 'Unpaid'} />
+              </Stack>
+              <Stack direction="row" justifyContent="space-between">
+                <Typography variant="body1" color="text.secondary">Received</Typography>
+                <Typography variant="body1">₹{order.amount_paid ?? 0}</Typography>
+              </Stack>
+              {balance > 0 && (
+                <Stack direction="row" justifyContent="space-between">
+                  <Typography variant="body1" fontWeight={700} color="warning.dark">Balance due</Typography>
+                  <Typography variant="body1" fontWeight={700} color="warning.dark">₹{balance}</Typography>
+                </Stack>
+              )}
+              {order.payment_ref && (
+                <Stack direction="row" justifyContent="space-between">
+                  <Typography variant="body1" color="text.secondary">Reference</Typography>
+                  <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>{order.payment_ref}</Typography>
+                </Stack>
+              )}
             </Stack>
           </MainCard>
 

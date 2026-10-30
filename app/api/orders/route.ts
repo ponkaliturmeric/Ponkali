@@ -4,6 +4,7 @@ import { getCustomerSession } from '@/lib/customer-auth';
 import { getDb } from '@/lib/db';
 import { priceCart } from '@/lib/pricing';
 import { createOrder, invalidCustomerField, missingCustomerField, type CustomerDetails } from '@/lib/orders';
+import { ORDER_SOURCES, PAYMENT_METHODS, isOption } from '@/lib/crm';
 
 const PAGE_SIZE = 20;
 
@@ -17,7 +18,8 @@ export async function GET(request: NextRequest) {
   const page = Math.max(1, parseInt(searchParams.get('page') || '1'));
   const status = searchParams.get('status');
   const search = (searchParams.get('search') || '').trim();
-  const payment = searchParams.get('payment'); // 'cod' | 'online'
+  const payment = searchParams.get('payment'); // any PAYMENT_METHODS value
+  const source = searchParams.get('source');   // any ORDER_SOURCES value
   const from = (searchParams.get('from') || '').trim(); // YYYY-MM-DD (inclusive)
   const to = (searchParams.get('to') || '').trim();     // YYYY-MM-DD (inclusive)
   const sort = searchParams.get('sort') || 'recent';
@@ -47,9 +49,14 @@ export async function GET(request: NextRequest) {
     where.push('(o.order_id ILIKE ? OR o.customer_name ILIKE ? OR o.phone ILIKE ? OR o.city ILIKE ?)');
     args.push(`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`);
   }
-  if (payment === 'cod' || payment === 'online') {
+  // Both are whitelisted against lib/crm.ts rather than interpolated.
+  if (payment && isOption(PAYMENT_METHODS, payment)) {
     where.push('o.payment_method = ?');
     args.push(payment);
+  }
+  if (source && isOption(ORDER_SOURCES, source)) {
+    where.push('o.source = ?');
+    args.push(source);
   }
   if (from) {
     where.push('o.created_at >= ?::date');

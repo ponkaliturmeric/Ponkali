@@ -12,10 +12,36 @@ const MAP: Record<string, { tone: keyof typeof TONE; label: string }> = {
   shipped: { tone: 'info', label: 'Shipped' },
   delivered: { tone: 'success', label: 'Delivered' },
   cancelled: { tone: 'error', label: 'Cancelled' },
-  // payment / stock
+  // payment methods
   cod: { tone: 'warning', label: 'COD' },
   upi: { tone: 'success', label: 'UPI' },
+  cash: { tone: 'success', label: 'Cash' },
+  bank: { tone: 'info', label: 'Bank transfer' },
+  online: { tone: 'success', label: 'Online' },
   razorpay: { tone: 'success', label: 'Online' },
+  other: { tone: 'default', label: 'Other' },
+  // payment status
+  paid: { tone: 'success', label: 'Paid' },
+  unpaid: { tone: 'error', label: 'Unpaid' },
+  partial: { tone: 'warning', label: 'Part-paid' },
+  refunded: { tone: 'default', label: 'Refunded' },
+  // where the order or enquiry came from
+  website: { tone: 'info', label: 'Website' },
+  whatsapp: { tone: 'success', label: 'WhatsApp' },
+  phone: { tone: 'info', label: 'Phone' },
+  instagram: { tone: 'primary', label: 'Instagram' },
+  'walk-in': { tone: 'primary', label: 'Walk-in' },
+  reference: { tone: 'primary', label: 'Reference' },
+  email: { tone: 'info', label: 'Email' },
+  exhibition: { tone: 'primary', label: 'Exhibition' },
+  // bulk enquiry pipeline stages
+  new: { tone: 'info', label: 'New' },
+  contacted: { tone: 'primary', label: 'Contacted' },
+  quoted: { tone: 'warning', label: 'Quoted' },
+  negotiating: { tone: 'warning', label: 'Negotiating' },
+  won: { tone: 'success', label: 'Won' },
+  lost: { tone: 'error', label: 'Lost' },
+  // stock
   'in-stock': { tone: 'success', label: 'In Stock' },
   'out-of-stock': { tone: 'error', label: 'Out of Stock' },
 };

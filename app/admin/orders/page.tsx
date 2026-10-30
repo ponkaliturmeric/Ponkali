@@ -9,6 +9,7 @@ import {
   InputAdornment, Pagination, CircularProgress, Divider,
 } from '@mui/material';
 import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
+import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import SearchIcon from '@mui/icons-material/Search';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
@@ -17,6 +18,7 @@ import PageHeader from '@/components/admin/PageHeader';
 import MainCard from '@/components/admin/MainCard';
 import StatusChip from '@/components/admin/StatusChip';
 import { Order } from '@/lib/types';
+import { ORDER_SOURCES, labelFor } from '@/lib/crm';
 
 const STATUS_OPTIONS = ['All', 'Pending', 'Confirmed', 'Packed', 'Shipped', 'Delivered'];
 
@@ -24,7 +26,13 @@ const PAYMENT_OPTIONS = [
   { value: 'all', label: 'All payments' },
   { value: 'online', label: 'Online (Razorpay)' },
   { value: 'cod', label: 'Cash on Delivery' },
+  { value: 'upi', label: 'UPI' },
+  { value: 'cash', label: 'Cash' },
+  { value: 'bank', label: 'Bank transfer' },
 ];
+
+/** Website orders vs the ones typed in by hand (WhatsApp, phone, walk-in…). */
+const SOURCE_OPTIONS = [{ value: 'all', label: 'All sources' }, ...ORDER_SOURCES];
 
 const DATE_OPTIONS = [
   { value: 'all', label: 'All time' },
@@ -55,6 +63,10 @@ function dateRange(preset: string): { from?: string; to?: string } {
 
 const formatINR = (v: number) => `₹${(v || 0).toLocaleString('en-IN')}`;
 
+/** What is still owed on an order — surfaced for part-paid WhatsApp orders. */
+const balanceDue = (o: Order) =>
+  Math.max(0, Math.round((Number(o.total) || 0) - (Number(o.amount_paid) || 0)));
+
 interface Summary { count: number; revenue: number; avg_order_value: number }
 
 export default function AdminOrdersPage() {
@@ -64,6 +76,7 @@ export default function AdminOrdersPage() {
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState('All');
   const [payment, setPayment] = useState('all');
+  const [source, setSource] = useState('all');
   const [datePreset, setDatePreset] = useState('all');
   const [sort, setSort] = useState('recent');
   // `searchInput` updates on every keystroke; `search` is the debounced value
@@ -90,6 +103,7 @@ export default function AdminOrdersPage() {
       if (statusFilter !== 'All') params.set('status', statusFilter);
       if (search) params.set('search', search);
       if (payment !== 'all') params.set('payment', payment);
+      if (source !== 'all') params.set('source', source);
       const { from, to } = dateRange(datePreset);
       if (from) params.set('from', from);
       if (to) params.set('to', to);
@@ -106,7 +120,7 @@ export default function AdminOrdersPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, statusFilter, search, payment, datePreset, sort, router]);
+  }, [page, statusFilter, search, payment, source, datePreset, sort, router]);
 
   useEffect(() => { fetchOrders(); }, [fetchOrders]);
 
@@ -120,9 +134,9 @@ export default function AdminOrdersPage() {
   const totalPages = Math.ceil(total / 20);
 
   const hasFilters =
-    statusFilter !== 'All' || payment !== 'all' || datePreset !== 'all' || search !== '';
+    statusFilter !== 'All' || payment !== 'all' || source !== 'all' || datePreset !== 'all' || search !== '';
   const clearAll = () => {
-    setStatusFilter('All'); setPayment('all'); setDatePreset('all');
+    setStatusFilter('All'); setPayment('all'); setSource('all'); setDatePreset('all');
     setSearchInput(''); setSearch(''); setPage(1);
   };
 
@@ -137,7 +151,8 @@ export default function AdminOrdersPage() {
         action={
           <Stack direction="row" spacing={1.5}>
             <Button variant="outlined" color="inherit" startIcon={<FileDownloadOutlinedIcon />} href="/api/orders/export?format=csv" sx={{ color: 'text.secondary' }}>CSV</Button>
-            <Button variant="contained" startIcon={<FileDownloadOutlinedIcon />} href="/api/orders/export?format=xlsx">Excel</Button>
+            <Button variant="outlined" color="inherit" startIcon={<FileDownloadOutlinedIcon />} href="/api/orders/export?format=xlsx" sx={{ color: 'text.secondary' }}>Excel</Button>
+            <Button component={Link} href="/admin/orders/new" variant="contained" startIcon={<AddRoundedIcon />}>New order</Button>
           </Stack>
         }
       />
@@ -175,6 +190,9 @@ export default function AdminOrdersPage() {
                 <Select size="small" value={payment} onChange={e => { setPayment(e.target.value); setPage(1); }} sx={selectSx}>
                   {PAYMENT_OPTIONS.map(o => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
                 </Select>
+                <Select size="small" value={source} onChange={e => { setSource(e.target.value); setPage(1); }} sx={selectSx}>
+                  {SOURCE_OPTIONS.map(o => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
+                </Select>
                 <Select size="small" value={datePreset} onChange={e => { setDatePreset(e.target.value); setPage(1); }} sx={selectSx}>
                   {DATE_OPTIONS.map(o => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
                 </Select>
@@ -191,6 +209,7 @@ export default function AdminOrdersPage() {
                   <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>Active:</Typography>
                   {statusFilter !== 'All' && <Chip size="small" label={`Status: ${statusFilter}`} onDelete={() => setStatusFilter('All')} />}
                   {payment !== 'all' && <Chip size="small" label={PAYMENT_OPTIONS.find(o => o.value === payment)?.label} onDelete={() => setPayment('all')} />}
+                  {source !== 'all' && <Chip size="small" label={`From: ${labelFor(ORDER_SOURCES, source)}`} onDelete={() => setSource('all')} />}
                   {datePreset !== 'all' && <Chip size="small" label={DATE_OPTIONS.find(o => o.value === datePreset)?.label} onDelete={() => setDatePreset('all')} />}
                   {search && <Chip size="small" label={`“${search}”`} onDelete={() => { setSearchInput(''); setSearch(''); }} />}
                   <Button size="small" onClick={clearAll} sx={{ color: 'text.secondary', minWidth: 0 }}>Clear all</Button>
@@ -221,26 +240,41 @@ export default function AdminOrdersPage() {
           <Table>
             <TableHead>
               <TableRow>
-                {['Order ID', 'Date', 'Customer', 'Phone', 'City', 'Items', 'Amount', 'Payment', 'Status', ''].map((h, i) => (
+                {['Order ID', 'Date', 'Source', 'Customer', 'Phone', 'City', 'Items', 'Amount', 'Payment', 'Status', ''].map((h, i) => (
                   <TableCell key={i}>{h}</TableCell>
                 ))}
               </TableRow>
             </TableHead>
             <TableBody>
               {loading ? (
-                <TableRow><TableCell colSpan={10} align="center" sx={{ py: 6 }}><CircularProgress size={26} /></TableCell></TableRow>
+                <TableRow><TableCell colSpan={11} align="center" sx={{ py: 6 }}><CircularProgress size={26} /></TableCell></TableRow>
               ) : orders.length === 0 ? (
-                <TableRow><TableCell colSpan={10} align="center" sx={{ py: 6, color: 'text.disabled' }}>No orders match these filters.</TableCell></TableRow>
+                <TableRow><TableCell colSpan={11} align="center" sx={{ py: 6, color: 'text.disabled' }}>No orders match these filters.</TableCell></TableRow>
               ) : orders.map(order => (
                 <TableRow key={order.order_id} hover>
                   <TableCell sx={{ fontFamily: 'monospace', fontWeight: 700, color: 'primary.main' }}>{order.order_id}</TableCell>
                   <TableCell sx={{ color: 'text.secondary' }}>{new Date(order.created_at).toLocaleDateString('en-IN')}</TableCell>
+                  <TableCell><StatusChip status={order.source || 'website'} /></TableCell>
                   <TableCell sx={{ fontWeight: 600 }}>{order.customer_name}</TableCell>
                   <TableCell sx={{ color: 'text.secondary' }}>{order.phone}</TableCell>
                   <TableCell sx={{ color: 'text.secondary' }}>{order.city}</TableCell>
                   <TableCell sx={{ color: 'text.secondary' }}>{order.item_count ?? '—'}</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>₹{order.total}</TableCell>
-                  <TableCell><StatusChip status={order.payment_method} /></TableCell>
+                  <TableCell sx={{ fontWeight: 700 }}>
+                    ₹{order.total}
+                    {balanceDue(order) > 0 && (
+                      <Typography variant="caption" color="warning.dark" display="block" fontWeight={600}>
+                        ₹{balanceDue(order)} due
+                      </Typography>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <Stack spacing={0.5} alignItems="flex-start">
+                      <StatusChip status={order.payment_method} />
+                      {order.payment_status && order.payment_status !== 'Paid' && (
+                        <StatusChip status={order.payment_status} />
+                      )}
+                    </Stack>
+                  </TableCell>
                   <TableCell>
                     <Select
                       value={order.status}

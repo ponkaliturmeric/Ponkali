@@ -15,6 +15,7 @@ import SpaceDashboardOutlinedIcon from '@mui/icons-material/SpaceDashboardOutlin
 import ReceiptLongOutlinedIcon from '@mui/icons-material/ReceiptLongOutlined';
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import GroupsOutlinedIcon from '@mui/icons-material/GroupsOutlined';
+import HandshakeOutlinedIcon from '@mui/icons-material/HandshakeOutlined';
 import MailOutlineRoundedIcon from '@mui/icons-material/MailOutlineRounded';
 import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
 import LogoutIcon from '@mui/icons-material/Logout';
@@ -34,6 +35,7 @@ const NAV_GROUPS = [
     items: [
       { title: 'Orders', url: '/admin/orders', icon: ReceiptLongOutlinedIcon },
       { title: 'Customers', url: '/admin/customers', icon: GroupsOutlinedIcon },
+      { title: 'Bulk Enquiries', url: '/admin/enquiries', icon: HandshakeOutlinedIcon },
       { title: 'Products', url: '/admin/products', icon: Inventory2OutlinedIcon },
       { title: 'Messages', url: '/admin/messages', icon: MailOutlineRoundedIcon },
     ],
