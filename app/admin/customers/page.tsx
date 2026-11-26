@@ -6,10 +6,12 @@ import Link from 'next/link';
 import {
   Box, Typography, Button, Stack, TextField, Chip, Table, TableHead,
   TableBody, TableRow, TableCell, TableContainer, Select, MenuItem,
-  InputAdornment, Pagination, CircularProgress, Avatar,
+  InputAdornment, Pagination, CircularProgress, Avatar, IconButton,
+  Tooltip, Dialog, DialogTitle, DialogContent, DialogActions, Alert,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
+import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
 import ReceiptLongOutlinedIcon from '@mui/icons-material/ReceiptLongOutlined';
 import GroupsOutlinedIcon from '@mui/icons-material/GroupsOutlined';
 import LoyaltyOutlinedIcon from '@mui/icons-material/LoyaltyOutlined';
@@ -69,6 +71,9 @@ export default function AdminCustomersPage() {
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  const [confirmDelete, setConfirmDelete] = useState<Customer | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
   const router = useRouter();
   const firstRun = useRef(true);
 
@@ -98,6 +103,29 @@ export default function AdminCustomersPage() {
   }, [page, sort, search, router]);
 
   useEffect(() => { fetchCustomers(); }, [fetchCustomers]);
+
+  const doDelete = async () => {
+    if (!confirmDelete) return;
+    setDeleting(true);
+    setDeleteError('');
+    try {
+      const params = new URLSearchParams();
+      if (confirmDelete.phone) params.set('phone', confirmDelete.phone);
+      if (confirmDelete.email) params.set('email', confirmDelete.email);
+      const res = await fetch(`/api/admin/customers?${params}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setDeleteError(data.error || 'Could not delete this customer.');
+        return;
+      }
+      setConfirmDelete(null);
+      fetchCustomers();
+    } catch {
+      setDeleteError('Could not reach the server. Please try again.');
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   const totalPages = Math.ceil(total / 20);
   const repeatRate = summary.total_customers > 0
@@ -176,11 +204,22 @@ export default function AdminCustomersPage() {
                     <TableCell sx={{ color: 'text.secondary' }}>{c.last_order ? new Date(c.last_order).toLocaleDateString('en-IN') : '—'}</TableCell>
                     <TableCell><Chip size="small" label={seg.label} sx={{ bgcolor: seg.bg, color: seg.fg, fontWeight: 700 }} /></TableCell>
                     <TableCell>
-                      {c.order_count > 0 && c.phone ? (
-                        <Button component={Link} href={`/admin/orders?search=${encodeURIComponent(c.phone)}`} size="small" startIcon={<ReceiptLongOutlinedIcon sx={{ fontSize: 16 }} />}>Orders</Button>
-                      ) : (
-                        <Typography variant="caption" color="text.disabled">No orders yet</Typography>
-                      )}
+                      <Stack direction="row" spacing={0.25} alignItems="center">
+                        {c.order_count > 0 && c.phone ? (
+                          <Button component={Link} href={`/admin/orders?search=${encodeURIComponent(c.phone)}`} size="small" startIcon={<ReceiptLongOutlinedIcon sx={{ fontSize: 16 }} />}>Orders</Button>
+                        ) : (
+                          <Typography variant="caption" color="text.disabled" sx={{ mr: 0.5 }}>No orders yet</Typography>
+                        )}
+                        <Tooltip title="Delete customer">
+                          <IconButton
+                            size="small"
+                            onClick={() => { setConfirmDelete(c); setDeleteError(''); }}
+                            sx={{ color: 'text.disabled', '&:hover': { color: 'error.main' } }}
+                          >
+                            <DeleteOutlineRoundedIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      </Stack>
                     </TableCell>
                   </TableRow>
                 );
@@ -196,6 +235,43 @@ export default function AdminCustomersPage() {
           </Stack>
         )}
       </MainCard>
+
+      {/* Delete confirmation.
+          A customer is not a row here — it is their order history plus any
+          account. So this dialog states the order count and lifetime value
+          explicitly: deleting erases those orders, which permanently lowers the
+          revenue and repeat-rate figures on the dashboard above. Nobody should
+          discover that afterwards. */}
+      <Dialog open={!!confirmDelete} onClose={() => setConfirmDelete(null)} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ fontWeight: 700 }}>Delete this customer?</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+            <strong>{confirmDelete?.customer_name || 'This customer'}</strong>
+            {confirmDelete?.phone ? ` · ${confirmDelete.phone}` : ''}
+          </Typography>
+          {confirmDelete && confirmDelete.order_count > 0 ? (
+            <Alert severity="warning" sx={{ mb: 1.5 }}>
+              This also deletes their <strong>{confirmDelete.order_count}</strong>{' '}
+              order{confirmDelete.order_count === 1 ? '' : 's'} worth{' '}
+              <strong>{formatINR(confirmDelete.total_spent)}</strong>, including the line items and
+              status history. Your revenue, average order value and repeat-rate figures will drop
+              accordingly.
+            </Alert>
+          ) : (
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+              They have no orders, so only their registered account is removed.
+            </Typography>
+          )}
+          <Typography variant="body2" color="text.secondary">This cannot be undone.</Typography>
+          {deleteError && <Alert severity="error" sx={{ mt: 2 }}>{deleteError}</Alert>}
+        </DialogContent>
+        <DialogActions sx={{ px: 3, py: 2 }}>
+          <Button color="inherit" onClick={() => setConfirmDelete(null)} sx={{ color: 'text.secondary' }}>Keep them</Button>
+          <Button variant="contained" color="error" onClick={doDelete} disabled={deleting}>
+            {deleting ? 'Deleting…' : 'Delete customer'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </AdminLayout>
   );
 }

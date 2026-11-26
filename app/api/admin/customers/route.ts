@@ -144,3 +144,116 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to load customers' }, { status: 500 });
   }
 }
+
+/**
+ * Delete a customer.
+ *
+ * There is no customers table — a "customer" is an aggregate of order rows
+ * (grouped by the last 10 digits of the phone) and optionally a `users`
+ * account. So deleting one is not a single row delete, and it is NOT a
+ * cosmetic hide: it erases every order that customer ever placed, which
+ * permanently lowers the revenue, AOV and repeat-rate figures on the dashboard.
+ *
+ * That is the honest meaning of "delete this customer", and it is what a
+ * data-erasure request requires, so the endpoint does exactly that — but the UI
+ * states the order count and lifetime value in the confirmation first, because
+ * nobody should learn this by watching their revenue drop.
+ *
+ * Identified by ?phone= (preferred) and/or ?email=. Account-only customers who
+ * never ordered have no phone key, hence the email path.
+ *
+ * Ordering matters: order_items has an FK to orders(order_id) with no cascade,
+ * so children are removed via a subquery while the parent rows still exist, and
+ * all of it lands in one transaction.
+ */
+export async function DELETE(request: NextRequest) {
+  const isAdmin = await getAdminSession();
+  if (!isAdmin) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const { searchParams } = new URL(request.url);
+  const rawPhone = (searchParams.get('phone') || '').trim();
+  const email = (searchParams.get('email') || '').trim().toLowerCase();
+
+  // The same key the list query groups on. Anything that is not a full 10-digit
+  // number is rejected rather than normalised: a partial key could match the
+  // wrong customer, and right('', 10) would match every row with a non-numeric
+  // phone at once.
+  const phoneKey = rawPhone.replace(/\D/g, '').slice(-10);
+  const hasPhone = phoneKey.length === 10;
+
+  if (!hasPhone && !email) {
+    return NextResponse.json(
+      { error: 'A 10-digit phone number or an email address is required.' },
+      { status: 400 },
+    );
+  }
+
+  const PHONE_KEY_SQL = "right(regexp_replace(phone, '[^0-9]', '', 'g'), 10)";
+
+  try {
+    const db = await getDb();
+
+    // Count first, so the response can report exactly what went.
+    let orderCount = 0;
+    let revenue = 0;
+    if (hasPhone) {
+      const { rows } = await db.execute({
+        sql: `SELECT COUNT(*) AS n, COALESCE(SUM(total), 0) AS revenue
+              FROM orders WHERE ${PHONE_KEY_SQL} = ?`,
+        args: [phoneKey],
+      });
+      orderCount = Number(rows[0]?.n ?? 0);
+      revenue = Number(rows[0]?.revenue ?? 0);
+    }
+
+    const stmts: { sql: string; args: (string | number | null)[] }[] = [];
+
+    if (hasPhone) {
+      stmts.push(
+        {
+          sql: `DELETE FROM order_items
+                WHERE order_id IN (SELECT order_id FROM orders WHERE ${PHONE_KEY_SQL} = ?)`,
+          args: [phoneKey],
+        },
+        {
+          sql: `DELETE FROM order_status_history
+                WHERE order_id IN (SELECT order_id FROM orders WHERE ${PHONE_KEY_SQL} = ?)`,
+          args: [phoneKey],
+        },
+        { sql: `DELETE FROM orders WHERE ${PHONE_KEY_SQL} = ?`, args: [phoneKey] },
+      );
+    }
+
+    // The registered account. With a phone in hand we match on that, and fall
+    // back to the email ONLY for an account that has no phone — otherwise an
+    // address shared with an unrelated account would take that account down
+    // with it.
+    if (hasPhone && email) {
+      stmts.push({
+        sql: `DELETE FROM users
+              WHERE right(regexp_replace(COALESCE(phone, ''), '[^0-9]', '', 'g'), 10) = ?
+                 OR (COALESCE(phone, '') = '' AND lower(email) = ?)`,
+        args: [phoneKey, email],
+      });
+    } else if (hasPhone) {
+      stmts.push({
+        sql: "DELETE FROM users WHERE right(regexp_replace(COALESCE(phone, ''), '[^0-9]', '', 'g'), 10) = ?",
+        args: [phoneKey],
+      });
+    } else {
+      stmts.push({ sql: 'DELETE FROM users WHERE lower(email) = ?', args: [email] });
+    }
+
+    await db.batch(stmts, 'write');
+
+    return NextResponse.json({
+      success: true,
+      deleted: { orders: orderCount, revenue_removed: Math.round(revenue) },
+    });
+  } catch (error) {
+    console.error('Customer delete error:', error);
+    return NextResponse.json({ error: 'Could not delete the customer. Please try again.' }, { status: 500 });
+  }
+}

@@ -47,6 +47,8 @@ export interface Order {
   /** UPI txn id, cheque no., Razorpay payment id — whatever identifies the payment. */
   payment_ref?: string;
   discount?: number;
+  /** Courier consignment / tracking number, once the parcel is handed over. */
+  tracking_number?: string;
 }
 
 export interface OrderItem {

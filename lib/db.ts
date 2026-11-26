@@ -253,6 +253,16 @@ async function initialize(db: Db) {
     -- The orders list can filter by source (e.g. "show me WhatsApp orders").
     CREATE INDEX IF NOT EXISTS idx_orders_source ON orders (source);
 
+    -- Courier tracking number (Speed Post, Delhivery, a local parcel service —
+    -- whatever carried it). Safe to add with no backfill: an order that was
+    -- never shipped has nothing to track, so NULL is the honest value and the
+    -- admin shows it as "Add".
+    ALTER TABLE orders ADD COLUMN IF NOT EXISTS tracking_number TEXT;
+    -- Operators search by tracking number when a customer asks "where is my
+    -- parcel" quoting only the consignment note.
+    CREATE INDEX IF NOT EXISTS idx_orders_tracking ON orders (tracking_number)
+      WHERE tracking_number IS NOT NULL;
+
     -- Bulk / wholesale enquiries. A pipeline, not an order: someone asks for a
     -- quote on 50 kg, and it is worked through stages until it is won or lost.
     -- Entered and updated entirely by hand from WhatsApp conversations.
