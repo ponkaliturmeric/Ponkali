@@ -12,10 +12,12 @@ import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
 import RadioButtonUncheckedRoundedIcon from '@mui/icons-material/RadioButtonUncheckedRounded';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import ReceiptLongOutlinedIcon from '@mui/icons-material/ReceiptLongOutlined';
+import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
 import AdminLayout from '@/components/AdminLayout';
 import PageHeader from '@/components/admin/PageHeader';
 import MainCard from '@/components/admin/MainCard';
 import StatusChip from '@/components/admin/StatusChip';
+import CopyText from '@/components/admin/CopyText';
 import { Order } from '@/lib/types';
 import { ORDER_SOURCES, PAYMENT_METHODS, labelFor } from '@/lib/crm';
 
@@ -29,13 +31,18 @@ export default function AdminOrderDetailPage({ params }: { params: { id: string 
   const [order, setOrder] = useState<OrderWithHistory | null>(null);
   const [loading, setLoading] = useState(true);
   const [notes, setNotes] = useState('');
+  const [tracking, setTracking] = useState('');
+  const [savingTracking, setSavingTracking] = useState(false);
   const [saving, setSaving] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
     fetch(`/api/orders/${params.id}`)
       .then(r => { if (r.status === 401) { router.push('/admin/login'); return null; } return r.json(); })
-      .then(data => { if (data) { setOrder(data); setNotes(data.notes || ''); } setLoading(false); });
+      .then(data => {
+        if (data) { setOrder(data); setNotes(data.notes || ''); setTracking(data.tracking_number || ''); }
+        setLoading(false);
+      });
   }, [params.id, router]);
 
   const updateStatus = async (status: string) => {
@@ -43,6 +50,18 @@ export default function AdminOrderDetailPage({ params }: { params: { id: string 
     const res = await fetch(`/api/orders/${params.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }) });
     setOrder(await res.json());
     setSaving(false);
+  };
+
+  const saveTracking = async () => {
+    setSavingTracking(true);
+    const res = await fetch(`/api/orders/${params.id}`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tracking_number: tracking }),
+    });
+    // Re-read from the response so the timeline picks up the new entry and the
+    // field shows exactly what was stored (trimmed, or cleared to empty).
+    const updated = await res.json().catch(() => null);
+    if (updated) { setOrder(updated); setTracking(updated.tracking_number || ''); }
+    setSavingTracking(false);
   };
 
   const saveNotes = async () => {
@@ -206,6 +225,39 @@ export default function AdminOrderDetailPage({ params }: { params: { id: string 
             </Stack>
           </MainCard>
 
+          <MainCard title="Shipping & Tracking">
+            {order.tracking_number ? (
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="caption" color="text.secondary" fontWeight={600} display="block">
+                  Current tracking number
+                </Typography>
+                <CopyText value={order.tracking_number} label="Copy tracking number" />
+              </Box>
+            ) : (
+              <Typography variant="body2" color="text.disabled" sx={{ mb: 2 }}>
+                No tracking number yet.
+              </Typography>
+            )}
+            <TextField
+              fullWidth size="small" label="Tracking / consignment number"
+              value={tracking}
+              onChange={e => setTracking(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); saveTracking(); } }}
+              placeholder="e.g. EE123456789IN"
+              inputProps={{ maxLength: 64, style: { fontFamily: 'monospace' } }}
+            />
+            <Button
+              variant="contained" onClick={saveTracking} disabled={savingTracking}
+              startIcon={<LocalShippingOutlinedIcon fontSize="small" />}
+              sx={{ mt: 2 }}
+            >
+              {savingTracking ? 'Saving…' : order.tracking_number ? 'Update tracking' : 'Save tracking'}
+            </Button>
+            <Typography variant="caption" color="text.disabled" display="block" sx={{ mt: 1.5 }}>
+              Clear the field and save to remove it. Changes are recorded in the timeline.
+            </Typography>
+          </MainCard>
+
           {order.history && order.history.length > 0 && (
             <MainCard title="Timeline">
               <Stack>
@@ -217,6 +269,9 @@ export default function AdminOrderDetailPage({ params }: { params: { id: string 
                     </Stack>
                     <Box sx={{ pb: 2 }}>
                       <Typography variant="body1" fontWeight={600}>{h.status}</Typography>
+                      {h.notes && (
+                        <Typography variant="caption" color="text.secondary" display="block">{h.notes}</Typography>
+                      )}
                       <Typography variant="caption" color="text.disabled">{new Date(h.changed_at).toLocaleString('en-IN')}</Typography>
                     </Box>
                   </Stack>

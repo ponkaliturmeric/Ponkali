@@ -70,7 +70,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   const db = await getDb();
 
   const exists = await db.execute({
-    sql: 'SELECT 1 FROM orders WHERE order_id = ?',
+    sql: 'SELECT status FROM orders WHERE order_id = ?',
     args: [params.id],
   });
   if (exists.rows.length === 0) {
@@ -95,6 +95,31 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       sql: 'UPDATE orders SET notes = ? WHERE order_id = ?',
       args: [body.notes, params.id],
     });
+  }
+
+  // Courier tracking number. Stored as NULL rather than '' when cleared, so the
+  // partial index stays small and "has a tracking number" is a single IS NOT
+  // NULL test everywhere. Capped because this is operator free-text, and a
+  // consignment number is never anywhere near this long.
+  if (typeof body.tracking_number === 'string') {
+    const tracking = body.tracking_number.trim().slice(0, 64);
+    await db.batch([
+      {
+        sql: 'UPDATE orders SET tracking_number = ? WHERE order_id = ?',
+        args: [tracking || null, params.id],
+      },
+      {
+        // The timeline entry carries the order's CURRENT status, not a made-up
+        // one: adding a tracking number is a note on the order, not a change of
+        // state, and a fake "Tracking" status would misread as a real step.
+        sql: 'INSERT INTO order_status_history (order_id, status, notes) VALUES (?, ?, ?)',
+        args: [
+          params.id,
+          String(exists.rows[0].status ?? 'Pending'),
+          tracking ? `Tracking number set to ${tracking}` : 'Tracking number cleared',
+        ],
+      },
+    ], 'write');
   }
 
   const order = await loadOrder(params.id);

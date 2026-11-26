@@ -92,3 +92,53 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     return NextResponse.json({ error: 'Could not save the changes. Please try again.' }, { status: 500 });
   }
 }
+
+/**
+ * Permanently delete an order.
+ *
+ * order_items.order_id carries a foreign key to orders(order_id) with no
+ * ON DELETE CASCADE, so the children have to go first or Postgres rejects the
+ * parent delete. order_status_history has no FK but would otherwise be left
+ * orphaned, pointing at an order that no longer exists.
+ *
+ * All three run in ONE transaction: a half-deleted order — line items gone but
+ * the row still listed, or vice versa — is worse than either outcome.
+ *
+ * This is genuinely irreversible and it removes the order from every revenue
+ * figure in the admin, so the UI confirms with the customer name and amount
+ * before calling it.
+ */
+export async function DELETE(_request: NextRequest, { params }: { params: { id: string } }) {
+  if (!(await getAdminSession())) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  try {
+    const db = await getDb();
+    const existing = await db.execute({
+      sql: 'SELECT order_id, customer_name, total FROM orders WHERE order_id = ?',
+      args: [params.id],
+    });
+    if (existing.rows.length === 0) {
+      return NextResponse.json({ error: 'Order not found' }, { status: 404 });
+    }
+
+    await db.batch([
+      { sql: 'DELETE FROM order_items WHERE order_id = ?', args: [params.id] },
+      { sql: 'DELETE FROM order_status_history WHERE order_id = ?', args: [params.id] },
+      { sql: 'DELETE FROM orders WHERE order_id = ?', args: [params.id] },
+    ], 'write');
+
+    return NextResponse.json({
+      success: true,
+      deleted: {
+        order_id: String(existing.rows[0].order_id),
+        customer_name: String(existing.rows[0].customer_name ?? ''),
+        total: Number(existing.rows[0].total ?? 0),
+      },
+    });
+  } catch (error) {
+    console.error('Order delete error:', error);
+    return NextResponse.json({ error: 'Could not delete the order. Please try again.' }, { status: 500 });
+  }
+}

@@ -6,17 +6,21 @@ import Link from 'next/link';
 import {
   Box, Typography, Button, Stack, TextField, Chip, Table, TableHead,
   TableBody, TableRow, TableCell, TableContainer, Select, MenuItem,
-  InputAdornment, Pagination, CircularProgress, Divider,
+  InputAdornment, Pagination, CircularProgress, Divider, IconButton,
+  Tooltip, Dialog, DialogTitle, DialogContent, DialogActions, Alert,
 } from '@mui/material';
 import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import SearchIcon from '@mui/icons-material/Search';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
+import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
+import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
 import AdminLayout from '@/components/AdminLayout';
 import PageHeader from '@/components/admin/PageHeader';
 import MainCard from '@/components/admin/MainCard';
 import StatusChip from '@/components/admin/StatusChip';
+import CopyText from '@/components/admin/CopyText';
 import { Order } from '@/lib/types';
 import { ORDER_SOURCES, labelFor } from '@/lib/crm';
 
@@ -86,6 +90,13 @@ export default function AdminOrdersPage() {
   );
   const [search, setSearch] = useState(searchInput);
   const [loading, setLoading] = useState(true);
+  // Order pending deletion (confirmation dialog), and the tracking-number editor.
+  const [confirmDelete, setConfirmDelete] = useState<Order | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
+  const [trackingFor, setTrackingFor] = useState<Order | null>(null);
+  const [trackingValue, setTrackingValue] = useState('');
+  const [savingTracking, setSavingTracking] = useState(false);
   const router = useRouter();
   const firstRun = useRef(true);
 
@@ -129,6 +140,47 @@ export default function AdminOrdersPage() {
       method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }),
     });
     fetchOrders();
+  };
+
+  const openTracking = (order: Order) => {
+    setTrackingFor(order);
+    setTrackingValue(order.tracking_number || '');
+  };
+
+  const saveTracking = async () => {
+    if (!trackingFor) return;
+    setSavingTracking(true);
+    try {
+      await fetch(`/api/orders/${trackingFor.order_id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tracking_number: trackingValue }),
+      });
+      setTrackingFor(null);
+      fetchOrders();
+    } finally {
+      setSavingTracking(false);
+    }
+  };
+
+  const doDelete = async () => {
+    if (!confirmDelete) return;
+    setDeleting(true);
+    setDeleteError('');
+    try {
+      const res = await fetch(`/api/admin/orders/${confirmDelete.order_id}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setDeleteError(data.error || 'Could not delete the order.');
+        return;
+      }
+      setConfirmDelete(null);
+      fetchOrders();
+    } catch {
+      setDeleteError('Could not reach the server. Please try again.');
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const totalPages = Math.ceil(total / 20);
@@ -240,19 +292,21 @@ export default function AdminOrdersPage() {
           <Table>
             <TableHead>
               <TableRow>
-                {['Order ID', 'Date', 'Source', 'Customer', 'Phone', 'City', 'Items', 'Amount', 'Payment', 'Status', ''].map((h, i) => (
+                {['Order ID', 'Date', 'Source', 'Customer', 'Phone', 'City', 'Items', 'Amount', 'Payment', 'Status', 'Tracking', ''].map((h, i) => (
                   <TableCell key={i}>{h}</TableCell>
                 ))}
               </TableRow>
             </TableHead>
             <TableBody>
               {loading ? (
-                <TableRow><TableCell colSpan={11} align="center" sx={{ py: 6 }}><CircularProgress size={26} /></TableCell></TableRow>
+                <TableRow><TableCell colSpan={12} align="center" sx={{ py: 6 }}><CircularProgress size={26} /></TableCell></TableRow>
               ) : orders.length === 0 ? (
-                <TableRow><TableCell colSpan={11} align="center" sx={{ py: 6, color: 'text.disabled' }}>No orders match these filters.</TableCell></TableRow>
+                <TableRow><TableCell colSpan={12} align="center" sx={{ py: 6, color: 'text.disabled' }}>No orders match these filters.</TableCell></TableRow>
               ) : orders.map(order => (
                 <TableRow key={order.order_id} hover>
-                  <TableCell sx={{ fontFamily: 'monospace', fontWeight: 700, color: 'primary.main' }}>{order.order_id}</TableCell>
+                  <TableCell>
+                    <CopyText value={order.order_id} label="Copy order ID" color="primary.main" />
+                  </TableCell>
                   <TableCell sx={{ color: 'text.secondary' }}>{new Date(order.created_at).toLocaleDateString('en-IN')}</TableCell>
                   <TableCell><StatusChip status={order.source || 'website'} /></TableCell>
                   <TableCell sx={{ fontWeight: 600 }}>{order.customer_name}</TableCell>
@@ -287,7 +341,34 @@ export default function AdminOrdersPage() {
                     </Select>
                   </TableCell>
                   <TableCell>
-                    <Button component={Link} href={`/admin/orders/${order.order_id}`} size="small" startIcon={<VisibilityOutlinedIcon sx={{ fontSize: 16 }} />}>View</Button>
+                    {order.tracking_number ? (
+                      <Stack direction="row" spacing={0.5} alignItems="center">
+                        <CopyText value={order.tracking_number} label="Copy tracking number" bold={false} fontSize="0.8125rem" />
+                        <Tooltip title="Edit tracking number">
+                          <IconButton size="small" onClick={() => openTracking(order)} sx={{ p: 0.375, color: 'text.disabled' }}>
+                            <LocalShippingOutlinedIcon sx={{ fontSize: 15 }} />
+                          </IconButton>
+                        </Tooltip>
+                      </Stack>
+                    ) : (
+                      <Button
+                        size="small" onClick={() => openTracking(order)}
+                        startIcon={<LocalShippingOutlinedIcon sx={{ fontSize: 15 }} />}
+                        sx={{ color: 'text.secondary', minWidth: 0, fontWeight: 500 }}
+                      >
+                        Add
+                      </Button>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <Stack direction="row" spacing={0.25} alignItems="center">
+                      <Button component={Link} href={`/admin/orders/${order.order_id}`} size="small" startIcon={<VisibilityOutlinedIcon sx={{ fontSize: 16 }} />}>View</Button>
+                      <Tooltip title="Delete order">
+                        <IconButton size="small" onClick={() => { setConfirmDelete(order); setDeleteError(''); }} sx={{ color: 'text.disabled', '&:hover': { color: 'error.main' } }}>
+                          <DeleteOutlineRoundedIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </Stack>
                   </TableCell>
                 </TableRow>
               ))}
@@ -302,6 +383,54 @@ export default function AdminOrdersPage() {
           </Stack>
         )}
       </MainCard>
+
+      {/* Tracking number editor */}
+      <Dialog open={!!trackingFor} onClose={() => setTrackingFor(null)} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ fontWeight: 700 }}>
+          {trackingFor?.tracking_number ? 'Edit tracking number' : 'Add tracking number'}
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            {trackingFor?.order_id} · {trackingFor?.customer_name}
+          </Typography>
+          <TextField
+            autoFocus fullWidth label="Tracking / consignment number"
+            value={trackingValue}
+            onChange={e => setTrackingValue(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); saveTracking(); } }}
+            placeholder="e.g. EE123456789IN"
+            inputProps={{ maxLength: 64, style: { fontFamily: 'monospace' } }}
+            helperText="Leave it empty to remove the tracking number."
+          />
+        </DialogContent>
+        <DialogActions sx={{ px: 3, py: 2 }}>
+          <Button color="inherit" onClick={() => setTrackingFor(null)} sx={{ color: 'text.secondary' }}>Cancel</Button>
+          <Button variant="contained" onClick={saveTracking} disabled={savingTracking}>
+            {savingTracking ? 'Saving…' : 'Save'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete confirmation. Spells out the amount, because deleting an order
+          removes it from every revenue figure in the admin. */}
+      <Dialog open={!!confirmDelete} onClose={() => setConfirmDelete(null)} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ fontWeight: 700 }}>Delete this order?</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary">
+            <strong>{confirmDelete?.order_id}</strong> — {confirmDelete?.customer_name} ·{' '}
+            {formatINR(Number(confirmDelete?.total) || 0)} will be deleted permanently, along with
+            its items and status history. It will no longer count towards your revenue totals, and
+            this cannot be undone.
+          </Typography>
+          {deleteError && <Alert severity="error" sx={{ mt: 2 }}>{deleteError}</Alert>}
+        </DialogContent>
+        <DialogActions sx={{ px: 3, py: 2 }}>
+          <Button color="inherit" onClick={() => setConfirmDelete(null)} sx={{ color: 'text.secondary' }}>Keep it</Button>
+          <Button variant="contained" color="error" onClick={doDelete} disabled={deleting}>
+            {deleting ? 'Deleting…' : 'Delete order'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </AdminLayout>
   );
 }

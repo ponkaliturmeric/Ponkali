@@ -47,16 +47,47 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('lg'));
-  const [open, setOpen] = useState(true);
+  // `pinned` is the hamburger's doing and survives the pointer leaving.
+  // `peeking` is the transient hover/touch/focus expansion.
+  //
+  // Starts UNPINNED so hover-to-expand works the moment the console opens, and
+  // the tables get the full width until you actually need the nav. The
+  // hamburger pins it permanently open for anyone who prefers that.
+  const [pinned, setPinned] = useState(false);
+  const [peeking, setPeeking] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [account, setAccount] = useState<null | HTMLElement>(null);
   const [search, setSearch] = useState('');
   const [loggingOut, setLoggingOut] = useState(false);
 
-  const expanded = open || isMobile;
-  const drawerWidth = isMobile ? DRAWER_WIDTH : open ? DRAWER_WIDTH : MINI_WIDTH;
+  // Hover only means something on a device that actually hovers. On a touch
+  // screen every "hover" is really a tap, which would make the rail expand the
+  // instant you tried to press an icon, so those get an explicit touch handler
+  // instead.
+  const canHover = useMediaQuery('(hover: hover) and (pointer: fine)');
 
-  const toggle = () => (isMobile ? setMobileOpen(p => !p) : setOpen(p => !p));
+  const expanded = isMobile || pinned || peeking;
+
+  // Two different widths on purpose. The PAPER is what you see, so it follows
+  // `expanded`. The LAYOUT slot follows `pinned` only, so a peek floats over
+  // the page instead of reflowing it — otherwise every accidental pass of the
+  // mouse would shove the whole table sideways and back.
+  const paperWidth = isMobile ? DRAWER_WIDTH : expanded ? DRAWER_WIDTH : MINI_WIDTH;
+  const layoutWidth = isMobile ? DRAWER_WIDTH : pinned ? DRAWER_WIDTH : MINI_WIDTH;
+  const peeked = peeking && !pinned && !isMobile;
+
+  const toggle = () => {
+    if (isMobile) { setMobileOpen(p => !p); return; }
+    // Pinning absorbs an active peek, so the rail doesn't collapse the moment
+    // the pointer leaves right after you clicked the hamburger.
+    setPinned(p => !p);
+    setPeeking(false);
+  };
+
+  // Collapse a peek once focus or the pointer goes elsewhere. Touch devices get
+  // this via the click handler on the main content area below.
+  const peekOn = () => { if (!pinned && !isMobile) setPeeking(true); };
+  const peekOff = () => setPeeking(false);
   const isActive = (url: string) =>
     pathname === url || (url !== '/admin/dashboard' && pathname.startsWith(url));
 
@@ -146,9 +177,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Top AppBar */}
       <AppBar position="fixed" elevation={0} sx={{ bgcolor: BRAND, color: '#fff', zIndex: t => t.zIndex.drawer + 1, boxShadow: '0 1px 0 rgba(0,0,0,0.06)' }}>
         <Toolbar sx={{ minHeight: 64, px: { xs: 1.5, sm: 2.5 }, gap: 1 }}>
-          <IconButton color="inherit" edge="start" onClick={toggle} sx={{ mr: 0.5 }}>
-            <MenuIcon />
-          </IconButton>
+          <Tooltip title={isMobile ? 'Menu' : pinned ? 'Unpin sidebar (hover to peek)' : 'Keep sidebar open'}>
+            <IconButton color="inherit" edge="start" onClick={toggle} sx={{ mr: 0.5 }} aria-label={pinned ? 'Unpin sidebar' : 'Pin sidebar open'}>
+              <MenuIcon />
+            </IconButton>
+          </Tooltip>
           <Box component={Link} href="/admin/dashboard" sx={{ display: { xs: 'none', sm: 'flex' }, alignItems: 'center', textDecoration: 'none' }}>
             <Typography sx={{ fontWeight: 800, fontSize: 17, letterSpacing: '0.16em', color: '#fff' }}>PONKALI</Typography>
             <Typography sx={{ ml: 1, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)' }}>Admin</Typography>
@@ -227,12 +260,32 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       ) : (
         <Drawer
           variant="permanent"
-          open={open}
+          open={expanded}
+          // Hover/touch/focus all expand the rail; the pointer leaving or focus
+          // moving away collapses it again, unless it is pinned open.
+          onMouseEnter={canHover ? peekOn : undefined}
+          onMouseLeave={canHover ? peekOff : undefined}
+          onTouchStart={canHover ? undefined : peekOn}
+          onFocus={peekOn}
+          onBlur={e => { if (!e.currentTarget.contains(e.relatedTarget as Node)) peekOff(); }}
           sx={{
-            width: drawerWidth, flexShrink: 0, whiteSpace: 'nowrap',
+            // The slot the layout reserves tracks `pinned`…
+            width: layoutWidth, flexShrink: 0, whiteSpace: 'nowrap',
             '& .MuiDrawer-paper': {
-              width: drawerWidth, border: 'none', overflowX: 'hidden',
-              transition: t => t.transitions.create('width', { duration: t.transitions.duration.standard }),
+              // …while the visible panel tracks `expanded`, so a peek floats
+              // above the page rather than pushing it around.
+              width: paperWidth, border: 'none', overflowX: 'hidden',
+              // A shadow only while peeking, so it reads as "temporarily over
+              // this" rather than as a permanent edge.
+              //
+              // Deliberately NOT raised above the AppBar: the paper is
+              // position:fixed and so already paints over the static main
+              // content, while the AppBar sits at zIndex.drawer + 1. Bumping
+              // the paper past that would slide the expanding panel over the
+              // header and hide the very hamburger used to pin it.
+              boxShadow: peeked ? '4px 0 24px rgba(0,0,0,0.28)' : 'none',
+              zIndex: t => t.zIndex.drawer,
+              transition: t => t.transitions.create(['width', 'box-shadow'], { duration: t.transitions.duration.shorter }),
             },
           }}
         >
@@ -243,9 +296,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Main content */}
       <Box
         component="main"
+        // Covers the touch case (no mouseleave to rely on) and the mouse that
+        // jumps straight from the rail into the page without crossing its edge.
+        onMouseEnter={canHover ? peekOff : undefined}
+        onTouchStart={canHover ? undefined : peekOff}
         sx={{
           flexGrow: 1, minWidth: 0,
-          width: { lg: `calc(100% - ${drawerWidth}px)` },
+          width: { lg: `calc(100% - ${layoutWidth}px)` },
           minHeight: '100vh',
           transition: theme.transitions.create('width', { duration: theme.transitions.duration.standard }),
         }}
