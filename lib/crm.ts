@@ -41,6 +41,15 @@ export const PAYMENT_METHODS: Option[] = [
 export const PAYMENT_STATUSES = ['Unpaid', 'Partial', 'Paid', 'Refunded'] as const;
 export type PaymentStatus = (typeof PAYMENT_STATUSES)[number];
 
+/**
+ * Whether the supplier has been paid for an order's goods — money OUT.
+ * Deliberately only two states: stock is settled after delivery, so an order
+ * is either squared up or it isn't. Kept separate from PAYMENT_STATUSES above,
+ * which tracks money IN from the customer.
+ */
+export const SUPPLIER_PAID_STATUSES = ['Not Paid', 'Paid'] as const;
+export type SupplierPaidStatus = (typeof SUPPLIER_PAID_STATUSES)[number];
+
 /** Fulfilment statuses. Mirrors VALID_STATUSES in app/api/orders/[id]/route.ts. */
 export const ORDER_STATUSES = [
   'Pending', 'Confirmed', 'Packed', 'Shipped', 'Delivered', 'Cancelled', 'Paid',

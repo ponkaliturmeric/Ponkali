@@ -126,8 +126,18 @@ export default function AdminEnquiriesPage() {
       const res = await fetch(`/api/admin/enquiries?${params}`);
       if (res.status === 401) { router.push('/admin/login'); return; }
       const data = await res.json().catch(() => ({}));
-      setEnquiries(data.enquiries || []);
-      setTotal(data.total || 0);
+      const rows = data.enquiries || [];
+      const count = data.total || 0;
+
+      // Same guard as the orders list, and for the same reason: an out-of-range
+      // page reports a total of 0, so stepping back cannot rely on the count.
+      if (rows.length === 0 && page > 1) {
+        setPage(p => Math.max(1, p - 1));
+        return;
+      }
+
+      setEnquiries(rows);
+      setTotal(count);
       setSummary(data.summary || EMPTY_SUMMARY);
     } catch {
       setEnquiries([]);

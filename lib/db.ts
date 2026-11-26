@@ -263,6 +263,23 @@ async function initialize(db: Db) {
     CREATE INDEX IF NOT EXISTS idx_orders_tracking ON orders (tracking_number)
       WHERE tracking_number IS NOT NULL;
 
+    -- Has the SUPPLIER been paid for this order's goods?
+    --
+    -- Not to be confused with payment_status, which is money coming IN from
+    -- the customer. This is money going OUT: the stock is bought from family
+    -- and settled after delivery, so an order can be fully paid by the
+    -- customer and still owed upstream. Two separate directions of money, two
+    -- separate columns.
+    --
+    -- Backfilled to 'Not Paid' rather than left NULL: the admin filters on it,
+    -- and a tri-state where NULL means "don't know" would make "what do I still
+    -- owe" unanswerable. Existing rows start unsettled and get marked off.
+    ALTER TABLE orders ADD COLUMN IF NOT EXISTS supplier_paid TEXT;
+    UPDATE orders SET supplier_paid = 'Not Paid' WHERE supplier_paid IS NULL;
+    ALTER TABLE orders ALTER COLUMN supplier_paid SET DEFAULT 'Not Paid';
+    -- The whole point of the column is "which orders do I still owe for".
+    CREATE INDEX IF NOT EXISTS idx_orders_supplier_paid ON orders (supplier_paid);
+
     -- Bulk / wholesale enquiries. A pipeline, not an order: someone asks for a
     -- quote on 50 kg, and it is worked through stages until it is won or lost.
     -- Entered and updated entirely by hand from WhatsApp conversations.
