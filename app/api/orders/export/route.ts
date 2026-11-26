@@ -26,6 +26,8 @@ interface OrderRow {
   balance: number;
   status: string;
   items: string;
+  tracking_number: string;
+  supplier_paid: string;
 }
 
 const COLUMNS: { header: string; key: keyof OrderRow; width: number }[] = [
@@ -52,6 +54,8 @@ const COLUMNS: { header: string; key: keyof OrderRow; width: number }[] = [
   { header: 'Received', key: 'amount_paid', width: 12 },
   { header: 'Balance Due', key: 'balance', width: 12 },
   { header: 'Status', key: 'status', width: 14 },
+  { header: 'Tracking Number', key: 'tracking_number', width: 22 },
+  { header: 'Supplier Paid', key: 'supplier_paid', width: 14 },
 ];
 
 /** Postgres returns timestamps as JS Date objects — format them readably (IST). */
@@ -103,6 +107,8 @@ async function fetchOrders(): Promise<OrderRow[]> {
     amount_paid: paid,
     balance: Math.max(0, Math.round((total - paid) * 100) / 100),
     status: String(o.status),
+    tracking_number: o.tracking_number != null ? String(o.tracking_number) : '',
+    supplier_paid: o.supplier_paid != null ? String(o.supplier_paid) : 'Not Paid',
     items: (itemsByOrder.get(String(o.order_id)) ?? []).join(', '),
     };
   });

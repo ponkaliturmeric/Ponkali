@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAdminSession } from '@/lib/auth';
 import { getCustomerSession } from '@/lib/customer-auth';
 import { getDb } from '@/lib/db';
+import { SUPPLIER_PAID_STATUSES } from '@/lib/crm';
 
 const VALID_STATUSES = ['Pending', 'Confirmed', 'Packed', 'Shipped', 'Delivered', 'Cancelled', 'Paid'];
 
@@ -27,6 +28,41 @@ async function loadOrder(orderId: string) {
     items: itemsRes.rows,
     history: historyRes.rows,
   };
+}
+
+/**
+ * What a signed-in CUSTOMER is allowed to see of their own order.
+ *
+ * loadOrder does SELECT *, which now carries internal business data: the
+ * admin's "Internal Notes", the payment reference, and supplier_paid — whether
+ * we have settled up with our own supplier, which is none of a buyer's
+ * business. The status timeline carries note text for the same reason
+ * ("Supplier marked as paid").
+ *
+ * A WHITELIST rather than a blocklist, deliberately: every column added to
+ * orders from now on is excluded until someone decides a customer should see
+ * it, instead of leaking by default. Tracking number IS included — that one is
+ * genuinely useful to the person waiting for the parcel.
+ */
+function customerView(order: Record<string, unknown>) {
+  const ALLOWED = [
+    'order_id', 'created_at', 'customer_name', 'phone', 'email',
+    'address_line1', 'address_line2', 'city', 'state', 'pincode', 'landmark',
+    'payment_method', 'payment_status', 'amount_paid',
+    'subtotal', 'shipping', 'cod_charge', 'discount', 'total',
+    'status', 'tracking_number', 'items',
+  ];
+  const safe: Record<string, unknown> = {};
+  for (const key of ALLOWED) {
+    if (key in order) safe[key] = order[key];
+  }
+  // Timeline without the internal note text.
+  const history = Array.isArray(order.history) ? order.history : [];
+  safe.history = history.map((h) => {
+    const row = h as Record<string, unknown>;
+    return { status: row.status, changed_at: row.changed_at };
+  });
+  return safe;
 }
 
 export async function GET(_request: NextRequest, { params }: { params: { id: string } }) {
@@ -55,6 +91,8 @@ export async function GET(_request: NextRequest, { params }: { params: { id: str
     if (!ownsOrder) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+    // Owns it, but is not an admin — strip the internal fields.
+    return NextResponse.json(customerView(order as Record<string, unknown>));
   }
 
   return NextResponse.json(order);
@@ -117,6 +155,32 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
           params.id,
           String(exists.rows[0].status ?? 'Pending'),
           tracking ? `Tracking number set to ${tracking}` : 'Tracking number cleared',
+        ],
+      },
+    ], 'write');
+  }
+
+  // Supplier settlement — money OUT, independent of the customer's payment.
+  // Validated against the allowed list rather than stored as free text, so the
+  // column stays filterable and a typo can't create a third state.
+  if (typeof body.supplier_paid === 'string') {
+    const value = body.supplier_paid.trim();
+    if (!SUPPLIER_PAID_STATUSES.includes(value as (typeof SUPPLIER_PAID_STATUSES)[number])) {
+      return NextResponse.json(
+        { error: `Supplier payment must be one of: ${SUPPLIER_PAID_STATUSES.join(', ')}.` },
+        { status: 400 },
+      );
+    }
+    await db.batch([
+      { sql: 'UPDATE orders SET supplier_paid = ? WHERE order_id = ?', args: [value, params.id] },
+      {
+        // Current status again, for the same reason as the tracking entry: this
+        // is a note on the order, not a fulfilment step.
+        sql: 'INSERT INTO order_status_history (order_id, status, notes) VALUES (?, ?, ?)',
+        args: [
+          params.id,
+          String(exists.rows[0].status ?? 'Pending'),
+          value === 'Paid' ? 'Supplier marked as paid' : 'Supplier marked as not paid',
         ],
       },
     ], 'write');

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
-  Box, Typography, Button, Stack, TextField, Divider, CircularProgress,
+  Box, Typography, Button, Stack, TextField, Divider, CircularProgress, Alert,
 } from '@mui/material';
 import PrintOutlinedIcon from '@mui/icons-material/PrintOutlined';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
@@ -19,7 +19,7 @@ import MainCard from '@/components/admin/MainCard';
 import StatusChip from '@/components/admin/StatusChip';
 import CopyText from '@/components/admin/CopyText';
 import { Order } from '@/lib/types';
-import { ORDER_SOURCES, PAYMENT_METHODS, labelFor } from '@/lib/crm';
+import { ORDER_SOURCES, PAYMENT_METHODS, SUPPLIER_PAID_STATUSES, labelFor } from '@/lib/crm';
 
 interface OrderWithHistory extends Order {
   history?: { status: string; changed_at: string; notes?: string }[];
@@ -33,6 +33,8 @@ export default function AdminOrderDetailPage({ params }: { params: { id: string 
   const [notes, setNotes] = useState('');
   const [tracking, setTracking] = useState('');
   const [savingTracking, setSavingTracking] = useState(false);
+  const [trackingError, setTrackingError] = useState('');
+  const [savingSupplier, setSavingSupplier] = useState(false);
   const [saving, setSaving] = useState(false);
   const router = useRouter();
 
@@ -54,14 +56,38 @@ export default function AdminOrderDetailPage({ params }: { params: { id: string 
 
   const saveTracking = async () => {
     setSavingTracking(true);
-    const res = await fetch(`/api/orders/${params.id}`, {
-      method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tracking_number: tracking }),
-    });
-    // Re-read from the response so the timeline picks up the new entry and the
-    // field shows exactly what was stored (trimmed, or cleared to empty).
-    const updated = await res.json().catch(() => null);
-    if (updated) { setOrder(updated); setTracking(updated.tracking_number || ''); }
-    setSavingTracking(false);
+    setTrackingError('');
+    try {
+      const res = await fetch(`/api/orders/${params.id}`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tracking_number: tracking }),
+      });
+      const data = await res.json().catch(() => null);
+      // res.ok matters here beyond the error message: an error body is
+      // { error: '...' }, and feeding that to setOrder replaced the whole order
+      // with an object that has no order_id, blanking the page.
+      if (!res.ok) {
+        setTrackingError((data && data.error) || 'Could not save the tracking number.');
+        return;
+      }
+      if (data) { setOrder(data); setTracking(data.tracking_number || ''); }
+    } catch {
+      setTrackingError('Could not reach the server. Please try again.');
+    } finally {
+      setSavingTracking(false);
+    }
+  };
+
+  const setSupplierPaid = async (value: string) => {
+    setSavingSupplier(true);
+    try {
+      const res = await fetch(`/api/orders/${params.id}`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ supplier_paid: value }),
+      });
+      const data = await res.json().catch(() => null);
+      if (res.ok && data) setOrder(data);
+    } finally {
+      setSavingSupplier(false);
+    }
   };
 
   const saveNotes = async () => {
@@ -225,6 +251,32 @@ export default function AdminOrderDetailPage({ params }: { params: { id: string 
             </Stack>
           </MainCard>
 
+          <MainCard title="Supplier Payment">
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2, lineHeight: 1.7 }}>
+              Whether you have paid your supplier for this order&apos;s stock. Nothing to do with
+              the customer&apos;s payment above.
+            </Typography>
+            <Box sx={{ mb: 2 }}>
+              <StatusChip status={order.supplier_paid || 'Not Paid'} size="medium" />
+            </Box>
+            <Stack spacing={1}>
+              {SUPPLIER_PAID_STATUSES.map(s => {
+                const current = (order.supplier_paid || 'Not Paid') === s;
+                return (
+                  <Button
+                    key={s} onClick={() => setSupplierPaid(s)} disabled={current || savingSupplier}
+                    variant={current ? 'contained' : 'outlined'}
+                    color={current ? 'primary' : 'inherit'}
+                    startIcon={current ? <CheckCircleRoundedIcon fontSize="small" /> : <RadioButtonUncheckedRoundedIcon fontSize="small" />}
+                    sx={{ justifyContent: 'flex-start', color: current ? undefined : 'text.primary', '&.Mui-disabled': { opacity: current ? 1 : 0.5, color: current ? '#fff' : undefined } }}
+                  >
+                    {s}
+                  </Button>
+                );
+              })}
+            </Stack>
+          </MainCard>
+
           <MainCard title="Shipping & Tracking">
             {order.tracking_number ? (
               <Box sx={{ mb: 2 }}>
@@ -253,6 +305,7 @@ export default function AdminOrderDetailPage({ params }: { params: { id: string 
             >
               {savingTracking ? 'Saving…' : order.tracking_number ? 'Update tracking' : 'Save tracking'}
             </Button>
+            {trackingError && <Alert severity="error" sx={{ mt: 2 }}>{trackingError}</Alert>}
             <Typography variant="caption" color="text.disabled" display="block" sx={{ mt: 1.5 }}>
               Clear the field and save to remove it. Changes are recorded in the timeline.
             </Typography>

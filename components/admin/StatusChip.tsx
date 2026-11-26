@@ -24,6 +24,9 @@ const MAP: Record<string, { tone: keyof typeof TONE; label: string }> = {
   paid: { tone: 'success', label: 'Paid' },
   unpaid: { tone: 'error', label: 'Unpaid' },
   partial: { tone: 'warning', label: 'Part-paid' },
+  // Supplier settlement. Amber, not red: paying after delivery is the normal
+  // arrangement here, so an unsettled order is a to-do and not a fault.
+  'not-paid': { tone: 'warning', label: 'Not Paid' },
   refunded: { tone: 'default', label: 'Refunded' },
   // where the order or enquiry came from
   website: { tone: 'info', label: 'Website' },

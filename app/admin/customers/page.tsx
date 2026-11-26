@@ -96,8 +96,18 @@ export default function AdminCustomersPage() {
       const res = await fetch(`/api/admin/customers?${params}`);
       if (res.status === 401) { router.push('/admin/login'); return; }
       const data = await res.json().catch(() => ({}));
-      setCustomers(data.customers || []);
-      setTotal(data.total || 0);
+      const rows = data.customers || [];
+      const count = data.total || 0;
+
+      // Same guard as the orders list, and for the same reason: an out-of-range
+      // page reports a total of 0, so stepping back cannot rely on the count.
+      if (rows.length === 0 && page > 1) {
+        setPage(p => Math.max(1, p - 1));
+        return;
+      }
+
+      setCustomers(rows);
+      setTotal(count);
       if (data.summary) setSummary(data.summary);
     } catch {
       setCustomers([]);

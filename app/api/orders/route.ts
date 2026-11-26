@@ -4,7 +4,7 @@ import { getCustomerSession } from '@/lib/customer-auth';
 import { getDb } from '@/lib/db';
 import { priceCart } from '@/lib/pricing';
 import { createOrder, invalidCustomerField, missingCustomerField, type CustomerDetails } from '@/lib/orders';
-import { ORDER_SOURCES, PAYMENT_METHODS, isOption } from '@/lib/crm';
+import { ORDER_SOURCES, PAYMENT_METHODS, isOption, isOneOf, SUPPLIER_PAID_STATUSES } from '@/lib/crm';
 
 const PAGE_SIZE = 20;
 
@@ -20,6 +20,7 @@ export async function GET(request: NextRequest) {
   const search = (searchParams.get('search') || '').trim();
   const payment = searchParams.get('payment'); // any PAYMENT_METHODS value
   const source = searchParams.get('source');   // any ORDER_SOURCES value
+  const supplier = searchParams.get('supplier'); // 'Paid' | 'Not Paid'
   const from = (searchParams.get('from') || '').trim(); // YYYY-MM-DD (inclusive)
   const to = (searchParams.get('to') || '').trim();     // YYYY-MM-DD (inclusive)
   const sort = searchParams.get('sort') || 'recent';
@@ -58,6 +59,11 @@ export async function GET(request: NextRequest) {
     where.push('o.source = ?');
     args.push(source);
   }
+  // "What do I still owe my supplier?" — the reason the column exists.
+  if (supplier && isOneOf(SUPPLIER_PAID_STATUSES, supplier)) {
+    where.push('COALESCE(o.supplier_paid, \'Not Paid\') = ?');
+    args.push(supplier);
+  }
   if (from) {
     where.push('o.created_at >= ?::date');
     args.push(from);
@@ -80,7 +86,13 @@ export async function GET(request: NextRequest) {
     const ordersRes = await db.execute({
       sql: `SELECT o.*, COALESCE(SUM(oi.quantity), 0) AS item_count,
                    COUNT(*) OVER() AS total_count,
-                   COALESCE(SUM(o.total) OVER(), 0) AS total_revenue
+                   COALESCE(SUM(o.total) OVER(), 0) AS total_revenue,
+                   -- How many of the matching orders are still owed upstream.
+                   -- A COUNT and deliberately not a rupee total: o.total is
+                   -- what the CUSTOMER pays, not what the stock cost, so any
+                   -- sum of it would be a wrong answer to "what do I owe".
+                   COALESCE(SUM(CASE WHEN COALESCE(o.supplier_paid, 'Not Paid') = 'Not Paid'
+                                     THEN 1 ELSE 0 END) OVER(), 0) AS supplier_unpaid_count
             FROM orders o
             LEFT JOIN order_items oi ON oi.order_id = o.order_id
             ${whereSql}
@@ -92,10 +104,12 @@ export async function GET(request: NextRequest) {
 
     const total = ordersRes.rows.length ? Number(ordersRes.rows[0].total_count) : 0;
     const revenue = ordersRes.rows.length ? Number(ordersRes.rows[0].total_revenue) : 0;
+    const supplierUnpaid = ordersRes.rows.length ? Number(ordersRes.rows[0].supplier_unpaid_count) : 0;
     const orders = ordersRes.rows.map((row) => {
       const order = { ...row };
       delete order.total_count;
       delete order.total_revenue;
+      delete order.supplier_unpaid_count;
       return order;
     });
 
@@ -108,6 +122,7 @@ export async function GET(request: NextRequest) {
         count: total,
         revenue,
         avg_order_value: total > 0 ? Math.round(revenue / total) : 0,
+        supplier_unpaid: supplierUnpaid,
       },
     });
   } catch (error) {

@@ -49,6 +49,12 @@ export interface Order {
   discount?: number;
   /** Courier consignment / tracking number, once the parcel is handed over. */
   tracking_number?: string;
+  /**
+   * 'Paid' | 'Not Paid' — whether the SUPPLIER has been settled for this
+   * order's goods. Money out, as opposed to payment_status, which is money in
+   * from the customer.
+   */
+  supplier_paid?: string;
 }
 
 export interface OrderItem {

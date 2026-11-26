@@ -8,6 +8,7 @@ import {
   TableBody, TableRow, TableCell, TableContainer, Select, MenuItem,
   InputAdornment, Pagination, CircularProgress, Divider, IconButton,
   Tooltip, Dialog, DialogTitle, DialogContent, DialogActions, Alert, Checkbox,
+  Snackbar,
 } from '@mui/material';
 import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
@@ -16,6 +17,7 @@ import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
+import HelpOutlineRoundedIcon from '@mui/icons-material/HelpOutlineRounded';
 import AdminLayout from '@/components/AdminLayout';
 import PageHeader from '@/components/admin/PageHeader';
 import MainCard from '@/components/admin/MainCard';
@@ -23,7 +25,7 @@ import StatusChip from '@/components/admin/StatusChip';
 import CopyText from '@/components/admin/CopyText';
 import BulkBar from '@/components/admin/BulkBar';
 import { Order } from '@/lib/types';
-import { ORDER_SOURCES, labelFor } from '@/lib/crm';
+import { ORDER_SOURCES, SUPPLIER_PAID_STATUSES, labelFor } from '@/lib/crm';
 
 const STATUS_OPTIONS = ['All', 'Pending', 'Confirmed', 'Packed', 'Shipped', 'Delivered'];
 
@@ -38,6 +40,13 @@ const PAYMENT_OPTIONS = [
 
 /** Website orders vs the ones typed in by hand (WhatsApp, phone, walk-in…). */
 const SOURCE_OPTIONS = [{ value: 'all', label: 'All sources' }, ...ORDER_SOURCES];
+
+/** Supplier settlement — money OUT, not the customer's payment. */
+const SUPPLIER_OPTIONS = [
+  { value: 'all', label: 'Supplier: all' },
+  { value: 'Not Paid', label: 'Supplier: not paid' },
+  { value: 'Paid', label: 'Supplier: paid' },
+];
 
 const DATE_OPTIONS = [
   { value: 'all', label: 'All time' },
@@ -72,16 +81,17 @@ const formatINR = (v: number) => `₹${(v || 0).toLocaleString('en-IN')}`;
 const balanceDue = (o: Order) =>
   Math.max(0, Math.round((Number(o.total) || 0) - (Number(o.amount_paid) || 0)));
 
-interface Summary { count: number; revenue: number; avg_order_value: number }
+interface Summary { count: number; revenue: number; avg_order_value: number; supplier_unpaid: number }
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [total, setTotal] = useState(0);
-  const [summary, setSummary] = useState<Summary>({ count: 0, revenue: 0, avg_order_value: 0 });
+  const [summary, setSummary] = useState<Summary>({ count: 0, revenue: 0, avg_order_value: 0, supplier_unpaid: 0 });
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState('All');
   const [payment, setPayment] = useState('all');
   const [source, setSource] = useState('all');
+  const [supplier, setSupplier] = useState('all');
   const [datePreset, setDatePreset] = useState('all');
   const [sort, setSort] = useState('recent');
   // `searchInput` updates on every keystroke; `search` is the debounced value
@@ -102,6 +112,10 @@ export default function AdminOrdersPage() {
   const [trackingFor, setTrackingFor] = useState<Order | null>(null);
   const [trackingValue, setTrackingValue] = useState('');
   const [savingTracking, setSavingTracking] = useState(false);
+  const [trackingError, setTrackingError] = useState('');
+  // Inline dropdown changes used to fail silently — the value simply snapped
+  // back with no explanation. This says what went wrong.
+  const [toast, setToast] = useState('');
   const router = useRouter();
   const firstRun = useRef(true);
 
@@ -120,23 +134,42 @@ export default function AdminOrdersPage() {
       if (search) params.set('search', search);
       if (payment !== 'all') params.set('payment', payment);
       if (source !== 'all') params.set('source', source);
+      if (supplier !== 'all') params.set('supplier', supplier);
       const { from, to } = dateRange(datePreset);
       if (from) params.set('from', from);
       if (to) params.set('to', to);
       const res = await fetch(`/api/orders?${params}`);
       if (res.status === 401) { router.push('/admin/login'); return; }
       const data = await res.json().catch(() => ({}));
-      setOrders(data.orders || []);
-      setTotal(data.total || 0);
-      setSummary(data.summary || { count: 0, revenue: 0, avg_order_value: 0 });
+      const rows = data.orders || [];
+      const count = data.total || 0;
+
+      // Deleting every row on the last page strands you there: the list shows
+      // "no orders match" over a non-empty result set, and because the total
+      // rides on the first row's window function, an out-of-range page reports
+      // total 0 — so the pagination control disappears too and there is no way
+      // back except clearing the filters.
+      //
+      // Hence stepping back on an empty page rather than trusting the count.
+      // It converges (page strictly decreases, floor of 1) and it self-heals
+      // whatever emptied the page. On a genuinely empty filter it lands on
+      // page 1, which is where that empty state belongs anyway.
+      if (rows.length === 0 && page > 1) {
+        setPage(p => Math.max(1, p - 1));
+        return;
+      }
+
+      setOrders(rows);
+      setTotal(count);
+      setSummary(data.summary || { count: 0, revenue: 0, avg_order_value: 0, supplier_unpaid: 0 });
     } catch {
       setOrders([]);
       setTotal(0);
-      setSummary({ count: 0, revenue: 0, avg_order_value: 0 });
+      setSummary({ count: 0, revenue: 0, avg_order_value: 0, supplier_unpaid: 0 });
     } finally {
       setLoading(false);
     }
-  }, [page, statusFilter, search, payment, source, datePreset, sort, router]);
+  }, [page, statusFilter, search, payment, source, supplier, datePreset, sort, router]);
 
   useEffect(() => { fetchOrders(); }, [fetchOrders]);
 
@@ -144,29 +177,55 @@ export default function AdminOrdersPage() {
   // this drops the selection exactly when the row set is about to change.
   useEffect(() => { setSelected([]); }, [fetchOrders]);
 
-  const updateStatus = async (orderId: string, status: string) => {
-    await fetch(`/api/orders/${orderId}`, {
-      method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }),
-    });
-    fetchOrders();
+  /** Shared by the two inline dropdowns: patch one field, report any failure. */
+  const patchOrder = async (orderId: string, body: Record<string, string>, fallback: string) => {
+    try {
+      const res = await fetch(`/api/orders/${orderId}`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setToast(data.error || fallback);
+      }
+    } catch {
+      setToast('Could not reach the server. Your change was not saved.');
+    } finally {
+      // Refetch either way: on success to pick up the new value, on failure to
+      // snap the dropdown back to what the database actually holds.
+      fetchOrders();
+    }
   };
+
+  const updateStatus = (orderId: string, status: string) =>
+    patchOrder(orderId, { status }, 'Could not update the order status.');
 
   const openTracking = (order: Order) => {
     setTrackingFor(order);
     setTrackingValue(order.tracking_number || '');
+    setTrackingError('');
   };
 
   const saveTracking = async () => {
     if (!trackingFor) return;
     setSavingTracking(true);
+    setTrackingError('');
     try {
-      await fetch(`/api/orders/${trackingFor.order_id}`, {
+      const res = await fetch(`/api/orders/${trackingFor.order_id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ tracking_number: trackingValue }),
       });
+      // Without this check the dialog closed on a 400 or 500 as if the number
+      // had saved, and the operator only found out when the column stayed empty.
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setTrackingError(data.error || 'Could not save the tracking number.');
+        return;
+      }
       setTrackingFor(null);
       fetchOrders();
+    } catch {
+      setTrackingError('Could not reach the server. Please try again.');
     } finally {
       setSavingTracking(false);
     }
@@ -227,12 +286,16 @@ export default function AdminOrdersPage() {
     }
   };
 
+  const updateSupplierPaid = (orderId: string, value: string) =>
+    patchOrder(orderId, { supplier_paid: value }, 'Could not update the supplier payment.');
+
   const totalPages = Math.ceil(total / 20);
 
   const hasFilters =
-    statusFilter !== 'All' || payment !== 'all' || source !== 'all' || datePreset !== 'all' || search !== '';
+    statusFilter !== 'All' || payment !== 'all' || source !== 'all' || supplier !== 'all' ||
+    datePreset !== 'all' || search !== '';
   const clearAll = () => {
-    setStatusFilter('All'); setPayment('all'); setSource('all'); setDatePreset('all');
+    setStatusFilter('All'); setPayment('all'); setSource('all'); setSupplier('all'); setDatePreset('all');
     setSearchInput(''); setSearch(''); setPage(1);
   };
 
@@ -289,6 +352,9 @@ export default function AdminOrdersPage() {
                 <Select size="small" value={source} onChange={e => { setSource(e.target.value); setPage(1); }} sx={selectSx}>
                   {SOURCE_OPTIONS.map(o => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
                 </Select>
+                <Select size="small" value={supplier} onChange={e => { setSupplier(e.target.value); setPage(1); }} sx={selectSx}>
+                  {SUPPLIER_OPTIONS.map(o => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
+                </Select>
                 <Select size="small" value={datePreset} onChange={e => { setDatePreset(e.target.value); setPage(1); }} sx={selectSx}>
                   {DATE_OPTIONS.map(o => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
                 </Select>
@@ -306,6 +372,7 @@ export default function AdminOrdersPage() {
                   {statusFilter !== 'All' && <Chip size="small" label={`Status: ${statusFilter}`} onDelete={() => setStatusFilter('All')} />}
                   {payment !== 'all' && <Chip size="small" label={PAYMENT_OPTIONS.find(o => o.value === payment)?.label} onDelete={() => setPayment('all')} />}
                   {source !== 'all' && <Chip size="small" label={`From: ${labelFor(ORDER_SOURCES, source)}`} onDelete={() => setSource('all')} />}
+                  {supplier !== 'all' && <Chip size="small" label={`Supplier: ${supplier}`} onDelete={() => setSupplier('all')} />}
                   {datePreset !== 'all' && <Chip size="small" label={DATE_OPTIONS.find(o => o.value === datePreset)?.label} onDelete={() => setDatePreset('all')} />}
                   {search && <Chip size="small" label={`“${search}”`} onDelete={() => { setSearchInput(''); setSearch(''); }} />}
                   <Button size="small" onClick={clearAll} sx={{ color: 'text.secondary', minWidth: 0 }}>Clear all</Button>
@@ -317,15 +384,34 @@ export default function AdminOrdersPage() {
       </Box>
 
       {/* Summary strip — reflects the current filters */}
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', sm: 'repeat(3, 1fr)' }, gap: 2, mb: 2.5 }}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', sm: 'repeat(4, 1fr)' }, gap: 2, mb: 2.5 }}>
         {[
           { label: hasFilters ? 'Matching orders' : 'Total orders', value: summary.count.toLocaleString('en-IN') },
           { label: hasFilters ? 'Matching revenue' : 'Total revenue', value: formatINR(summary.revenue) },
           { label: 'Avg order value', value: formatINR(summary.avg_order_value) },
+          // A count, never a rupee figure: the order total is the customer's
+          // price, not what the stock cost, so summing it would answer the
+          // wrong question. Clicking it filters to exactly those orders.
+          {
+            label: 'Supplier not paid',
+            value: summary.supplier_unpaid.toLocaleString('en-IN'),
+            warn: summary.supplier_unpaid > 0,
+            onClick: () => { setSupplier('Not Paid'); setPage(1); },
+          },
         ].map(s => (
           <MainCard key={s.label} contentSx={{ py: 1.75 }}>
-            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>{s.label}</Typography>
-            <Typography variant="h4" sx={{ fontWeight: 700, mt: 0.25 }}>{s.value}</Typography>
+            <Box
+              onClick={s.onClick}
+              sx={s.onClick ? { cursor: 'pointer' } : undefined}
+              role={s.onClick ? 'button' : undefined}
+              tabIndex={s.onClick ? 0 : undefined}
+              onKeyDown={s.onClick ? (e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); s.onClick!(); } }) : undefined}
+            >
+              <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>{s.label}</Typography>
+              <Typography variant="h4" sx={{ fontWeight: 700, mt: 0.25, color: s.warn ? 'warning.dark' : undefined }}>
+                {s.value}
+              </Typography>
+            </Box>
           </MainCard>
         ))}
       </Box>
@@ -353,16 +439,23 @@ export default function AdminOrdersPage() {
                     inputProps={{ 'aria-label': 'Select all orders on this page' }}
                   />
                 </TableCell>
-                {['Order ID', 'Date', 'Source', 'Customer', 'Phone', 'City', 'Items', 'Amount', 'Payment', 'Status', 'Tracking', ''].map((h, i) => (
-                  <TableCell key={i}>{h}</TableCell>
+                {['Order ID', 'Date', 'Source', 'Customer', 'Phone', 'City', 'Items', 'Amount', 'Payment', 'Supplier paid', 'Status', 'Tracking', ''].map((h, i) => (
+                  <TableCell key={i} sx={{ whiteSpace: 'nowrap' }}>
+                    {h}
+                    {h === 'Supplier paid' && (
+                      <Tooltip title="Whether you have paid your supplier for this order's stock. Separate from the customer's payment.">
+                        <HelpOutlineRoundedIcon sx={{ fontSize: 13, ml: 0.5, verticalAlign: 'middle', color: 'text.disabled' }} />
+                      </Tooltip>
+                    )}
+                  </TableCell>
                 ))}
               </TableRow>
             </TableHead>
             <TableBody>
               {loading ? (
-                <TableRow><TableCell colSpan={13} align="center" sx={{ py: 6 }}><CircularProgress size={26} /></TableCell></TableRow>
+                <TableRow><TableCell colSpan={14} align="center" sx={{ py: 6 }}><CircularProgress size={26} /></TableCell></TableRow>
               ) : orders.length === 0 ? (
-                <TableRow><TableCell colSpan={13} align="center" sx={{ py: 6, color: 'text.disabled' }}>No orders match these filters.</TableCell></TableRow>
+                <TableRow><TableCell colSpan={14} align="center" sx={{ py: 6, color: 'text.disabled' }}>No orders match these filters.</TableCell></TableRow>
               ) : orders.map(order => (
                 <TableRow key={order.order_id} hover selected={selected.includes(order.order_id)}>
                   <TableCell padding="checkbox">
@@ -397,6 +490,18 @@ export default function AdminOrdersPage() {
                         <StatusChip status={order.payment_status} />
                       )}
                     </Stack>
+                  </TableCell>
+                  <TableCell>
+                    <Select
+                      value={order.supplier_paid || 'Not Paid'}
+                      onChange={e => updateSupplierPaid(order.order_id, e.target.value)}
+                      size="small" variant="outlined"
+                      sx={{ minWidth: 125, '& .MuiSelect-select': { py: 0.75 } }}
+                      renderValue={v => <StatusChip status={v} />}
+                      aria-label={`Supplier payment for ${order.order_id}`}
+                    >
+                      {SUPPLIER_PAID_STATUSES.map(s => <MenuItem key={s} value={s}>{s}</MenuItem>)}
+                    </Select>
                   </TableCell>
                   <TableCell>
                     <Select
@@ -453,6 +558,13 @@ export default function AdminOrdersPage() {
         )}
       </MainCard>
 
+      <Snackbar
+        open={!!toast} autoHideDuration={6000} onClose={() => setToast('')}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert severity="error" onClose={() => setToast('')} variant="filled">{toast}</Alert>
+      </Snackbar>
+
       {/* Tracking number editor */}
       <Dialog open={!!trackingFor} onClose={() => setTrackingFor(null)} maxWidth="xs" fullWidth>
         <DialogTitle sx={{ fontWeight: 700 }}>
@@ -471,6 +583,7 @@ export default function AdminOrdersPage() {
             inputProps={{ maxLength: 64, style: { fontFamily: 'monospace' } }}
             helperText="Leave it empty to remove the tracking number."
           />
+          {trackingError && <Alert severity="error" sx={{ mt: 2 }}>{trackingError}</Alert>}
         </DialogContent>
         <DialogActions sx={{ px: 3, py: 2 }}>
           <Button color="inherit" onClick={() => setTrackingFor(null)} sx={{ color: 'text.secondary' }}>Cancel</Button>
