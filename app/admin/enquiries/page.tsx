@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import {
   Box, Typography, Button, Stack, TextField, Chip, Table, TableHead, TableBody,
   TableRow, TableCell, TableContainer, Select, MenuItem, InputAdornment,
-  Pagination, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions,
+  Pagination, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions, Checkbox,
   IconButton, Tooltip, Alert, Divider,
 } from '@mui/material';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
@@ -18,6 +18,7 @@ import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import AdminLayout from '@/components/AdminLayout';
 import PageHeader from '@/components/admin/PageHeader';
 import MainCard from '@/components/admin/MainCard';
+import BulkBar from '@/components/admin/BulkBar';
 import StatusChip from '@/components/admin/StatusChip';
 import { INDIAN_STATES } from '@/lib/shipping';
 import { ENQUIRY_SOURCES, ENQUIRY_STATUSES, labelFor } from '@/lib/crm';
@@ -103,6 +104,10 @@ export default function AdminEnquiriesPage() {
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [selected, setSelected] = useState<number[]>([]);
+  const [confirmBulk, setConfirmBulk] = useState(false);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [bulkError, setBulkError] = useState('');
   const [confirmDelete, setConfirmDelete] = useState<BulkEnquiry | null>(null);
 
   // Debounce the search box, same as the orders list.
@@ -134,6 +139,9 @@ export default function AdminEnquiriesPage() {
   }, [page, status, search, sort, router]);
 
   useEffect(() => { fetchEnquiries(); }, [fetchEnquiries]);
+
+  // Drop the selection whenever the visible rows are about to change.
+  useEffect(() => { setSelected([]); }, [fetchEnquiries]);
 
   const openNew = () => {
     setEditingId(null);
@@ -201,6 +209,39 @@ export default function AdminEnquiriesPage() {
       body: JSON.stringify({ status: next }),
     });
     fetchEnquiries();
+  };
+
+  const allOnPage = enquiries.map(e => e.id);
+  const allSelected = allOnPage.length > 0 && allOnPage.every(id => selected.includes(id));
+  const someSelected = selected.length > 0 && !allSelected;
+  const toggleAll = () => setSelected(allSelected ? [] : allOnPage);
+  const toggleOne = (id: number) =>
+    setSelected(prev => (prev.includes(id) ? prev.filter(x => x !== id) : prev.concat(id)));
+
+  const selectedEnquiries = enquiries.filter(e => selected.includes(e.id));
+
+  const doBulkDelete = async () => {
+    setBulkDeleting(true);
+    setBulkError('');
+    try {
+      const res = await fetch('/api/admin/enquiries', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: selected }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setBulkError(data.error || 'Could not delete the selected enquiries.');
+        return;
+      }
+      setConfirmBulk(false);
+      setSelected([]);
+      fetchEnquiries();
+    } catch {
+      setBulkError('Could not reach the server. Please try again.');
+    } finally {
+      setBulkDeleting(false);
+    }
   };
 
   const doDelete = async () => {
@@ -286,12 +327,29 @@ export default function AdminEnquiriesPage() {
         </MainCard>
       </Box>
 
+      <BulkBar
+        count={selected.length} noun="enquiry"
+        onClear={() => setSelected([])}
+        onDelete={() => { setConfirmBulk(true); setBulkError(''); }}
+        busy={bulkDeleting}
+      />
+
       {/* Table */}
       <MainCard noPadding>
         <TableContainer>
           <Table>
             <TableHead>
               <TableRow>
+                <TableCell padding="checkbox">
+                  <Checkbox
+                    size="small"
+                    checked={allSelected}
+                    indeterminate={someSelected}
+                    onChange={toggleAll}
+                    disabled={enquiries.length === 0}
+                    inputProps={{ 'aria-label': 'Select all enquiries on this page' }}
+                  />
+                </TableCell>
                 {['Customer', 'Contact', 'Asked for', 'Quantity', 'Value', 'Follow-up', 'Stage', ''].map((h, i) => (
                   <TableCell key={i}>{h}</TableCell>
                 ))}
@@ -299,10 +357,10 @@ export default function AdminEnquiriesPage() {
             </TableHead>
             <TableBody>
               {loading ? (
-                <TableRow><TableCell colSpan={8} align="center" sx={{ py: 6 }}><CircularProgress size={26} /></TableCell></TableRow>
+                <TableRow><TableCell colSpan={9} align="center" sx={{ py: 6 }}><CircularProgress size={26} /></TableCell></TableRow>
               ) : enquiries.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} align="center" sx={{ py: 7, color: 'text.disabled' }}>
+                  <TableCell colSpan={9} align="center" sx={{ py: 7, color: 'text.disabled' }}>
                     <Stack alignItems="center" spacing={1.5}>
                       <Inventory2OutlinedIcon sx={{ fontSize: 38 }} />
                       <Typography color="text.secondary">
@@ -317,7 +375,15 @@ export default function AdminEnquiriesPage() {
               ) : enquiries.map((e) => {
                 const wa = waLink(e.phone);
                 return (
-                  <TableRow key={e.id} hover>
+                  <TableRow key={e.id} hover selected={selected.includes(e.id)}>
+                    <TableCell padding="checkbox">
+                      <Checkbox
+                        size="small"
+                        checked={selected.includes(e.id)}
+                        onChange={() => toggleOne(e.id)}
+                        inputProps={{ 'aria-label': `Select enquiry from ${e.customer_name}` }}
+                      />
+                    </TableCell>
                     <TableCell>
                       <Typography variant="body2" fontWeight={700}>{e.customer_name}</Typography>
                       {e.company && <Typography variant="caption" color="text.secondary">{e.company}</Typography>}
@@ -486,6 +552,32 @@ export default function AdminEnquiriesPage() {
           <Button color="inherit" onClick={() => setDialogOpen(false)} sx={{ color: 'text.secondary' }}>Cancel</Button>
           <Button variant="contained" onClick={save} disabled={saving}>
             {saving ? 'Saving…' : editingId ? 'Save changes' : 'Add enquiry'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Bulk delete confirmation */}
+      <Dialog open={confirmBulk} onClose={() => setConfirmBulk(false)} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ fontWeight: 700 }}>
+          Delete {selected.length} enquir{selected.length === 1 ? 'y' : 'ies'}?
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+            These will be removed permanently. This cannot be undone.
+          </Typography>
+          <Typography variant="caption" color="text.secondary" component="div" sx={{ maxHeight: 120, overflowY: 'auto' }}>
+            {selectedEnquiries.map(e => (
+              <Box key={e.id}>
+                {e.customer_name}{e.company ? ` · ${e.company}` : ''}{e.quantity ? ` · ${e.quantity}` : ''}
+              </Box>
+            ))}
+          </Typography>
+          {bulkError && <Alert severity="error" sx={{ mt: 2 }}>{bulkError}</Alert>}
+        </DialogContent>
+        <DialogActions sx={{ px: 3, py: 2 }}>
+          <Button color="inherit" onClick={() => setConfirmBulk(false)} sx={{ color: 'text.secondary' }}>Cancel</Button>
+          <Button variant="contained" color="error" onClick={doBulkDelete} disabled={bulkDeleting}>
+            {bulkDeleting ? 'Deleting…' : `Delete ${selected.length}`}
           </Button>
         </DialogActions>
       </Dialog>
