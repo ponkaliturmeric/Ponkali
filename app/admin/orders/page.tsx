@@ -7,7 +7,7 @@ import {
   Box, Typography, Button, Stack, TextField, Chip, Table, TableHead,
   TableBody, TableRow, TableCell, TableContainer, Select, MenuItem,
   InputAdornment, Pagination, CircularProgress, Divider, IconButton,
-  Tooltip, Dialog, DialogTitle, DialogContent, DialogActions, Alert,
+  Tooltip, Dialog, DialogTitle, DialogContent, DialogActions, Alert, Checkbox,
 } from '@mui/material';
 import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
@@ -21,6 +21,7 @@ import PageHeader from '@/components/admin/PageHeader';
 import MainCard from '@/components/admin/MainCard';
 import StatusChip from '@/components/admin/StatusChip';
 import CopyText from '@/components/admin/CopyText';
+import BulkBar from '@/components/admin/BulkBar';
 import { Order } from '@/lib/types';
 import { ORDER_SOURCES, labelFor } from '@/lib/crm';
 
@@ -94,6 +95,10 @@ export default function AdminOrdersPage() {
   const [confirmDelete, setConfirmDelete] = useState<Order | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState('');
+  // Ticked rows, by order_id. Cleared whenever the visible rows change —
+  // deleting something you can no longer see is the one outcome to rule out.
+  const [selected, setSelected] = useState<string[]>([]);
+  const [confirmBulk, setConfirmBulk] = useState(false);
   const [trackingFor, setTrackingFor] = useState<Order | null>(null);
   const [trackingValue, setTrackingValue] = useState('');
   const [savingTracking, setSavingTracking] = useState(false);
@@ -135,6 +140,10 @@ export default function AdminOrdersPage() {
 
   useEffect(() => { fetchOrders(); }, [fetchOrders]);
 
+  // fetchOrders' identity changes with every filter, page and sort change, so
+  // this drops the selection exactly when the row set is about to change.
+  useEffect(() => { setSelected([]); }, [fetchOrders]);
+
   const updateStatus = async (orderId: string, status: string) => {
     await fetch(`/api/orders/${orderId}`, {
       method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }),
@@ -160,6 +169,41 @@ export default function AdminOrdersPage() {
       fetchOrders();
     } finally {
       setSavingTracking(false);
+    }
+  };
+
+  const allOnPage = orders.map(o => o.order_id);
+  const allSelected = allOnPage.length > 0 && allOnPage.every(id => selected.includes(id));
+  const someSelected = selected.length > 0 && !allSelected;
+  const toggleAll = () => setSelected(allSelected ? [] : allOnPage);
+  const toggleOne = (id: string) =>
+    setSelected(prev => (prev.includes(id) ? prev.filter(x => x !== id) : prev.concat(id)));
+
+  /** Totals for the confirmation dialog, from the rows we already have. */
+  const selectedOrders = orders.filter(o => selected.includes(o.order_id));
+  const selectedValue = selectedOrders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+
+  const doBulkDelete = async () => {
+    setDeleting(true);
+    setDeleteError('');
+    try {
+      const res = await fetch('/api/admin/orders', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order_ids: selected }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setDeleteError(data.error || 'Could not delete the selected orders.');
+        return;
+      }
+      setConfirmBulk(false);
+      setSelected([]);
+      fetchOrders();
+    } catch {
+      setDeleteError('Could not reach the server. Please try again.');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -286,12 +330,29 @@ export default function AdminOrdersPage() {
         ))}
       </Box>
 
+      <BulkBar
+        count={selected.length} noun="order"
+        onClear={() => setSelected([])}
+        onDelete={() => { setConfirmBulk(true); setDeleteError(''); }}
+        busy={deleting}
+      />
+
       {/* Table */}
       <MainCard noPadding>
         <TableContainer>
           <Table>
             <TableHead>
               <TableRow>
+                <TableCell padding="checkbox">
+                  <Checkbox
+                    size="small"
+                    checked={allSelected}
+                    indeterminate={someSelected}
+                    onChange={toggleAll}
+                    disabled={orders.length === 0}
+                    inputProps={{ 'aria-label': 'Select all orders on this page' }}
+                  />
+                </TableCell>
                 {['Order ID', 'Date', 'Source', 'Customer', 'Phone', 'City', 'Items', 'Amount', 'Payment', 'Status', 'Tracking', ''].map((h, i) => (
                   <TableCell key={i}>{h}</TableCell>
                 ))}
@@ -299,11 +360,19 @@ export default function AdminOrdersPage() {
             </TableHead>
             <TableBody>
               {loading ? (
-                <TableRow><TableCell colSpan={12} align="center" sx={{ py: 6 }}><CircularProgress size={26} /></TableCell></TableRow>
+                <TableRow><TableCell colSpan={13} align="center" sx={{ py: 6 }}><CircularProgress size={26} /></TableCell></TableRow>
               ) : orders.length === 0 ? (
-                <TableRow><TableCell colSpan={12} align="center" sx={{ py: 6, color: 'text.disabled' }}>No orders match these filters.</TableCell></TableRow>
+                <TableRow><TableCell colSpan={13} align="center" sx={{ py: 6, color: 'text.disabled' }}>No orders match these filters.</TableCell></TableRow>
               ) : orders.map(order => (
-                <TableRow key={order.order_id} hover>
+                <TableRow key={order.order_id} hover selected={selected.includes(order.order_id)}>
+                  <TableCell padding="checkbox">
+                    <Checkbox
+                      size="small"
+                      checked={selected.includes(order.order_id)}
+                      onChange={() => toggleOne(order.order_id)}
+                      inputProps={{ 'aria-label': `Select order ${order.order_id}` }}
+                    />
+                  </TableCell>
                   <TableCell>
                     <CopyText value={order.order_id} label="Copy order ID" color="primary.main" />
                   </TableCell>
@@ -407,6 +476,33 @@ export default function AdminOrdersPage() {
           <Button color="inherit" onClick={() => setTrackingFor(null)} sx={{ color: 'text.secondary' }}>Cancel</Button>
           <Button variant="contained" onClick={saveTracking} disabled={savingTracking}>
             {savingTracking ? 'Saving…' : 'Save'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Bulk delete confirmation */}
+      <Dialog open={confirmBulk} onClose={() => setConfirmBulk(false)} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ fontWeight: 700 }}>
+          Delete {selected.length} order{selected.length === 1 ? '' : 's'}?
+        </DialogTitle>
+        <DialogContent>
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            {formatINR(selectedValue)} of orders will be deleted permanently, along with their
+            items and status history. Your revenue totals will drop accordingly.
+          </Alert>
+          <Typography variant="caption" color="text.secondary" component="div" sx={{ maxHeight: 120, overflowY: 'auto' }}>
+            {selectedOrders.map(o => (
+              <Box key={o.order_id} sx={{ fontFamily: 'monospace' }}>
+                {o.order_id} · {o.customer_name} · {formatINR(Number(o.total) || 0)}
+              </Box>
+            ))}
+          </Typography>
+          {deleteError && <Alert severity="error" sx={{ mt: 2 }}>{deleteError}</Alert>}
+        </DialogContent>
+        <DialogActions sx={{ px: 3, py: 2 }}>
+          <Button color="inherit" onClick={() => setConfirmBulk(false)} sx={{ color: 'text.secondary' }}>Cancel</Button>
+          <Button variant="contained" color="error" onClick={doBulkDelete} disabled={deleting}>
+            {deleting ? 'Deleting…' : `Delete ${selected.length} order${selected.length === 1 ? '' : 's'}`}
           </Button>
         </DialogActions>
       </Dialog>

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAdminSession } from '@/lib/auth';
 import { getDb } from '@/lib/db';
-import { OPEN_ENQUIRY_STATUSES } from '@/lib/crm';
+import { OPEN_ENQUIRY_STATUSES, MAX_BULK_DELETE } from '@/lib/crm';
 import { validateEnquiry } from '@/lib/enquiries';
 
 /**
@@ -146,5 +146,66 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Enquiry create error:', error);
     return NextResponse.json({ error: 'Could not save the enquiry. Please try again.' }, { status: 500 });
+  }
+}
+
+/**
+ * Bulk delete — the enquiries ticked in the admin list.
+ *
+ * Simpler than orders: bulk_enquiries owns no child rows, so one statement
+ * covers the whole selection. RETURNING tells us what genuinely went, which
+ * matters when a selection has gone stale.
+ */
+export async function DELETE(request: NextRequest) {
+  if (!(await getAdminSession())) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: 'Expected a JSON body with ids.' }, { status: 400 });
+  }
+
+  const raw = (body as { ids?: unknown })?.ids;
+  if (!Array.isArray(raw) || raw.length === 0) {
+    return NextResponse.json({ error: 'Select at least one enquiry to delete.' }, { status: 400 });
+  }
+
+  // Ids are serial integers; anything else is dropped rather than coerced, so a
+  // stray "12abc" can never turn into row 12.
+  const ids = Array.from(
+    new Set(
+      raw
+        .map((v) => (typeof v === 'number' ? v : typeof v === 'string' && /^\d+$/.test(v.trim()) ? Number(v.trim()) : NaN))
+        .filter((n) => Number.isInteger(n) && n > 0),
+    ),
+  );
+  if (ids.length === 0) {
+    return NextResponse.json({ error: 'No valid enquiry ids were supplied.' }, { status: 400 });
+  }
+  if (ids.length > MAX_BULK_DELETE) {
+    return NextResponse.json(
+      { error: `Too many enquiries in one request (${ids.length}). The limit is ${MAX_BULK_DELETE}.` },
+      { status: 400 },
+    );
+  }
+
+  const placeholders = ids.map(() => '?').join(', ');
+
+  try {
+    const db = await getDb();
+    const { rows } = await db.execute({
+      sql: `DELETE FROM bulk_enquiries WHERE id IN (${placeholders}) RETURNING id`,
+      args: ids,
+    });
+    if (rows.length === 0) {
+      return NextResponse.json({ error: 'None of those enquiries exist any more.' }, { status: 404 });
+    }
+    return NextResponse.json({ success: true, deleted: rows.length });
+  } catch (error) {
+    console.error('Bulk enquiry delete error:', error);
+    return NextResponse.json({ error: 'Could not delete the selected enquiries. Please try again.' }, { status: 500 });
   }
 }

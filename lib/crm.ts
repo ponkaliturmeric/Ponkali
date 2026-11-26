@@ -84,3 +84,13 @@ export function labelFor(options: Option[], value: string | null | undefined): s
   if (!value) return '—';
   return options.find((o) => o.value === value)?.label ?? value;
 }
+
+/**
+ * Ceiling on one bulk-delete request.
+ *
+ * The admin pages show 20 rows at a time, so a legitimate "select all and
+ * delete" is far below this. The cap exists so a malformed or replayed request
+ * can't hand the database an unbounded IN list, and so an accidental
+ * select-everything stays something a human could still have meant.
+ */
+export const MAX_BULK_DELETE = 200;

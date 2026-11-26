@@ -7,7 +7,7 @@ import {
   Box, Typography, Button, Stack, TextField, Chip, Table, TableHead,
   TableBody, TableRow, TableCell, TableContainer, Select, MenuItem,
   InputAdornment, Pagination, CircularProgress, Avatar, IconButton,
-  Tooltip, Dialog, DialogTitle, DialogContent, DialogActions, Alert,
+  Tooltip, Dialog, DialogTitle, DialogContent, DialogActions, Alert, Checkbox,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
@@ -21,6 +21,7 @@ import AdminLayout from '@/components/AdminLayout';
 import PageHeader from '@/components/admin/PageHeader';
 import MainCard from '@/components/admin/MainCard';
 import StatCard from '@/components/admin/StatCard';
+import BulkBar from '@/components/admin/BulkBar';
 import { BRAND, GOLD } from '@/components/admin/theme';
 
 interface Customer {
@@ -71,6 +72,10 @@ export default function AdminCustomersPage() {
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  // A customer has no id — the row key is its phone, or its email for an
+  // account that never ordered. Same key the delete endpoint matches on.
+  const [selected, setSelected] = useState<string[]>([]);
+  const [confirmBulk, setConfirmBulk] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<Customer | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState('');
@@ -103,6 +108,47 @@ export default function AdminCustomersPage() {
   }, [page, sort, search, router]);
 
   useEffect(() => { fetchCustomers(); }, [fetchCustomers]);
+
+  // Drop the selection whenever the visible rows are about to change.
+  useEffect(() => { setSelected([]); }, [fetchCustomers]);
+
+  const keyOf = (c: Customer) => c.phone || c.email || '';
+  const allOnPage = customers.map(keyOf).filter(Boolean);
+  const allSelected = allOnPage.length > 0 && allOnPage.every(k => selected.includes(k));
+  const someSelected = selected.length > 0 && !allSelected;
+  const toggleAll = () => setSelected(allSelected ? [] : allOnPage);
+  const toggleOne = (k: string) =>
+    setSelected(prev => (prev.includes(k) ? prev.filter(x => x !== k) : prev.concat(k)));
+
+  const selectedCustomers = customers.filter(c => selected.includes(keyOf(c)));
+  const selectedOrders = selectedCustomers.reduce((n, c) => n + (c.order_count || 0), 0);
+  const selectedSpend = selectedCustomers.reduce((n, c) => n + (c.total_spent || 0), 0);
+
+  const doBulkDelete = async () => {
+    setDeleting(true);
+    setDeleteError('');
+    try {
+      const res = await fetch('/api/admin/customers', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customers: selectedCustomers.map(c => ({ phone: c.phone, email: c.email })),
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setDeleteError(data.error || 'Could not delete the selected customers.');
+        return;
+      }
+      setConfirmBulk(false);
+      setSelected([]);
+      fetchCustomers();
+    } catch {
+      setDeleteError('Could not reach the server. Please try again.');
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   const doDelete = async () => {
     if (!confirmDelete) return;
@@ -166,12 +212,29 @@ export default function AdminCustomersPage() {
         </MainCard>
       </Box>
 
+      <BulkBar
+        count={selected.length} noun="customer"
+        onClear={() => setSelected([])}
+        onDelete={() => { setConfirmBulk(true); setDeleteError(''); }}
+        busy={deleting}
+      />
+
       {/* Table */}
       <MainCard noPadding>
         <TableContainer>
           <Table>
             <TableHead>
               <TableRow>
+                <TableCell padding="checkbox">
+                  <Checkbox
+                    size="small"
+                    checked={allSelected}
+                    indeterminate={someSelected}
+                    onChange={toggleAll}
+                    disabled={customers.length === 0}
+                    inputProps={{ 'aria-label': 'Select all customers on this page' }}
+                  />
+                </TableCell>
                 {['Customer', 'Phone', 'Location', 'Orders', 'Total Spent', 'Last Order', 'Segment', ''].map((h, i) => (
                   <TableCell key={i} align={['Orders', 'Total Spent'].includes(h) ? 'right' : 'left'}>{h}</TableCell>
                 ))}
@@ -179,13 +242,22 @@ export default function AdminCustomersPage() {
             </TableHead>
             <TableBody>
               {loading ? (
-                <TableRow><TableCell colSpan={8} align="center" sx={{ py: 6 }}><CircularProgress size={26} /></TableCell></TableRow>
+                <TableRow><TableCell colSpan={9} align="center" sx={{ py: 6 }}><CircularProgress size={26} /></TableCell></TableRow>
               ) : customers.length === 0 ? (
-                <TableRow><TableCell colSpan={8} align="center" sx={{ py: 6, color: 'text.disabled' }}>No customers found.</TableCell></TableRow>
+                <TableRow><TableCell colSpan={9} align="center" sx={{ py: 6, color: 'text.disabled' }}>No customers found.</TableCell></TableRow>
               ) : customers.map((c, i) => {
                 const seg = segment(c.order_count);
                 return (
-                  <TableRow key={c.phone || c.email || `cust-${i}`} hover>
+                  <TableRow key={c.phone || c.email || `cust-${i}`} hover selected={selected.includes(keyOf(c))}>
+                    <TableCell padding="checkbox">
+                      <Checkbox
+                        size="small"
+                        checked={selected.includes(keyOf(c))}
+                        onChange={() => toggleOne(keyOf(c))}
+                        disabled={!keyOf(c)}
+                        inputProps={{ 'aria-label': `Select ${c.customer_name || 'customer'}` }}
+                      />
+                    </TableCell>
                     <TableCell>
                       <Stack direction="row" spacing={1.5} alignItems="center">
                         <Avatar sx={{ width: 38, height: 38, fontSize: 13, fontWeight: 700, background: `linear-gradient(135deg, ${GOLD}, ${BRAND})` }}>
@@ -235,6 +307,43 @@ export default function AdminCustomersPage() {
           </Stack>
         )}
       </MainCard>
+
+      {/* Bulk delete confirmation — same warning as the single case, totalled. */}
+      <Dialog open={confirmBulk} onClose={() => setConfirmBulk(false)} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ fontWeight: 700 }}>
+          Delete {selected.length} customer{selected.length === 1 ? '' : 's'}?
+        </DialogTitle>
+        <DialogContent>
+          {selectedOrders > 0 ? (
+            <Alert severity="warning" sx={{ mb: 2 }}>
+              This also deletes <strong>{selectedOrders}</strong>{' '}
+              order{selectedOrders === 1 ? '' : 's'} worth{' '}
+              <strong>{formatINR(selectedSpend)}</strong> between them, including line items and
+              status history. Your revenue, average order value and repeat-rate figures will drop
+              accordingly.
+            </Alert>
+          ) : (
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              None of them have orders, so only their registered accounts are removed.
+            </Typography>
+          )}
+          <Typography variant="caption" color="text.secondary" component="div" sx={{ maxHeight: 120, overflowY: 'auto' }}>
+            {selectedCustomers.map(c => (
+              <Box key={keyOf(c)}>
+                {c.customer_name || '—'}{c.phone ? ` · ${c.phone}` : ''} · {c.order_count} order{c.order_count === 1 ? '' : 's'}
+              </Box>
+            ))}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>This cannot be undone.</Typography>
+          {deleteError && <Alert severity="error" sx={{ mt: 2 }}>{deleteError}</Alert>}
+        </DialogContent>
+        <DialogActions sx={{ px: 3, py: 2 }}>
+          <Button color="inherit" onClick={() => setConfirmBulk(false)} sx={{ color: 'text.secondary' }}>Cancel</Button>
+          <Button variant="contained" color="error" onClick={doBulkDelete} disabled={deleting}>
+            {deleting ? 'Deleting…' : `Delete ${selected.length}`}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Delete confirmation.
           A customer is not a row here — it is their order history plus any
