@@ -199,8 +199,12 @@ export default function OrderForm({
         setSaving(false);
         return;
       }
+      // No router.refresh() here: we are navigating to a different route, and
+      // the order detail page is a client component that fetches its own data
+      // on mount. Refreshing forced an extra server round trip and an RSC
+      // re-render of the page we were leaving — part of why saving an order
+      // felt like the admin reloading itself.
       router.push(`/admin/orders/${data.order_id}`);
-      router.refresh();
     } catch {
       setError('Network error. Please try again.');
       setSaving(false);

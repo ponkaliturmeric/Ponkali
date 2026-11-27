@@ -8,7 +8,7 @@ import {
   TableBody, TableRow, TableCell, TableContainer, Select, MenuItem,
   InputAdornment, Pagination, CircularProgress, Divider, IconButton,
   Tooltip, Dialog, DialogTitle, DialogContent, DialogActions, Alert, Checkbox,
-  Snackbar,
+  Snackbar, LinearProgress,
 } from '@mui/material';
 import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
@@ -177,22 +177,66 @@ export default function AdminOrdersPage() {
   // this drops the selection exactly when the row set is about to change.
   useEffect(() => { setSelected([]); }, [fetchOrders]);
 
-  /** Shared by the two inline dropdowns: patch one field, report any failure. */
+  /**
+   * Shared by the two inline dropdowns: change one field on one row.
+   *
+   * Applied to local state FIRST, then saved in the background. The previous
+   * version refetched the whole list on every change, which meant the table
+   * blanked to a spinner and a second heavy aggregate query ran — it read as
+   * the page reloading itself, and on a remote database it took seconds.
+   *
+   * On failure the snapshot goes back and a toast says why, so the dropdown
+   * never shows a value the database does not hold.
+   */
   const patchOrder = async (orderId: string, body: Record<string, string>, fallback: string) => {
+    const snapshot = { orders, total, summary };
+
+    const row = orders.find(o => o.order_id === orderId);
+    if (!row) return;
+
+    // If a filter is active and this change makes the row stop matching it,
+    // take the row out instead of leaving a row on screen that contradicts the
+    // filter above it. Marking orders off a filtered worklist then behaves the
+    // way you would expect: they disappear as you go.
+    const leavesStatusFilter = !!body.status && statusFilter !== 'All' && body.status !== statusFilter;
+    const leavesSupplierFilter = !!body.supplier_paid && supplier !== 'all' && body.supplier_paid !== supplier;
+    const drops = leavesStatusFilter || leavesSupplierFilter;
+
+    // Keep the "Supplier not paid" card honest without asking the server again.
+    let unpaidDelta = 0;
+    if (body.supplier_paid) {
+      const was = row.supplier_paid || 'Not Paid';
+      if (was !== body.supplier_paid) unpaidDelta = body.supplier_paid === 'Paid' ? -1 : 1;
+    }
+
+    setOrders(list =>
+      drops
+        ? list.filter(o => o.order_id !== orderId)
+        : list.map(o => (o.order_id === orderId ? { ...o, ...body } : o)),
+    );
+    if (drops) setTotal(n => Math.max(0, n - 1));
+    setSummary(s => ({
+      ...s,
+      count: drops ? Math.max(0, s.count - 1) : s.count,
+      supplier_unpaid: Math.max(0, s.supplier_unpaid + unpaidDelta),
+    }));
+
     try {
-      const res = await fetch(`/api/orders/${orderId}`, {
+      const res = await fetch(`/api/orders/${orderId}?brief=1`, {
         method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         setToast(data.error || fallback);
+        setOrders(snapshot.orders);
+        setTotal(snapshot.total);
+        setSummary(snapshot.summary);
       }
     } catch {
       setToast('Could not reach the server. Your change was not saved.');
-    } finally {
-      // Refetch either way: on success to pick up the new value, on failure to
-      // snap the dropdown back to what the database actually holds.
-      fetchOrders();
+      setOrders(snapshot.orders);
+      setTotal(snapshot.total);
+      setSummary(snapshot.summary);
     }
   };
 
@@ -210,7 +254,7 @@ export default function AdminOrdersPage() {
     setSavingTracking(true);
     setTrackingError('');
     try {
-      const res = await fetch(`/api/orders/${trackingFor.order_id}`, {
+      const res = await fetch(`/api/orders/${trackingFor.order_id}?brief=1`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ tracking_number: trackingValue }),
@@ -222,8 +266,13 @@ export default function AdminOrdersPage() {
         setTrackingError(data.error || 'Could not save the tracking number.');
         return;
       }
+      // Patch the one row rather than refetching the list. The server trims and
+      // caps the value, so mirror that here or the cell would briefly show
+      // something the database does not hold.
+      const saved = trackingValue.trim().slice(0, 64);
+      const id = trackingFor.order_id;
+      setOrders(list => list.map(o => (o.order_id === id ? { ...o, tracking_number: saved } : o)));
       setTrackingFor(null);
-      fetchOrders();
     } catch {
       setTrackingError('Could not reach the server. Please try again.');
     } finally {
@@ -425,6 +474,12 @@ export default function AdminOrdersPage() {
 
       {/* Table */}
       <MainCard noPadding>
+        {/* A refetch with rows already on screen shows this instead of
+            replacing the table with a spinner — blanking the whole table was
+            what made an update feel like a page reload. */}
+        <Box sx={{ height: 3 }}>
+          {loading && orders.length > 0 && <LinearProgress sx={{ height: 3 }} />}
+        </Box>
         <TableContainer>
           <Table>
             <TableHead>
@@ -452,7 +507,7 @@ export default function AdminOrdersPage() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {loading ? (
+              {loading && orders.length === 0 ? (
                 <TableRow><TableCell colSpan={14} align="center" sx={{ py: 6 }}><CircularProgress size={26} /></TableCell></TableRow>
               ) : orders.length === 0 ? (
                 <TableRow><TableCell colSpan={14} align="center" sx={{ py: 6, color: 'text.disabled' }}>No orders match these filters.</TableCell></TableRow>

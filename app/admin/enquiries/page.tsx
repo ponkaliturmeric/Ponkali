@@ -6,6 +6,7 @@ import {
   Box, Typography, Button, Stack, TextField, Chip, Table, TableHead, TableBody,
   TableRow, TableCell, TableContainer, Select, MenuItem, InputAdornment,
   Pagination, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions, Checkbox,
+  LinearProgress, Snackbar,
   IconButton, Tooltip, Alert, Divider,
 } from '@mui/material';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
@@ -21,7 +22,7 @@ import MainCard from '@/components/admin/MainCard';
 import BulkBar from '@/components/admin/BulkBar';
 import StatusChip from '@/components/admin/StatusChip';
 import { INDIAN_STATES } from '@/lib/shipping';
-import { ENQUIRY_SOURCES, ENQUIRY_STATUSES, labelFor } from '@/lib/crm';
+import { ENQUIRY_SOURCES, ENQUIRY_STATUSES, labelFor, OPEN_ENQUIRY_STATUSES } from '@/lib/crm';
 import type { BulkEnquiry } from '@/lib/types';
 
 /**
@@ -108,6 +109,7 @@ export default function AdminEnquiriesPage() {
   const [confirmBulk, setConfirmBulk] = useState(false);
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [bulkError, setBulkError] = useState('');
+  const [toast, setToast] = useState('');
   const [confirmDelete, setConfirmDelete] = useState<BulkEnquiry | null>(null);
 
   // Debounce the search box, same as the orders list.
@@ -210,15 +212,57 @@ export default function AdminEnquiriesPage() {
     }
   };
 
-  /** Inline stage change from the table — sends only the status. */
+  /**
+   * Inline stage change from the table — sends only the status.
+   *
+   * Applied locally, saved in the background, no refetch. The refetch that used
+   * to follow threw away this very update and ran the list query again, which
+   * blanked the table and made moving an enquiry along the pipeline feel like a
+   * page reload. On failure the snapshot goes back and a toast says why.
+   */
   const changeStatus = async (id: number, next: string) => {
-    setEnquiries((prev) => prev.map((e) => (e.id === id ? { ...e, status: next } : e)));
-    await fetch(`/api/admin/enquiries/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: next }),
-    });
-    fetchEnquiries();
+    const snapshot = { enquiries, total, summary };
+    const row = enquiries.find(e => e.id === id);
+    if (!row) return;
+
+    // Leaving an active stage filter means leaving the list.
+    const drops = status !== 'All' && next !== status;
+
+    // Keep the KPI strip honest without another round trip.
+    const wasOpen = OPEN_ENQUIRY_STATUSES.includes(row.status);
+    const isOpen = OPEN_ENQUIRY_STATUSES.includes(next);
+    const delta = (a: boolean, b: boolean) => (a === b ? 0 : b ? 1 : -1);
+
+    setEnquiries(prev =>
+      drops ? prev.filter(e => e.id !== id) : prev.map(e => (e.id === id ? { ...e, status: next } : e)),
+    );
+    if (drops) setTotal(n => Math.max(0, n - 1));
+    setSummary(s => ({
+      ...s,
+      open: Math.max(0, s.open + delta(wasOpen, isOpen)),
+      won: Math.max(0, s.won + delta(row.status === 'Won', next === 'Won')),
+      lost: Math.max(0, s.lost + delta(row.status === 'Lost', next === 'Lost')),
+    }));
+
+    try {
+      const res = await fetch(`/api/admin/enquiries/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: next }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setToast(data.error || 'Could not update the stage.');
+        setEnquiries(snapshot.enquiries);
+        setTotal(snapshot.total);
+        setSummary(snapshot.summary);
+      }
+    } catch {
+      setToast('Could not reach the server. Your change was not saved.');
+      setEnquiries(snapshot.enquiries);
+      setTotal(snapshot.total);
+      setSummary(snapshot.summary);
+    }
   };
 
   const allOnPage = enquiries.map(e => e.id);
@@ -346,6 +390,11 @@ export default function AdminEnquiriesPage() {
 
       {/* Table */}
       <MainCard noPadding>
+        {/* Keeps the rows on screen during a refetch rather than replacing the
+            table with a spinner. */}
+        <Box sx={{ height: 3 }}>
+          {loading && enquiries.length > 0 && <LinearProgress sx={{ height: 3 }} />}
+        </Box>
         <TableContainer>
           <Table>
             <TableHead>
@@ -366,7 +415,7 @@ export default function AdminEnquiriesPage() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {loading ? (
+              {loading && enquiries.length === 0 ? (
                 <TableRow><TableCell colSpan={9} align="center" sx={{ py: 6 }}><CircularProgress size={26} /></TableCell></TableRow>
               ) : enquiries.length === 0 ? (
                 <TableRow>
@@ -565,6 +614,13 @@ export default function AdminEnquiriesPage() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <Snackbar
+        open={!!toast} autoHideDuration={6000} onClose={() => setToast('')}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert severity="error" onClose={() => setToast('')} variant="filled">{toast}</Alert>
+      </Snackbar>
 
       {/* Bulk delete confirmation */}
       <Dialog open={confirmBulk} onClose={() => setConfirmBulk(false)} maxWidth="xs" fullWidth>
