@@ -1,5 +1,6 @@
 import { getCatalog } from '@/lib/catalog';
 import { FAQ, GUIDES } from '@/lib/content';
+import { RECIPES } from '@/lib/recipes';
 import { PACK_NOTES } from '@/lib/products';
 import { BUSINESS, SITE_URL, DEFAULT_DESCRIPTION } from '@/lib/seo';
 import { ZONE_RATES, STATE_ZONES, MIN_SHIPPING, type Zone } from '@/lib/shipping';
@@ -175,6 +176,42 @@ export async function GET() {
     ]),
     rule(),
     '',
+    '## Recipes (complete text)',
+    '',
+    'Quantities matter more than anything else with turmeric: too much is bitter,',
+    'and in hot oil it scorches in about ten seconds. Each recipe states the exact',
+    'amount. No health claims are made anywhere on this site — these are cooking',
+    'instructions, not medicine.',
+    '',
+    ...RECIPES.flatMap((r) => [
+      `### ${r.name} (${r.tamilName})`,
+      '',
+      `URL: ${SITE_URL}/recipes/${r.slug}`,
+      `Yield: ${r.recipeYield} · Prep: ${r.prepTime} · Cook: ${r.cookTime} · ${r.cuisine}`,
+      `Turmeric used: ${r.turmericUsed}`,
+      '',
+      r.intro,
+      '',
+      '#### Ingredients',
+      '',
+      ...r.ingredients.map((i) => `- ${i}`),
+      '',
+      '#### Method',
+      '',
+      ...r.steps.map((s, i) => `${i + 1}. ${s.text}`),
+      '',
+      '#### Getting it right',
+      '',
+      ...r.tips.map((tip) => `- ${tip}`),
+      '',
+      ...(r.faq && r.faq.length
+        ? ['#### Questions', '', ...r.faq.flatMap((f) => [`**${f.question}**`, '', f.answer, ''])]
+        : []),
+      rule('·'),
+      '',
+    ]),
+    rule(),
+    '',
     '## Frequently asked questions (complete)',
     '',
     ...FAQ.flatMap((f) => [`### ${f.question}`, '', f.answer, '']),
@@ -189,6 +226,8 @@ export async function GET() {
     `- Brand facts and certifications: ${SITE_URL}/brand-facts`,
     `- Our story: ${SITE_URL}/our-story`,
     `- The farm: ${SITE_URL}/farm`,
+    `- Recipes index: ${SITE_URL}/recipes`,
+    ...RECIPES.map((r) => `- ${r.name}: ${SITE_URL}/recipes/${r.slug}`),
     `- Guides index: ${SITE_URL}/guides`,
     ...GUIDES.map((g) => `- ${g.title}: ${SITE_URL}/guides/${g.slug}`),
     `- FAQ: ${SITE_URL}/faq`,

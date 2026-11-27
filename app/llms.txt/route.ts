@@ -43,6 +43,7 @@ export async function GET() {
     '## Pages',
     '',
     `- [Shop](${SITE_URL}/shop): all pack sizes`,
+    `- [Turmeric recipes](${SITE_URL}/recipes): South Indian turmeric recipes with exact quantities — manjal paal, turmeric rice, kashayam, neer mor`,
     `- [Bulk and wholesale](${SITE_URL}/bulk-orders): bulk turmeric powder supply for hotels, caterers, retailers and resellers across India`,
     `- [மஞ்சள் பொடி / Tamil page](${SITE_URL}/manjal-podi): the same information in Tamil`,
     `- [Our story](${SITE_URL}/our-story): three generations on the same Erode land`,

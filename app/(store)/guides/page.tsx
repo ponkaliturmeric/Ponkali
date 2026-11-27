@@ -58,6 +58,25 @@ export default function GuidesIndexPage() {
             </span>
           </Link>
         ))}
+
+        {/* Guides answer "which turmeric should I buy"; recipes answer "what do
+            I do with it". Linking the two keeps readers on the site and gives
+            crawlers a path between the two clusters. */}
+        <Link
+          href="/recipes"
+          className="block bg-dark-brown rounded-2xl p-7 hover:bg-black transition-colors group"
+        >
+          <h2 className="font-hero text-[22px] font-extrabold text-white tracking-tight mb-2">
+            Turmeric recipes, with real quantities
+          </h2>
+          <p className="text-[15px] text-white/70 leading-[1.7] mb-4">
+            Manjal paal, turmeric rice, kashayam and spiced buttermilk — how much turmeric each one
+            actually needs, and when to add it so it doesn&apos;t turn bitter.
+          </p>
+          <span className="inline-flex items-center gap-2 text-[13px] font-semibold text-gold">
+            Browse the recipes <ArrowRightIcon className="w-3.5 h-3.5" />
+          </span>
+        </Link>
       </div>
     </div>
   );

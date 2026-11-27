@@ -2,6 +2,7 @@ import type { MetadataRoute } from 'next';
 import { SITE_URL } from '@/lib/seo';
 import { PRODUCTS } from '@/lib/products';
 import { GUIDES } from '@/lib/content';
+import { RECIPES } from '@/lib/recipes';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
@@ -15,6 +16,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // Tamil landing page — the local-language queries nobody else serves.
     { url: `${SITE_URL}/manjal-podi`, lastModified: now, changeFrequency: 'weekly', priority: 0.8 },
     // The page written to be quoted: every verifiable claim in one place.
+    // Recipe searches are the largest category of turmeric query there is, and
+    // a Recipe rich result carries a photo and a cook time into the listing.
+    { url: `${SITE_URL}/recipes`, lastModified: now, changeFrequency: 'weekly', priority: 0.8 },
+    ...RECIPES.map((r) => ({
+      url: `${SITE_URL}/recipes/${r.slug}`,
+      lastModified: r.updated,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    })),
     { url: `${SITE_URL}/brand-facts`, lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${SITE_URL}/our-story`, lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
     { url: `${SITE_URL}/farm`, lastModified: now, changeFrequency: 'monthly', priority: 0.6 },

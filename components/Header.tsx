@@ -7,10 +7,15 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useCart } from './CartContext';
 import { CartIcon, MenuIcon, XIcon, UserIcon } from './Icons';
 
+// Recipes and Guides were reachable only from the footer, which is the weakest
+// link position on a site. They are the pages that bring in search traffic, so
+// they belong in the main nav — for crawlers and for anyone browsing.
 const NAV = [
   ['Home', '/'],
-  ['Our Story', '/our-story'],
   ['Shop', '/shop'],
+  ['Recipes', '/recipes'],
+  ['Guides', '/guides'],
+  ['Our Story', '/our-story'],
   ['Contact', '/contact'],
 ];
 
@@ -66,7 +71,8 @@ export default function Header() {
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-8">
+        {/* gap tightens at md so six items don't overflow a tablet width. */}
+        <nav className="hidden md:flex items-center gap-5 lg:gap-8">
           {NAV.map(([label, href]) => (
             <Link key={href} href={href}
               className="text-[14px] font-medium text-dark-brown/70 hover:text-dark-brown transition-colors tracking-wide">
