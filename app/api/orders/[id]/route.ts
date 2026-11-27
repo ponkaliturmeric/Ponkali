@@ -14,14 +14,18 @@ async function loadOrder(orderId: string) {
   });
   if (orderRes.rows.length === 0) return null;
 
-  const itemsRes = await db.execute({
-    sql: 'SELECT product_name, weight, quantity, price FROM order_items WHERE order_id = ? ORDER BY id',
-    args: [orderId],
-  });
-  const historyRes = await db.execute({
-    sql: 'SELECT status, changed_at, notes FROM order_status_history WHERE order_id = ? ORDER BY id DESC',
-    args: [orderId],
-  });
+  // In parallel: neither depends on the other, and awaiting them one after the
+  // other paid the database's round-trip latency twice for no reason.
+  const [itemsRes, historyRes] = await Promise.all([
+    db.execute({
+      sql: 'SELECT product_name, weight, quantity, price FROM order_items WHERE order_id = ? ORDER BY id',
+      args: [orderId],
+    }),
+    db.execute({
+      sql: 'SELECT status, changed_at, notes FROM order_status_history WHERE order_id = ? ORDER BY id DESC',
+      args: [orderId],
+    }),
+  ]);
 
   return {
     ...orderRes.rows[0],
@@ -104,6 +108,12 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  // ?brief=1 — the caller already applied the change locally and only needs to
+  // know it saved. Skips re-reading the order, which is three more queries
+  // against a remote database for a body nobody reads. The order detail page
+  // omits it, because it DOES use the refreshed order and its new timeline.
+  const brief = new URL(request.url).searchParams.get('brief') === '1';
+
   const body = await request.json();
   const db = await getDb();
 
@@ -184,6 +194,10 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
         ],
       },
     ], 'write');
+  }
+
+  if (brief) {
+    return NextResponse.json({ success: true });
   }
 
   const order = await loadOrder(params.id);

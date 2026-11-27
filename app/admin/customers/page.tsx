@@ -8,6 +8,7 @@ import {
   TableBody, TableRow, TableCell, TableContainer, Select, MenuItem,
   InputAdornment, Pagination, CircularProgress, Avatar, IconButton,
   Tooltip, Dialog, DialogTitle, DialogContent, DialogActions, Alert, Checkbox,
+  LinearProgress,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
@@ -231,6 +232,11 @@ export default function AdminCustomersPage() {
 
       {/* Table */}
       <MainCard noPadding>
+        {/* Keeps the rows on screen during a refetch rather than replacing the
+            table with a spinner. */}
+        <Box sx={{ height: 3 }}>
+          {loading && customers.length > 0 && <LinearProgress sx={{ height: 3 }} />}
+        </Box>
         <TableContainer>
           <Table>
             <TableHead>
@@ -251,7 +257,7 @@ export default function AdminCustomersPage() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {loading ? (
+              {loading && customers.length === 0 ? (
                 <TableRow><TableCell colSpan={9} align="center" sx={{ py: 6 }}><CircularProgress size={26} /></TableCell></TableRow>
               ) : customers.length === 0 ? (
                 <TableRow><TableCell colSpan={9} align="center" sx={{ py: 6, color: 'text.disabled' }}>No customers found.</TableCell></TableRow>
