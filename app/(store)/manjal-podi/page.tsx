@@ -210,6 +210,16 @@ export default async function ManjalPodiPage() {
               </Link>
             </li>
             <li>
+              <Link href="/recipes/turmeric-milk-manjal-paal" className="text-gold font-medium hover:underline">
+                மஞ்சள் பால் செய்முறை
+              </Link>
+            </li>
+            <li>
+              <Link href="/recipes" className="text-gold font-medium hover:underline">
+                மஞ்சள் சமையல் குறிப்புகள் (சாதம், கஷாயம், நீர் மோர்)
+              </Link>
+            </li>
+            <li>
               <Link href="/farm" className="text-gold font-medium hover:underline">
                 எங்கள் பண்ணைப் படங்கள்
               </Link>

@@ -124,6 +124,7 @@ export default function Footer() {
                 ['Our Story', '/our-story'],
                 ['From Our Farm', '/farm'],
                 ['Turmeric Guides', '/guides'],
+                ['Recipes', '/recipes'],
                 ['FAQ', '/faq'],
                 ['All Products', '/shop'],
                 ['Bulk & Wholesale', '/bulk-orders'],
